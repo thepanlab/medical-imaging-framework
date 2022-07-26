@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# import sys
 import numpy as np
 import glob
 import argparse
-import sys
 import json
 import os
 import re
@@ -16,9 +16,6 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('load_json',
         help='Load settings from file in json format.')
-
-l_images = glob.glob("./data/ep_intensity_all/*")
-a_images = np.array(l_images)
 
 # print(parser)
 
@@ -53,18 +50,21 @@ l_subjects = []
 # Testing first file to see if it contained the specific letter for subject
 
 def get_filename(file_address):
+    """It get the filename from a complete address"""
     file_name = file_address.split("/")[-1]
     return  file_name
 
 def get_subject(file_address, letter_search):
+    """It get the subject from the file address, in order to recognize it needs the letter that identify the subjet"""
     x = re.search(letter_search + "[0-9]+", get_filename(file_address) ) 
 #     print(x.group(0))
     return x.group(0)
-   
+
 def check_letter_in_filename(file_address, letter_search):
+    """It checks if the letter is present in the file address"""
     x = re.search(letter_search + "[0-9]+", get_filename(file_address) ) 
-    
-    if x == None:
+
+    if x is None:
         raise Exception("Letter {} not found in file name {}".format(letter, file_address)) 
 
 # Just to check that the letter is present in the first file
@@ -73,7 +73,6 @@ check_letter_in_filename(filelist[0], letter)
 l_subjects = []
 
 for item in filelist:
-    
     l_subjects.append(get_subject(item, letter))        
 
 a_subjects = np.array(l_subjects)
@@ -96,10 +95,10 @@ n_subjects = len(l_unique_subject)
 columns = ["V_" + ite_subject for ite_subject in l_unique_subject]
 indices = ["T_" + ite_subject for ite_subject in l_unique_subject]
 
-df_mean = pd.DataFrame(columns = columns, 
+df_mean_inner = pd.DataFrame(columns = columns, 
                        index = indices)
 
-
+print("Inner loop")
 for i in range(len(l_unique_subject)):
 
     index_test = l_unique_subject[i]
@@ -148,12 +147,58 @@ for i in range(len(l_unique_subject)):
             
         mean_temp = mean_sum/len(a_filelist_train)
         
-        df_mean.loc["T_"+index_test,"V_"+index_val] = mean_temp 
-       
+        df_mean_inner.loc["T_"+index_test,"V_"+index_val] = mean_temp 
+
+## Outer loop
+
+n_subjects = len(l_unique_subject)
+
+columns = ["mean_test"]
+indices = ["T_" + ite_subject for ite_subject in l_unique_subject]
+
+df_mean_outer = pd.DataFrame(columns = columns, 
+                   index = indices)
+
+for i in range(len(l_unique_subject)):
+
+    index_test = l_unique_subject[i]
+    bool_sub_train_val = a_subjects != index_test
+
+    a_filelist_train_val = a_filelist[bool_sub_train_val]
+    a_subject_train_val = a_subjects[bool_sub_train_val]
+
+    a_filelist_test = a_filelist[~bool_sub_train_val]
+    a_subject_test = a_subjects[~bool_sub_train_val]
+    
+    print("Test", index_test)
+
+    mean_sum = 0
+    count = 1
+
+    for img_address in a_filelist_train_val:
+        img_temp = Image.open(img_address).convert('L')
+
+        img_temp_array = np.array(img_temp)
+
+        mean_temp = img_temp_array.mean()
+
+        mean_sum += mean_temp
+
+        if count %100 == 0:
+            print(count,"/",len(a_filelist_train_val), end='\r')
+
+        count+= 1
+
+    print()        
+
+    mean_temp = mean_sum/len(a_filelist_train)
+
+    df_mean_outer.loc["T_"+index_test,"mean_test"] = mean_temp 
+
 # This allow to deal with directories with and without /
 # os.path.join(output_directory,"means_nested_cv_inner_loop.csv")
-
 # Create subdirectory if it doesnt exit
 os.makedirs(output_directory, exist_ok=True)
 
-df_mean.to_csv( os.path.join(output_directory,"means_nested_cv_inner_loop.csv") )
+df_mean_inner.to_csv( os.path.join(output_directory,"means_nested_cv_inner_loop.csv") )
+df_mean_outer.to_csv( os.path.join(output_directory,"means_nested_cv_outer_loop.csv") )
