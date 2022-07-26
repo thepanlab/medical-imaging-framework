@@ -1,0 +1,9 @@
+{
+    "loss_line_color":"b", 
+    "val_loss_line_color":"r",
+    "acc_line_color":"b", 
+    "val_acc_line_color":"r",
+    "font_family":"monospace",
+    "label_font_size":12, 
+    "title_font_size":12
+}
