@@ -33,7 +33,9 @@ Description
 * The splitting will be done according to the subject.
 * Syntax to label subject: You will enter the first letter, e.g. ``S``. This will give idea how to look for subject. The code will look for ``S1``, ``S2`` and so on. It will detect the total number of subjects, the variable n is used.
 * For Cross validation: it will calculate the train mean for each of the folds(n values) and well as the train-validation whole dataset (1 value).
-* For Nested cross validation: it will calculate the train for each of the folds in inner loop (n time n-1 values) as wells as outer loop (n values).
+* For Nested cross validation: it will calculate the train for each of the folds in inner loop (n times n-1 values) as wells as outer loop (n values).
+   *  Inner loop file: ``means_nested_cv_inner_loop.csv`` 
+   *  Outer loop file: ``means_nested_cv_outer_loop.csv``
 * Config file (``json`` file):
     * ``files_directory``: one specific address for files
     * ``letter``: letter that assigned the subject
