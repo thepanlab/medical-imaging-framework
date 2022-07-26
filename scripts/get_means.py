@@ -3,7 +3,6 @@
 
 # import sys
 import numpy as np
-import glob
 import argparse
 import json
 import os
@@ -79,9 +78,6 @@ a_subjects = np.array(l_subjects)
 
 set_subject = set(l_subjects)
 
-# for i in set_subject:
-#     print(i)
-
 l_unique_subject = list(set_subject)
 
 l_unique_subject.sort()
@@ -90,7 +86,7 @@ l_unique_subject.sort()
 
 # ### Auto
 
-n_subjects = len(l_unique_subject)
+# n_subjects = len(l_unique_subject)
 
 columns = ["V_" + ite_subject for ite_subject in l_unique_subject]
 indices = ["T_" + ite_subject for ite_subject in l_unique_subject]
@@ -126,7 +122,7 @@ for i in range(len(l_unique_subject)):
 #         break
         
         a_filelist_train, a_filelist_val = a_filelist_train_val[bool_train], a_filelist_train_val[bool_val]
-#         break     
+   
         mean_sum = 0
         count = 1
         
@@ -136,9 +132,9 @@ for i in range(len(l_unique_subject)):
             img_temp_array = np.array(img_temp)
 
             mean_temp = img_temp_array.mean()
-#             print(mean_temp)
+
             mean_sum += mean_temp
-#             break
+
             if count %100 == 0:
                 print(count,"/",len(a_filelist_train), end='\r')
 
@@ -150,8 +146,6 @@ for i in range(len(l_unique_subject)):
         df_mean_inner.loc["T_"+index_test,"V_"+index_val] = mean_temp 
 
 ## Outer loop
-
-n_subjects = len(l_unique_subject)
 
 columns = ["mean_test"]
 indices = ["T_" + ite_subject for ite_subject in l_unique_subject]
