@@ -3,7 +3,20 @@ import numpy as np
 import os 
 
 def roc_curve(true_vals, pred_vals, results_path, name):
-    pass
+
+    #assuming true_vals is a numpy array
+    n_classes = np.unique(true_vals)
+
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = roc_curve(true_vals[:, i], pred_vals[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    fpr["micro"], tpr["micro"], _ = roc_curve(true_vals.ravel(), pred_vals.ravel())
+    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
 def get_data(path):
 
