@@ -1,11 +1,11 @@
-from turtle import color
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 import os
 import json
+import argparse
 
-def lc_loss(path, data_frame, config):
+def lc_loss(path, data_frame, config, name):
     """ Creates the model loss plot using the defined configurations and saves it in the results directory.  
     """ 
 
@@ -16,7 +16,6 @@ def lc_loss(path, data_frame, config):
     #Establishing the plot's colors
     loss_line_color = config['loss_line_color']
     val_loss_line_color = config['val_loss_line_color']
-    font_family = config['font_family']
 
     #Establishing the plot's font and font sizes
     font_family = config['font_family']
@@ -36,12 +35,17 @@ def lc_loss(path, data_frame, config):
     plt.xlabel('epoch')
     plt.legend(['train', 'val'], loc='best')
 
-    #Saving plot to results directory
-    plt.savefig(path + 'test_loss.jpg')
+    #Saving plot to results directory and closing figure to avoid further plotting
+    save_format = config['save_format']
+    save_res = config['save_resolution']
 
-def lc_accuracy(path, data_frame, config):
+    plt.savefig(path + name + '_lc_loss' + '.' + save_format, format=save_format, dpi=save_res)
+    plt.close()
+
+def lc_accuracy(path, data_frame, config, name):
     """ Creates the model accuracy plot using the defined configurations and saves it in the results directory.  
     """ 
+    
     #Grabbing accuracy and val_accuracy data from passed dataframe
     acc = data_frame['accuracy']
     val_acc = data_frame['val_accuracy']
@@ -68,14 +72,19 @@ def lc_accuracy(path, data_frame, config):
     plt.xlabel('epoch')
     plt.legend(['train', 'val'], loc='best')
 
-    #Saving plot to results directory
-    plt.savefig(path + 'test_acc.jpg')
 
-def get_results_config(path):
+    #Saving plot to results directory and closing plot
+    save_format = config['save_format']
+    save_res = config['save_resolution']
+
+    plt.savefig(path + name + '_lc_accuracy' + '.' + save_format, format=save_format, dpi=save_res)
+    plt.close()
+
+def get_results_config(args):
     """Gets configuration information for the model accuracy and loss plots from the 'results_config.json' file. 
     """
 
-    with open(path + 'learningcurve_config.json') as config_file:
+    with open(args.load_json) as config_file:
         results_config = json.load(config_file)
 
     #Returns configurations as a dictionary
@@ -88,18 +97,22 @@ def main():
     data_path = dir_path + '/data/Sample Data/'
     current_path = dir_path + '/scripts/'
     results_path = dir_path + '/results/'
-    file_name = 'model_1_k0_history.csv'
-    file_path = data_path + file_name
+    file_name = 'model_1_k0_history'
+
+    file_path = data_path + file_name + '.csv'
 
     #Reading in CSV file into a dataframe
     results_df = pd.read_csv(file_path,index_col = 0)
 
     #Obtaining dictionary of configurations from json file
-    results_config = get_results_config(current_path)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('load_json', help='Load settings from file in json format.')
+    args = parser.parse_args()
+    results_config = get_results_config(args)
 
     #Creating accuracy and loss plots
-    lc_accuracy(results_path, results_df, results_config)
-    lc_loss(results_path, results_df, results_config)
+    lc_accuracy(results_path, results_df, results_config, file_name)
+    lc_loss(results_path, results_df, results_config, file_name)
 
 if __name__ == "__main__":
     main()
