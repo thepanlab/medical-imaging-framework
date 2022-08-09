@@ -4,10 +4,19 @@ from matplotlib import pyplot as plt
 import os
 import json
 import argparse
+import regex as re
+
+#TO DO: 
+# Add progress message "lc produced" - Done
+# Add verification for the needed files -Done
+# remove box leave needed axes - Done
+# Change title, make more specific (Subject #(after k) Learning curve) - Done
 
 def lc_loss(path, data_frame, config, name):
     """ Creates the model loss plot using the defined configurations and saves it in the results directory.  
     """ 
+
+    subject_num = get_subject_num(name)
 
     #Grabbing accuracy and val_accuracy data from passed dataframe
     loss = data_frame['loss']
@@ -30,21 +39,29 @@ def lc_loss(path, data_frame, config, name):
     #Creating plot
     plt.plot(loss, color=loss_line_color)
     plt.plot(val_loss, color=val_loss_line_color)
-    plt.title('model loss')
+    plt.title(subject_num.upper() + ' learning curve')
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'val'], loc='best')
+
+    #Removing top and right axis lines
+    plt.rcParams['axes.spines.right'] = False
+    plt.rcParams['axes.spines.top'] = False
 
     #Saving plot to results directory and closing figure to avoid further plotting
     save_format = config['save_format']
     save_res = config['save_resolution']
 
-    plt.savefig(path + name + '_lc_loss' + '.' + save_format, format=save_format, dpi=save_res)
+    plt.savefig(os.path.join(path, name) + '_lc_loss' + '.' + save_format, format=save_format, dpi=save_res)
     plt.close()
+
+    print("Loss Learning curve has been created for - " + name )
 
 def lc_accuracy(path, data_frame, config, name):
     """ Creates the model accuracy plot using the defined configurations and saves it in the results directory.  
     """ 
+
+    subject_num = get_subject_num(name)
     
     #Grabbing accuracy and val_accuracy data from passed dataframe
     acc = data_frame['accuracy']
@@ -67,18 +84,27 @@ def lc_accuracy(path, data_frame, config, name):
     #Creating plot
     plt.plot(acc, color=acc_line_color)
     plt.plot(val_acc, color=val_acc_line_color)
-    plt.title('model accuracy')
+    plt.title(subject_num.upper() + ' learning curve')
     plt.ylabel('accuracy', )
     plt.xlabel('epoch')
     plt.legend(['train', 'val'], loc='best')
-
 
     #Saving plot to results directory and closing plot
     save_format = config['save_format']
     save_res = config['save_resolution']
 
-    plt.savefig(path + name + '_lc_accuracy' + '.' + save_format, format=save_format, dpi=save_res)
+    plt.savefig(os.path.join(path, name) + '_lc_accuracy' + '.' + save_format, format=save_format, dpi=save_res)
     plt.close()
+
+    print("Accuracy Learning curve has been created for - " + name )
+
+def get_subject_num(file_name):
+    try: 
+        subject_search = re.search('(k[0-9])', file_name)
+        subject_num = subject_search.captures()[0]
+        return subject_num
+    except: 
+        raise Exception("File name does not contain k[0-9] format.")
 
 def get_results_config(args):
     """Gets configuration information for the model accuracy and loss plots from the 'results_config.json' file. 
@@ -90,19 +116,31 @@ def get_results_config(args):
     #Returns configurations as a dictionary
     return results_config
 
+def create_graphs(file_list, file_path, results_path, results_config):  
+
+    #Lopping through each file and creating needed graphs
+    for file in file_list:
+
+        #Reading in CSV file into a dataframe
+        results_df = pd.read_csv(os.path.join(file_path, file),index_col = 0)
+
+        file_name = re.sub('.csv', '', file)
+
+        #Creating accuracy and loss plots
+        lc_accuracy(results_path, results_df, results_config, file_name)
+        lc_loss(results_path, results_df, results_config, file_name)
+
+def file_verification(files_list):
+    verified_list = []
+    for file in files_list:
+        history_check = re.search("history", file)
+        if history_check != None:
+            verified_list.append(file)
+        else:
+            pass
+    return verified_list
+
 def main():
-
-    #Establishing needed directories
-    dir_path = os.getcwd()
-    data_path = dir_path + '/data/Sample Data/'
-    current_path = dir_path + '/scripts/'
-    results_path = dir_path + '/results/'
-    file_name = 'model_1_k0_history'
-
-    file_path = data_path + file_name + '.csv'
-
-    #Reading in CSV file into a dataframe
-    results_df = pd.read_csv(file_path,index_col = 0)
 
     #Obtaining dictionary of configurations from json file
     parser = argparse.ArgumentParser()
@@ -110,9 +148,15 @@ def main():
     args = parser.parse_args()
     results_config = get_results_config(args)
 
-    #Creating accuracy and loss plots
-    lc_accuracy(results_path, results_df, results_config, file_name)
-    lc_loss(results_path, results_df, results_config, file_name)
+    file_path = results_config['input_path']
+    results_path = results_config['output_path']
+
+    #Creating list of files needed to process
+    list_files = os.listdir(file_path)
+
+    verified_list_files = file_verification(list_files)
+
+    create_graphs(verified_list_files, file_path, results_path, results_config)
 
 if __name__ == "__main__":
     main()
