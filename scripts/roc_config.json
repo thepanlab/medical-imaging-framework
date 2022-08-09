@@ -1,0 +1,9 @@
+{
+    "input_path":"home/ecabello/medical-imaging-framework/medical-imaging-framework/data/Sample cm",
+    "output_path": "/home/ecabello/medical-imaging-framework/medical-imaging-framework/results",
+    "line_width":"2",
+    "label_types": ["fat","ligament","flavum","empty","spinal cord"],
+    "line_colors": ["aqua", "darkorange", "cornflowerblue", "brown","seagreen"], 
+    "save_resolution":"figure", 
+    "save_format": "png"
+}
