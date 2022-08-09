@@ -8,6 +8,9 @@ import json
 import pandas as pd
 from sklearn.preprocessing import label_binarize
 
+#To Do:
+#change title to include file name
+
 def create_roc_curve(true_vals, pred_vals, roc_config, file_name, results_path):
 
     #assuming true_vals is a numpy array
@@ -50,20 +53,34 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, results_path):
     save_format = roc_config['save_format']
     save_res = roc_config['save_resolution']
 
+    #Establishing the plot's font and font sizes
+    font_family = roc_config['font_family']
+    label_font_size = roc_config['label_font_size']
+    title_font_size = roc_config['title_font_size']
+
+    #Setting the previously established parameters
+    plt.rcParams['font.family'] = font_family
+    plt.rc('axes', labelsize=label_font_size)
+    plt.rc('axes', titlesize=title_font_size)
+
+    #Removing top and right axis lines
+    plt.rcParams['axes.spines.right'] = False
+    plt.rcParams['axes.spines.top'] = False
+
     for i, type_name, color in zip(classes, l_types, colors):
         plt.plot(fpr[i], tpr[i], color=color, lw=lw,
                 label='{0} (AUC = {1:0.2f})'
                 ''.format(type_name, roc_auc[i]))
 
-        
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel('1 - Specificity')
     plt.ylabel('Sensitivity')
     plt.title('Receiver operating characteristic(ROC) multi-class Testing')
-    plt.legend(loc="lower right")
-    plt.savefig(os.path.join(results_path, file_name) + '.' +save_format, dpi=save_res)
+    plt.legend(loc="best")
+
+    plt.savefig(os.path.join(results_path, file_name) + '.' + save_format, dpi=save_res)
     plt.close()
 
 def get_data(path):
