@@ -11,7 +11,7 @@ from sklearn.preprocessing import label_binarize
 #To Do:
 #change title to include file name
 
-def create_roc_curve(true_vals, pred_vals, roc_config, file_name, results_path):
+def create_roc_curve(true_vals, prod_vals, roc_config, file_name, results_path):
 
     #assuming true_vals is a numpy array
     classes = np.unique(true_vals)
@@ -23,13 +23,11 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, results_path):
 
     true_val_bin = label_binarize(true_vals, classes=classes)
 
-    pred_val_bin = label_binarize(pred_vals, classes=classes)
-
     for i in range(n_classes):
-        fpr[i], tpr[i], _ = roc_curve(true_val_bin[:,i], pred_val_bin[:,i])
+        fpr[i], tpr[i], _ = roc_curve(true_val_bin[:,i], prod_vals[:,i])
         roc_auc[i] = auc(fpr[i], tpr[i])
 
-    fpr["micro"], tpr["micro"], _ = roc_curve(true_val_bin.ravel(), pred_val_bin.ravel())
+    fpr["micro"], tpr["micro"], _ = roc_curve(true_val_bin.ravel(), prod_vals.ravel())
     roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
     # First aggregate all false positive rates
@@ -86,7 +84,6 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, results_path):
 def get_data(path):
     """ Gets labels and predictions from csv file.   
     """ 
-    path = "/home/ecabello/medical-imaging-framework/medical-imaging-framework/data/Sample cm/test_df_cm"
     vals = pd.read_csv(path + '.csv')
     
     y_val = vals['y_val']
@@ -112,13 +109,19 @@ def main():
     args = parser.parse_args()
     roc_config = get_config(args)
 
-    file_path = roc_config['input_path']
+    file_name = 'test_df_cm'
+    file_path = os.path.join(roc_config['input_path'], file_name)
     results_path = roc_config['output_path']
 
-    file_name = 'test_df_cm'
+    results_exist = os.path.exists(results_path)
+    if not results_exist:
+        os.makedirs(results_path)
 
     #Obtaining needed labels and predictions
-    y_val, pred_val = get_data(os.path.join(file_path, file_name))
+    y_val, pred_val = get_data(file_path)
+
+    with open('/home/ecabello/medical-imaging-framework/medical-imaging-framework/data/Sample Data/pred_val_K1_outer_k2_val.npy', 'rb') as f:
+        pred_val = np.load(f)
 
     create_roc_curve(y_val, pred_val, roc_config, file_name, results_path)
 
