@@ -6,12 +6,6 @@ import json
 import argparse
 import regex as re
 
-#TO DO: 
-# Add progress message "lc produced" - Done
-# Add verification for the needed files -Done
-# remove box leave needed axes - Done
-# Change title, make more specific (Subject #(after k) Learning curve) - Done
-
 def lc_loss(path, data_frame, config, name):
     """ Creates the model loss plot using the defined configurations and saves it in the results directory.  
     """ 
@@ -148,8 +142,13 @@ def main():
     args = parser.parse_args()
     results_config = get_results_config(args)
 
+    #Grabbing file directories 
     file_path = results_config['input_path']
     results_path = results_config['output_path']
+
+    results_exist = os.path.exists(results_path)
+    if not results_exist:
+        os.makedirs(results_path)
 
     #Creating list of files needed to process
     list_files = os.listdir(file_path)

@@ -1,6 +1,6 @@
 {
     "input_path":"/home/ecabello/medical-imaging-framework/medical-imaging-framework/data/Sample Data", 
-    "output_path":"/home/ecabello/medical-imaging-framework/medical-imaging-framework/results",
+    "output_path":"/home/ecabello/medical-imaging-framework/medical-imaging-framework/results/learning curve",
     "loss_line_color":"r", 
     "val_loss_line_color":"b",
     "acc_line_color":"b", 
