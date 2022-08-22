@@ -1,5 +1,6 @@
 {
     "files_directory":"/home/pcallec/Epidural_EP/data/ep_intensity",
     "letter": "E",
-    "output_means":"../data/means/"
+    "output_means":"../data/means/",
+    "n_parallel_processes": "all"
 }
