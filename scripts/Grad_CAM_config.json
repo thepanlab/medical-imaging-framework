@@ -5,6 +5,7 @@
     "output_image_address": "./",
 
     "alpha": 0.7,
+    
     "mean_row": "T_k3",
     "mean_col": "mean_test",
     "last_conv_layer_name": "conv5_block3_out"

@@ -51,7 +51,7 @@ def load_config(args):
 
     # Check if file is valid
     if not exists(args.json):
-        sys.exit("Error: The following JSON file does not exist! " + args.json)
+        raise Exception("Error: The following JSON file does not exist! " + args.json)
 
     # Open the json file
     with open(args.json) as config_file:
@@ -59,23 +59,23 @@ def load_config(args):
 
     # Check if the model file is valid
     if not exists(results_config['input_model_address']):
-        sys.exit("Error: The following model file does not exist! " + results_config['input_model_address'])
+        raise Exception("Error: The following model file does not exist! " + results_config['input_model_address'])
     if os.stat(results_config['input_model_address']).st_size == 0:
-        sys.exit("Error: The following model file is empty! " + results_config['input_model_address'])
+        raise Exception("Error: The following model file is empty! " + results_config['input_model_address'])
 
     # Check if the means file is valid
     if not results_config['input_means_address']:
         print("Warning: No means file was given.")
     if not exists(results_config['input_means_address']):
-        sys.exit("Error: The following means file does not exist! " + results_config['input_means_address'])
+        raise Exception("Error: The following means file does not exist! " + results_config['input_means_address'])
     if os.stat(results_config['input_means_address']).st_size == 0:
-        sys.exit("Error: The following means file is empty! " + results_config['input_means_address'])
+        raise Exception("Error: The following means file is empty! " + results_config['input_means_address'])
 
     # Check if the image file is valid
     if not exists(results_config['input_img_address']):
-        sys.exit("Error: The following image file does not exist! " + results_config['input_img_address'])
+        raise Exception("Error: The following image file does not exist! " + results_config['input_img_address'])
     if os.stat(results_config['input_img_address']).st_size == 0:
-        sys.exit("Error: The following image file is empty! " + results_config['input_img_address'])
+        raise Exception("Error: The following image file is empty! " + results_config['input_img_address'])
 
     # Return the json contents
     return (
@@ -106,6 +106,7 @@ def get_images(addr):
             images.append(os.path.join(addr, name))
     print("There are " + str(len(images)) + " image(s) to be processed.")
     return images
+
 
 
 """ Load the data from their addresses """
@@ -205,7 +206,7 @@ def save_gradcam_output(img_path, heatmap, cam_path="./", alpha=0.4):
 
 
 
-""" Main function """
+""" Main program """
 def main():
     # Get program arguments
     args = parse_args()
@@ -234,6 +235,6 @@ def main():
 
 
 
-""" Main program """
+""" Executes the program """
 if __name__ == "__main__":
     main()

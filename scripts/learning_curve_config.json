@@ -1,13 +1,16 @@
 {
-    "input_path":"/home/ecabello/medical-imaging-framework/medical-imaging-framework/data/Sample Data", 
-    "output_path":"/home/ecabello/medical-imaging-framework/medical-imaging-framework/results/learning curve",
-    "loss_line_color":"r", 
-    "val_loss_line_color":"b",
-    "acc_line_color":"b", 
-    "val_acc_line_color":"r",
-    "font_family":"arial",
-    "label_font_size":12, 
-    "title_font_size":12, 
-    "save_resolution":600, 
+    "input_path": "/home/jshaw/medical-imaging-framework/data/model_data/Test_subject_e1/config_1/resnet_50_0_test_e1_val_e2/", 
+    "output_path": "/home/jshaw/medical-imaging-framework/results/learning_curve",
+    
+    "loss_line_color": "r", 
+    "val_loss_line_color": "b",
+    "acc_line_color": "b", 
+    "val_acc_line_color": "r",
+
+    "font_family": "arial",
+    "label_font_size": 12, 
+    "title_font_size": 12, 
+    
+    "save_resolution": 600, 
     "save_format": "png"
 }
