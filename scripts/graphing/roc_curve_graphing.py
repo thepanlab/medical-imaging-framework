@@ -1,4 +1,5 @@
 from termcolor import colored
+import subprocess
 import argparse
 import json
 import os
@@ -58,10 +59,11 @@ def run_program(n, args):
     # for each item, run the program
     for i in range(n):
         try:
-            os.system("python3 " + args["program_location"] + " -j " + args["json_file_prefix"] + str(i) + ".json")
-        
+            command = "python3 " + args["program_location"] + " -j " + args["json_file_prefix"] + str(i) + ".json"
+            subprocess.run(command, check=True, shell=True)
+
         except Exception as err:
-            print(colored("Exception caught, " + args["program_location"] + str(i) + ".json skipped: \n\t" + str(err) + "\n", "red"))
+            print(colored("Exception caught, " + args["json_file_prefix"] + str(i) + ".json skipped. See text above.\n", "red"))
 
 
 
