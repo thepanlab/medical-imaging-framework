@@ -1,35 +1,8 @@
 {
-    "program_location": "../roc_curve.py",
-    "json_file_prefix": "./roc_output/roc_curve_graphing_config_item_",
+    
+    "data_path": "/home/jshaw/medical-imaging-framework/data/model_data/",
 
-    "pred_paths": [
-        "/home/jshaw/medical-imaging-framework/data/model_data/Test_subject_e1/config_1/resnet_50_0_test_e1_val_e2/prediction/resnet_50_0_test_e1_val_e2_val_predicted.csv",
-        "/home/jshaw/medical-imaging-framework/data/model_data/Test_subject_e1/config_1/resnet_50_1_test_e1_val_e3/prediction/resnet_50_1_test_e1_val_e3_val_predicted.csv",
-        "/home/jshaw/medical-imaging-framework/data/model_data/Test_subject_e1/config_2/Xception_0_test_e1_val_e2/prediction/Xception_0_test_e1_val_e2_val_predicted.csv",
-        "/home/jshaw/medical-imaging-framework/data/model_data/Test_subject_e1/config_2/Xception_1_test_e1_val_e3/prediction/Xception_1_test_e1_val_e3_val_predicted.csv"
-        
-    ],
-
-    "true_paths": [
-        "/home/jshaw/medical-imaging-framework/data/model_data/Test_subject_e1/config_1/resnet_50_0_test_e1_val_e2/true_label/resnet_50_0_test_e1_val_e2_val true label index.csv",
-        "/home/jshaw/medical-imaging-framework/data/model_data/Test_subject_e1/config_1/resnet_50_1_test_e1_val_e3/true_label/resnet_50_1_test_e1_val_e3_val true label index.csv",
-        "/home/jshaw/medical-imaging-framework/data/model_data/Test_subject_e1/config_2/Xception_0_test_e1_val_e2/true_label/Xception_0_test_e1_val_e2_val true label index.csv",
-        "/home/jshaw/medical-imaging-framework/data/model_data/Test_subject_e1/config_2/Xception_1_test_e1_val_e3/true_label/Xception_1_test_e1_val_e3_val true label index.csv"
-    ],
-
-    "output_paths": [
-        "./roc_output",
-        "./roc_output",
-        "./roc_output",
-        "./roc_output"
-    ],
-
-    "output_file_prefixes": [
-        "resnet_50_0_test_e1_val_e2_val_roc_curve",
-        "resnet_50_1_test_e1_val_e3_val_roc_curve",
-        "Xception_0_test_e1_val_e2_val_roc_curve",
-        "Xception_1_test_e1_val_e3_val_roc_curve"
-    ],
+    "output_path": "./roc_output",
 
     "line_width":  "2",
     "label_types": ["fat","ligament","flavum","empty","spinal cord"],
