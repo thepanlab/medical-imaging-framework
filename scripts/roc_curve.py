@@ -1,6 +1,7 @@
 from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_curve, auc
 from matplotlib import pyplot as plt
+from termcolor import colored
 from itertools import cycle
 import pandas as pd
 import numpy as np
@@ -12,9 +13,8 @@ import os
 
 
 
-""" Creates the ROC Graph """
 def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
-
+    """ Creates the ROC Graph. """
     # Assuming true_vals is a numpy array
     classes = np.unique(true_vals)
     n_classes = len(classes)
@@ -81,17 +81,17 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
     plt.ylim([0.0, 1.05])
     plt.xlabel('1 - Specificity')
     plt.ylabel('Sensitivity')
-    plt.title('Receiver operating characteristic(ROC) multi-class Testing')
+    plt.title('Receiver Operating Characteristic(ROC): ' + file_name)
     plt.legend(loc="best")
 
     # Save the figure
-    plt.savefig(os.path.join(output_path, file_name) + '.' + save_format, dpi=save_res)
+    plt.savefig(os.path.join(output_path, file_name) + '_roc_curve.' + save_format, dpi=save_res)
     plt.close()
 
 
 
-""" Reads in the labels and predictions from CSV """
 def get_data(pred_path, true_path):
+    """ Reads in the labels and predictions from CSV. """
 
     # Read CSV file
     pred = pd.read_csv(pred_path, header=None).to_numpy()
@@ -112,8 +112,8 @@ def get_data(pred_path, true_path):
 
 
 
-""" Reads in the configuration from a JSON file """
 def get_config():
+    """ Reads in the configuration from a JSON file. """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '-j', '--json', '--load_json',
@@ -128,11 +128,15 @@ def get_config():
 
 
 
-""" The main program """
-def main():
+def main(config=None):
+    """ The main program. """
 
     # Obtaining dictionary of configurations from json file
-    roc_config = get_config()
+    if config is None:
+        roc_config = get_config()
+
+    else:
+        roc_config = config
 
     # Check that the output path exists
     output_path = roc_config['output_path']
@@ -150,10 +154,10 @@ def main():
 
     # Create the curve
     create_roc_curve(true_val, pred_val, roc_config, roc_config['output_file_prefix'], output_path)
-    print("ROC curve created.")
+    print(colored("ROC curve created for: " + roc_config['output_file_prefix'], "green"))
 
 
 
-""" Executes the program """
 if __name__ == "__main__":
+    """ Executes the program """
     main()
