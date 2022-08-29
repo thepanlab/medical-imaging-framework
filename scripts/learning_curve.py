@@ -1,16 +1,19 @@
 from matplotlib import pyplot as plt
+from termcolor import colored
 import pandas as pd
 import numpy as np
 import regex as re
-import argparse
-import json
+import ultraimport
 import os
 
+# Imports a module from a level below.
+# If moved to same level, use "import get_config".
+get_config = ultraimport('/home/jshaw/medical-imaging-framework/scripts/graphing/get_config.py')
 
 
-""" Creates the model loss plot using the defined configurations and saves it in the results directory. """ 
+
 def lc_loss(path, data_frame, config, name):
-
+    """ Creates the model loss plot using the defined configurations and saves it in the results directory. """ 
     # The current subject
     subject_num = get_subject_num(name)
 
@@ -51,13 +54,12 @@ def lc_loss(path, data_frame, config, name):
     # Save the figure
     plt.savefig(os.path.join(path, name) + '_lc_loss' + '.' + save_format, format=save_format, dpi=save_res)
     plt.close()
-    print("Loss Learning curve has been created for - " + name )
+    print(colored("Loss Learning curve has been created for - " + name, 'green'))
 
 
 
-""" Creates the model accuracy plot using the defined configurations and saves it in the results directory.  """ 
 def lc_accuracy(path, data_frame, config, name):
-
+    """ Creates the model accuracy plot using the defined configurations and saves it in the results directory.  """ 
     # The current subject
     subject_num = get_subject_num(name)
     
@@ -92,42 +94,28 @@ def lc_accuracy(path, data_frame, config, name):
     save_res = config['save_resolution']
     plt.savefig(os.path.join(path, name) + '_lc_accuracy' + '.' + save_format, format=save_format, dpi=save_res)
     plt.close()
-    print("Accuracy Learning curve has been created for - " + name )
+    print(colored("Accuracy Learning curve has been created for - " + name , 'green'))
 
 
 
-""" Gets the subject id """
 def get_subject_num(file_name):
+    """ Gets the subject id """
     try: 
         subject_search = re.search('(e[0-9]_val_)', file_name)
         subject_num = subject_search.captures()[0]
         return subject_num
     except: 
-        raise Exception("File name does not contain 'e[0-9]_val_' format.")
+        raise Exception(colored("File name does not contain 'e[0-9]_val_' format.", 'red'))
 
 
 
-""" Gets configuration information for the model accuracy and loss plots from the 'results_config.json' file. """
-def get_results_config(args):
-
-    # Load the JSON
-    with open(args.json) as config_file:
-        results_config = json.load(config_file)
-
-    # Returns configurations as a dictionary
-    return results_config
-
-
-
-""" Create graphs for each item """
 def create_graphs(file_list, file_path, results_path, results_config):  
-
+    """ Create graphs for each item """
     # Looping through each file and creating needed graphs
     for file in file_list:
 
         # Reading in CSV file into a dataframe
         results_df = pd.read_csv(os.path.join(file_path, file),index_col = 0)
-
         file_name = re.sub('.csv', '', file)
 
         # Creating accuracy and loss plots
@@ -136,8 +124,8 @@ def create_graphs(file_list, file_path, results_path, results_config):
 
 
 
-""" Verifies files are valid """
 def file_verification(files_list):
+    """ Verifies files are valid """
     verified_list = []
     for file in files_list:
         history_check = re.search("history", file)
@@ -149,37 +137,26 @@ def file_verification(files_list):
 
 
 
-""" The main program """
-def main():
-
-    # Obtainin dictionary of configurations from json file
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-j', '--json', '--load_json',
-        help='Load settings from a JSON file.',
-        required=False,
-        default='learning_curve_config.json'
-    )
-    args = parser.parse_args()
-    results_config = get_results_config(args)
+def main(config=None):
+    """ The main program """
+    # Obtaining dictionary of configurations from json file
+    if config is None:
+        config = get_config.parse_json('learning_curve_config.json')
 
     # Grab file directories 
-    file_path = results_config['input_path']
-    results_path = results_config['output_path']
-
+    file_path = config['input_path']
+    results_path = config['output_path']
     results_exist = os.path.exists(results_path)
     if not results_exist:
         os.makedirs(results_path)
 
-    # Create list of files needed to process
+    # Create list of files needed to process and graph them
     list_files = os.listdir(file_path)
-
     verified_list_files = file_verification(list_files)
-
-    create_graphs(verified_list_files, file_path, results_path, results_config)
-
+    create_graphs(verified_list_files, file_path, results_path, config)
 
 
-""" Executes the program """
+
 if __name__ == "__main__":
+    """ Executes the program """
     main()

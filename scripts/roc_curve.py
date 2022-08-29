@@ -5,9 +5,12 @@ from termcolor import colored
 from itertools import cycle
 import pandas as pd
 import numpy as np
-import argparse
-import json
+import ultraimport
 import os 
+
+# Imports a module from a level below.
+# If moved to same level, use "import get_config".
+get_config = ultraimport('/home/jshaw/medical-imaging-framework/scripts/graphing/get_config.py')
 
 # TODO: change title to include file name
 
@@ -92,7 +95,6 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
 
 def get_data(pred_path, true_path):
     """ Reads in the labels and predictions from CSV. """
-
     # Read CSV file
     pred = pd.read_csv(pred_path, header=None).to_numpy()
     true = pd.read_csv(true_path, header=None).to_numpy()
@@ -112,40 +114,21 @@ def get_data(pred_path, true_path):
 
 
 
-def get_config():
-    """ Reads in the configuration from a JSON file. """
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-j', '--json', '--load_json',
-        help='Load settings from a JSON file.',
-        required=False,
-        default='roc_curve_config.json'
-    )
-    args = parser.parse_args()
-    with open(args.json) as config_file:
-        roc_config = json.load(config_file)
-    return roc_config
-
-
-
 def main(config=None):
     """ The main program. """
 
     # Obtaining dictionary of configurations from json file
     if config is None:
-        roc_config = get_config()
-
-    else:
-        roc_config = config
+        config = get_config.parse_json('roc_curve_config.json')
 
     # Check that the output path exists
-    output_path = roc_config['output_path']
+    output_path = config['output_path']
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
     # Obtain needed labels and predictions
-    pred_path = roc_config['pred_path']
-    true_path = roc_config['true_path']
+    pred_path = config['pred_path']
+    true_path = config['true_path']
     if not os.path.exists(pred_path):
         raise Exception("Error: The prediction path is not valid!: " + pred_path)
     if not os.path.exists(true_path):
@@ -153,8 +136,8 @@ def main(config=None):
     true_val, pred_val = get_data(pred_path, true_path)
 
     # Create the curve
-    create_roc_curve(true_val, pred_val, roc_config, roc_config['output_file_prefix'], output_path)
-    print(colored("ROC curve created for: " + roc_config['output_file_prefix'], "green"))
+    create_roc_curve(true_val, pred_val, config, config['output_file_prefix'], output_path)
+    print(colored("ROC curve created for: " + config['output_file_prefix'], "green"))
 
 
 
