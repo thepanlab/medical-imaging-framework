@@ -1,7 +1,6 @@
 {
     
-    "data_path": "/home/jshaw/medical-imaging-framework/data/model_data/",
-
+    "data_path":   "/home/jshaw/medical-imaging-framework/data/model_data/",
     "output_path": "./roc_output",
 
     "line_width":  "2",

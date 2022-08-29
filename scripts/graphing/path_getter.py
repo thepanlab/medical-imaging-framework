@@ -96,3 +96,25 @@ def get_files(data_path, target_folder, isIndex=None):
                         
     # Return the target files
     return target_files
+
+
+
+def get_folds(data_path):
+    """ This function will get every fold-path that exists. """
+    # Store paths in a simple array
+    folds = []
+
+    # Get the test subjects
+    test_subject_paths = get_subfiles(data_path)
+
+    # For each subject, get the configurations
+    for subject in test_subject_paths:
+        config_paths = get_subfiles(subject)
+
+        # For each config, get its folds and add to list
+        for config in config_paths:
+            fold_paths = get_subfiles(config)
+            folds.extend(fold_paths)
+
+    # Return the directory-paths
+    return folds

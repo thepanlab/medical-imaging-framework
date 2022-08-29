@@ -6,8 +6,8 @@ import subprocess
 import os
 
 # Imports a module from a level above.
-# If moved to same level, use "import roc_curve".
-roc_curve = ultraimport('../roc_curve.py')
+# If moved to same level, use "import confusion_matrix".
+confusion_matrix = ultraimport('../confusion_matrix.py')
 
 
 
@@ -17,9 +17,7 @@ def run_program(args):
     pred_paths, true_paths = find_directories(args["data_path"])
     json = {
         label: args[label] for label in (
-            'line_width', 'label_types', 'line_colors',
-            'font_family', 'label_font_size', 'title_font_size',
-            'save_resolution', 'save_format', 'output_path'
+            'label_types', 'output_path'
             )
         }
     # For each item, run the program
@@ -28,7 +26,7 @@ def run_program(args):
             try:
                 # Get the program's arguments
                 json = generate_json(pred_paths, true_paths, key, index, json)
-                roc_curve.main(json)
+                confusion_matrix.main(json)
             # Catch weird stuff
             except Exception as err:
                 print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
@@ -38,7 +36,7 @@ def run_program(args):
 def find_directories(data_path):
     """ Finds the directories for every input needed to make graphs. """
     # Get the paths of every prediction and true CSV, as well as the fold-names
-    pred_paths = path_getter.get_files(data_path, "prediction", isIndex=False)
+    pred_paths = path_getter.get_files(data_path, "prediction", isIndex=True)
     true_paths = path_getter.get_files(data_path, "true_label", isIndex=True)
     return pred_paths, true_paths
 
@@ -60,7 +58,7 @@ def generate_json(pred_paths, true_paths, key, index, json):
 def main():
     """ The Main Program. """
     # Get program configuration and run using its contents
-    config = parse_json('roc_curve_graphing_config.json')
+    config = parse_json('confusion_matrix_graphing_config.json')
     run_program(config)
 
 
