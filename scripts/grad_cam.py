@@ -37,16 +37,16 @@ get_config = ultraimport('/home/jshaw/medical-imaging-framework/scripts/graphing
 def load_config():
     """ Load the JSON configuration file """
     # Get the configuration
-    config = get_config.parse_json('Grad_CAM_config.json')
+    config = get_config.parse_json('grad_cam_config.json')
 
     # Check if the given input files exist
     files = ['input_model_address', 'input_means_address', 'input_img_address']
     for file in files:
         addr = config[file]
         if not exists(addr):
-            raise Exception(colored("Error: The following model file does not exist! " + addr))
+            raise Exception(colored("Error: The following file does not exist! " + addr))
         if os.stat(addr).st_size == 0:
-            raise Exception("Error: The following model file is empty! " + addr)
+            raise Exception("Error: The following file is empty! " + addr)
 
     # Return the json contents as variables
     return (
@@ -83,11 +83,8 @@ def get_images(addr):
 def load_data(model_addr, mean_addr, mean_row, mean_col):
     """ Load the data from their addresses """
     model = keras.models.load_model(model_addr)
-    if mean_addr:
-        mean = pd.read_csv(mean_addr, index_col=0)
-        mean = mean.loc[mean_row, mean_col]
-    else:
-        mean = None
+    mean = pd.read_csv(mean_addr, index_col=0)
+    mean = mean.loc[mean_row, mean_col]
     return model, mean
 
 
