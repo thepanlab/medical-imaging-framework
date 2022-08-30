@@ -1,0 +1,36 @@
+{
+
+    "hyper-parameter":{
+
+    },
+    "files_directory":"/home/ylliu/img_ps/ep_intensity",
+    "results_path": "/home/ylliu/image_scripts/new_results",
+
+    "letter": "E",
+    "means_path":"../data/means/",
+
+    "batch_size": "24",
+    "epochs": "50",
+    "learning_rate": "0.01",
+    "momentum": "0.9",
+    "decay": "0.01",
+    "patience": "10",
+    "channels": "1",
+
+    "testing_subject" : "e1,e3,e5,e6",
+    "subject_list": "e1,e2,e3,e4,e5,e6",
+    "seed": "9",
+    "classes_names": "fat,ligament,flavum,epidural space,spinal cord",
+    "rotations": "2",
+    "cropping_position": "40,10",
+    "image_size": "800,400",
+    "mean": "0",
+    "use_mean": "false",
+	"do_cropping" : "false",
+    "model_list": "resnet_50,resnet_VGG16,Xception,ResNet50V2,InceptionV3",
+    "selected_model": "InceptionV3"
+}
+
+
+
+
