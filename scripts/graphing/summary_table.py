@@ -119,7 +119,7 @@ def main(config=None):
     """ The main body of the program """
     # Obtain a dictionary of configurations
     if config is None:
-        config = parse_json('summary_table_graphing_config.json')
+        config = parse_json('summary_table_config.json')
 
     # Get the necessary input files
     true_paths = path_getter.get_files(config['data_path'], "true_label", isIndex=True, getValidation=True)
@@ -136,6 +136,7 @@ def main(config=None):
     if not os.path.exists(config['output_path']):
         os.makedirs(config['output_path'])
     graph(accuracies, stderr, os.path.join(config['output_path'], config['output_filename']))
+    print(colored("Finished writing the summary table.", 'green'))
 
 
 
