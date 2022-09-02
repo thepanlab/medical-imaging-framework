@@ -14,7 +14,7 @@ learning_curve = ultraimport('../learning_curve.py')
 def run_program(args):
     """ Run the program for each item. """
     # Get the needed input paths, as well as the proper file names for output
-    fold_paths = path_getter.get_folds(args["data_path"])
+    subfold_paths = path_getter.get_subfolds(args["data_path"])
     json = {
         label: args[label] for label in (
             'loss_line_color', 'val_loss_line_color', 'acc_line_color', 'val_acc_line_color',
@@ -23,10 +23,10 @@ def run_program(args):
             )
         }
     # For each item, run the program
-    for fold in fold_paths:
+    for subfold in subfold_paths:
         try:
             # Get the program's arguments
-            json['input_path'] = fold
+            json['input_path'] = subfold
             learning_curve.main(json)
         # Catch weird stuff
         except Exception as err:

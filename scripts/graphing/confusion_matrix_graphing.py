@@ -21,15 +21,16 @@ def run_program(args):
             )
         }
     # For each item, run the program
-    for key in pred_paths:
-        for index in range(len(pred_paths[key])):
-            try:
-                # Get the program's arguments
-                json = generate_json(pred_paths, true_paths, key, index, json)
-                confusion_matrix.main(json)
-            # Catch weird stuff
-            except Exception as err:
-                print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
+    for model in pred_paths:
+        for subject in pred_paths[model]:
+            for item in range(len(pred_paths[model][subject])):
+                try:
+                    # Get the program's arguments
+                    json = generate_json(pred_paths, true_paths, model, subject, item, json)
+                    confusion_matrix.main(json)
+                # Catch weird stuff
+                except Exception as err:
+                    print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
 
 
 
@@ -42,15 +43,15 @@ def find_directories(data_path):
 
 
 
-def generate_json(pred_paths, true_paths, key, index, json):
+def generate_json(pred_paths, true_paths, model, subject, item, json):
     """ Creates a dictionary of would-be JSON arguments """
     # The current expected suffix format for true labels
     true_label_suffix = " true label index.csv"
 
     # Create dictionary for every item
-    json["pred_path"] = pred_paths[key][index]
-    json["true_path"] = true_paths[key][index]
-    json["output_file_prefix"] = true_paths[key][index].split('/')[-1].replace(true_label_suffix, "")
+    json["pred_path"] = pred_paths[model][subject][item]
+    json["true_path"] = true_paths[model][subject][item]
+    json["output_file_prefix"] = true_paths[model][subject][item].split('/')[-1].replace(true_label_suffix, "")
     return json
 
 
