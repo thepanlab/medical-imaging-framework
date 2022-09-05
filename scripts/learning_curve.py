@@ -54,7 +54,7 @@ def lc_loss(path, data_frame, config, name):
     # Save the figure
     plt.savefig(os.path.join(path, name) + '_lc_loss' + '.' + save_format, format=save_format, dpi=save_res)
     plt.close()
-    print(colored("Loss Learning curve has been created for - " + name, 'green'))
+    print(colored("Loss Learning curve has been created for: " + name + "\n", 'green'))
 
 
 
@@ -94,7 +94,7 @@ def lc_accuracy(path, data_frame, config, name):
     save_res = config['save_resolution']
     plt.savefig(os.path.join(path, name) + '_lc_accuracy' + '.' + save_format, format=save_format, dpi=save_res)
     plt.close()
-    print(colored("Accuracy Learning curve has been created for - " + name , 'green'))
+    print(colored("Accuracy Learning curve has been created for: " + name , 'green'))
 
 
 

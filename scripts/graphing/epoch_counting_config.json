@@ -1,5 +1,4 @@
 {
     "data_path": "/home/jshaw/medical-imaging-framework/data/model_data/",
-    "output_path": "./summary_output",
-    "output_filename": "summary_table"
+    "output_path": "./epoch_output/"
 }

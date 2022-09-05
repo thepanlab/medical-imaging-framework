@@ -15,38 +15,47 @@ get_config = ultraimport('/home/jshaw/medical-imaging-framework/scripts/graphing
 
 
 
-def create_confusion_matrix(true_vals, pred_vals, results_path, name, labels):
+def create_confusion_matrix(true_vals, pred_vals, results_path, file_name, labels):
     """ Creates confusion matrix and saves as a csv in the results directory.  """ 
-    # Check the file is valid
-    file_name = re.sub('.csv', '', name)
+    # Check the input is valid
     if len(true_vals) != len(pred_vals):
         raise Exception('The length of true and predicted values are not equal.')
 
+    # Create the axis labels
+    col_names = ['pred_' + l for l in labels]   # pd.MultiIndex.from_arrays([labels], names=["Predicted"])
+    ind_names = ['true_' + l for l in labels]   # pd.MultiIndex.from_arrays([labels], names=["Truth"])
+
     # Create the matrix
     conf_matrix = confusion_matrix(true_vals, pred_vals)
-    header = pd.MultiIndex.from_product([["Predicted"], labels], names=['', 'True'])
-    conf_matrix_df = pd.DataFrame(conf_matrix, columns=header, index=labels)
+    conf_matrix_df = pd.DataFrame(conf_matrix, columns=col_names, index=ind_names)
+
+    # Output the results
     conf_matrix_df.to_csv(os.path.join(results_path, file_name) + '_conf_matrix.csv')
-    print(colored("Confusion matrix created for " + name, 'green')) 
+    print(colored("Confusion matrix created for " + file_name, 'green')) 
     return conf_matrix
 
 
 
+# TODO implement this according to the new file structure
 def average_conf_matrices(matrices_list, results_path, name, labels):
     """ Takes a list of confusion matrices already computed and averages their results. Averages matrix is stored in the results directory.   """
+    # Create the axis labels    
+    col_names = ['pred_' + l for l in labels]   # pd.MultiIndex.from_arrays([labels], names=["Predicted"])
+    ind_names = ['true_' + l for l in labels]   # pd.MultiIndex.from_arrays([labels], names=["Truth"])
+
     # Compute the average using a list of computed matrices
-    avg_matrix = np.mean(matrices_list, axis=0)
     num_matrices = len(matrices_list)
-    header = pd.MultiIndex.from_product([["Predicted"], labels], names=['', 'True'])
-    avg_matrix_df = pd.DataFrame(avg_matrix, columns=header, index=labels)
-    avg_matrix_df.to_csv(os.path.join(results_path, name) + '_avg_conf_matrix.csv')
-    print(colored("Average confusion matrix created for " + name, 'green')) 
+    avg_matrix = np.mean(matrices_list, axis=0)
+    avg_matrix_df = pd.DataFrame(avg_matrix, columns=col_names, index=ind_names)
 
     # Compute the standard error of the matrices
     stderr_matrix = np.std(matrices_list, axis=0, ddof=0)/(math.sqrt(num_matrices))
-    stderr_matrix_df = pd.DataFrame(stderr_matrix, columns=header, index=labels)
+    stderr_matrix_df = pd.DataFrame(stderr_matrix, columns=col_names, index=ind_names)
+
+    # Output both matricies
+    avg_matrix_df.to_csv(os.path.join(results_path, name) + '_avg_conf_matrix.csv')
     stderr_matrix_df.to_csv(os.path.join(results_path, name) + '_stderr_conf_matrix.csv')
-    print(colored("Standard error confusion matrix created for " + name, 'green'))
+    print(colored("Average and standard error confusion matrix created for " + name + "\n", 'green'))
 
 
 
@@ -95,8 +104,10 @@ def main(config=None):
     # Create a confusion matrix for the given files
     matrices_list = []
     conf_matrix = create_confusion_matrix(true_val , pred_val, output_path, config['output_file_prefix'], config['label_types'])
-    matrices_list.append(conf_matrix)
-    average_conf_matrices(matrices_list, output_path, config['output_file_prefix'], config['label_types'])
+    
+    # TODO Create an average/stderr matrix
+    # matrices_list.append(conf_matrix)
+    # average_conf_matrices(matrices_list, output_path, config['output_file_prefix'], config['label_types'])
 
 
 

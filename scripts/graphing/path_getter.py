@@ -32,6 +32,9 @@ import os
 
 def get_subfiles(path, return_full_path=True):
     """ This will get a list of everything contained within some particular directory; by model and subject. """
+    # Make this path have all forward-shashes, to make usable with Windows machines
+    path = path.replace("\\", "/")
+
     # Check if the path exists and is a directory
     if not (os.path.exists(path) and os.path.isdir(path)):
         raise Exception(colored("Error: The directory does not exist! - " + path, "red"))
@@ -48,32 +51,58 @@ def get_subfiles(path, return_full_path=True):
 
 
 
-def get_files(data_path, target_folder, isIndex=None, getValidation=False, getTesting=False, isCSV=True):
-    """ This function will get a set of files from each subfold contained within a particular target directory. """
-    # Will return a dictionary of arrays separated by model
-    target_files = {}
+def get_subfolds(data_path):
+    """ This function will get every "subfold" that exists. """
+    # Store paths in a dictionary
+    subfolds = {}
 
-    # They cannot both be true
-    if getValidation and getTesting:
-        getValidation = False
-        getTesting = False
+    # Get the test subjects
+    test_subject_paths = get_subfiles(data_path)
 
-    # Get the test subjects (Level 1)
-    test_subject_paths = get_subfiles(data_path.replace('\\\\', '/'))
-
-    # For each subject, get the configurations (Level 2)
+    # For each subject, get the configurations
     for subject in test_subject_paths:
         config_paths = get_subfiles(subject)
         subject_id = subject.split('/')[-1].split('_')[-1]
 
-        # For each config, get its subfolds (Level 3)
+        # For each model/config, find its contents
         for config in config_paths:
-            subfold_paths = get_subfiles(config)
 
-            # Each subfold should contain the target folder. Try to find it.
-            for subfold in subfold_paths:
+            # Check if the model has contents
+            subfold_paths = get_subfiles(config)
+            if subfold_paths:
+                
+                # Check that the dictionary contains the model/subject
+                model_name = subfold_paths[0].split('/')[-1].split('_')[0]
+                if model_name not in subfolds:
+                    subfolds[model_name] = {}
+                if subject_id not in subfolds[model_name]:
+                    subfolds[model_name][subject_id] = []
+
+                # Add to results
+                subfolds[model_name][subject_id].extend(subfold_paths)
+
+    # Return the directory-paths
+    return subfolds
+
+
+
+def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=False, getTesting=False, isCSV=True):
+    """ This function will get a set of files from each "subfold" contained within a particular target directory. """
+    # Will return a dictionary of arrays separated by model
+    target_subfolder_files = {}
+
+    # Get the existing subfolds
+    subfolds = get_subfolds(data_path)
+
+    # Iterate through the subfolds
+    for model_name in subfolds:
+        target_subfolder_files[model_name] = {}
+        for subject_id in subfolds[model_name]:
+            target_subfolder_files[model_name][subject_id] = []
+            
+            # Each subfold should contain the target subfolder. Try to find it.
+            for subfold in subfolds[model_name][subject_id]:
                 subfiles = get_subfiles(subfold, return_full_path=False)
-                model_name = subfold.split('/')[-1].split('_')[0]
 
                 # Check if the target folder is in the list
                 if target_folder not in subfiles:
@@ -83,14 +112,6 @@ def get_files(data_path, target_folder, isIndex=None, getValidation=False, getTe
                 # Get the items within the target folder
                 full_target_path = os.path.join(subfold, target_folder)
                 target_paths = get_subfiles(full_target_path)
-
-                # Check model-array exists
-                if model_name not in target_files:
-                    target_files[model_name] = {}
-
-                # Check if subject-array exists
-                if subject_id not in target_files[model_name]:
-                    target_files[model_name][subject_id] = []
 
                 # Make sure these are CSV files
                 if isCSV:
@@ -110,37 +131,53 @@ def get_files(data_path, target_folder, isIndex=None, getValidation=False, getTe
 
                 # Append specifically indexed or not results to list if needed
                 if isIndex is None:
-                    target_files[model_name][subject_id].extend(target_paths)
+                    target_subfolder_files[model_name][subject_id].extend(target_paths)
                 elif isIndex:
                     for file in target_paths:
                         if "index" in file:
-                            target_files[model_name][subject_id].append(file)
+                            target_subfolder_files[model_name][subject_id].append(file)
                 else:
                     for file in target_paths:
                         if "index" not in file:
-                            target_files[model_name][subject_id].append(file)
+                            target_subfolder_files[model_name][subject_id].append(file)
                         
     # Return the target files
-    return target_files
+    return target_subfolder_files
 
 
 
-def get_subfolds(data_path):
-    """ This function will get every fold-path that exists. """
-    # Store paths in a simple array
-    subfolds = []
+def get_history_paths(data_path):
+    """ This function will get every history file from each model-fold. """
+    # Will return a dictionary of arrays separated by model
+    histories = {}
 
-    # Get the test subjects
-    test_subject_paths = get_subfiles(data_path)
+    # Get the existing subfolds
+    subfolds = get_subfolds(data_path)
 
-    # For each subject, get the configurations
-    for subject in test_subject_paths:
-        config_paths = get_subfiles(subject)
+    # Iterate through the subfolds
+    for model_name in subfolds:
+        histories[model_name] = {}
+        for subject_id in subfolds[model_name]:
+            histories[model_name][subject_id] = []
+            
+            # Each subfold should contain one history file. Try to find it.
+            for subfold in subfolds[model_name][subject_id]:
+                subfiles = get_subfiles(subfold)
 
-        # For each config, get its subfolds and add to list
-        for config in config_paths:
-            subfold_paths = get_subfiles(config)
-            subfolds.extend(subfold_paths)
+                # Search for the history file
+                missing = True
+                for subfile in subfiles:
+                    if subfile.endswith("history.csv"):
+                        histories[model_name][subject_id].append(subfile)
+                        missing = False
+                        break
+                    
+                # Warn that the target file was not detected
+                if missing:
+                    print(colored("Warning: a history file was not detected in " + subfold, "yellow"))
+                    continue
 
-    # Return the directory-paths
-    return subfolds
+    # Return results
+    return histories
+
+                

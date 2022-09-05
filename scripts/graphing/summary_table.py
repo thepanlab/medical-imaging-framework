@@ -122,8 +122,8 @@ def main(config=None):
         config = parse_json('summary_table_config.json')
 
     # Get the necessary input files
-    true_paths = path_getter.get_files(config['data_path'], "true_label", isIndex=True, getValidation=True)
-    pred_paths = path_getter.get_files(config['data_path'], "prediction", isIndex=True, getValidation=True)
+    true_paths = path_getter.get_subfolder_files(config['data_path'], "true_label", isIndex=True, getValidation=True)
+    pred_paths = path_getter.get_subfolder_files(config['data_path'], "prediction", isIndex=True, getValidation=True)
 
     # Read in each file into a dictionary
     true = read_data(true_paths)

@@ -130,9 +130,9 @@ def main(config=None):
     pred_path = config['pred_path']
     true_path = config['true_path']
     if not os.path.exists(pred_path):
-        raise Exception("Error: The prediction path is not valid!: " + pred_path)
+        raise Exception(colored("Error: The prediction path is not valid!: " + pred_path, 'red'))
     if not os.path.exists(true_path):
-        raise Exception("Error: The true-value path is not valid!: " + true_path)
+        raise Exception(colored("Error: The true-value path is not valid!: " + true_path, 'red'))
     true_val, pred_val = get_data(pred_path, true_path)
 
     # Create the curve

@@ -22,15 +22,19 @@ def run_program(args):
             'save_resolution', 'save_format', 'output_path'
             )
         }
+
     # For each item, run the program
-    for subfold in subfold_paths:
-        try:
-            # Get the program's arguments
-            json['input_path'] = subfold
-            learning_curve.main(json)
-        # Catch weird stuff
-        except Exception as err:
-            print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
+    for model in subfold_paths:
+        for subject in subfold_paths[model]:
+            for subfold in subfold_paths[model][subject]:
+                try:
+                    # Get the program's arguments and run
+                    json['input_path'] = subfold
+                    learning_curve.main(json)
+
+                # Catch weird stuff
+                except Exception as err:
+                    print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
 
 
 def main():
