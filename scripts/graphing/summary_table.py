@@ -23,8 +23,9 @@ def read_data(paths):
 
             # Check if the fold has files to read from
             if not paths[model][target_id]:
-                raise Exception(colored("Error: model '" + model + "' and target '" + target_id
-                                        + "' had no CSV files detected.", 'red'))
+                raise Exception(colored("Error: model '" + model + "' and target '" 
+                    + target_id +  "' had no indexed CSV files detected. " 
+                    + "Double-check the predictions have files ending in '_index.csv'.", 'red'))
 
             # For each file, read and store it
             for path in paths[model][target_id]:

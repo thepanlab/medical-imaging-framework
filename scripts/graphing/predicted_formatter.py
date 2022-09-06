@@ -87,15 +87,14 @@ def main():
     file_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False)
 
     # Translate each file
-    for fold in file_paths:
-        for file_path in file_paths[fold]:
+    for model in file_paths:
+        for test_subject in file_paths[model]:
+            for file_path in file_paths[model][test_subject]:
+                # The translation
+                translated_data = translate_file(file_path)
 
-            # The translation
-            translated_data = translate_file(file_path)
-
-            # Write it to file
-            write_file(file_path, translated_data)
-
+                # Write it to file
+                write_file(file_path, translated_data)
     print(colored("Formatting is finished!\n", "green"))
 
     
