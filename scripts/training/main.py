@@ -69,15 +69,24 @@ def get_filename_list(path):
     img_count_total = 0
     file_list = []
     for item in dirs:
-        temp_dir = path + "/" + item
+        second_dir = path + "/" + item
         dir_count += 1
         img_count = 0
-        if os.path.isdir(temp_dir):
-            subdirs = os.listdir(temp_dir)
-            for subitem in subdirs:
-                img_count += 1
-                img_count_total += 1
-                file_list.append(temp_dir + "/" +subitem)
+        if os.path.isdir(second_dir):
+            sub_dirs = os.listdir(second_dir)
+            for sub_item in sub_dirs:
+                third_dir = second_dir + "/" + sub_item
+                if os.path.isdir(third_dir):
+                    third_dir_files = os.listdir(third_dir)
+                    for third_dir_file in third_dir_files:
+                        final_path = third_dir + "/" + third_dir_file
+                        img_count += 1
+                        img_count_total += 1
+                        file_list.append(final_path)
+                else:    
+                    img_count += 1
+                    img_count_total += 1
+                    file_list.append(third_dir)
         print("folder: %s, img count: %d"%(item, img_count))
     print("folder count: %d"%(dir_count))
     print("image count: %d"%(img_count_total))
@@ -110,7 +119,8 @@ def get_label_subject(path,label_position ,class_names, subject_list):
 
     # Update label index within the filename, this line only perform once
     if label_position==-1:
-        label_position=formatted_path.split('_').index(labels[0])
+        temp = formatted_path.split('.')
+        label_position=temp[0].split('_').index(labels[0])
 
     idx=class_names.index(labels[0])
     # Get all match the subjects
@@ -125,7 +135,8 @@ def get_label_subject(path,label_position ,class_names, subject_list):
 
 def parse_image(filename, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width):
 
-    parts = tf.strings.split(filename, "_")
+    parts_0 = tf.strings.split(filename, ".")
+    parts = tf.strings.split(parts_0[0], "_")
     label = parts[label_position]
 
     label_bool = (label == class_names)
@@ -133,8 +144,12 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
     # tf.print(filename, label, output_stream=sys.stderr, sep=',')
 
     image = tf.io.read_file(filename)
+    # image = tf.image.decode_jpeg(image, channels=channels)
+    # image = tf.image.convert_image_dtype(image, dtype=tf.float32)
+
     image = tf.io.decode_image(image, channels=channels, dtype=tf.float32,
                                name=None, expand_animations=False)
+
     #  Parameters for decode_image function
     #  contents: A Tensor of type string. 0-D. The encoded image bytes.
     #  channels: An optional int. Defaults to 0. Number of color channels for the decoded image.
@@ -152,6 +167,9 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
     if use_mean == 'true':
         image = image - mean / 255
 
+    # img_np=image.eval(session=tf.compat.v1.Session())
+    # img_np = image.numpy()
+    # print(len(img_np))
     # with tf.compat.v1.Session() as sess:
     #     img_np = image.eval(session=sess)
     #     crop_img_np = cropped_imageeval(session=sess)
@@ -228,8 +246,8 @@ def training(data, testing_subject, config_name):
     image_size = data['image_size'].split(",")  # (string list)
     offset_height = int(cropping_position[0])  # (int)
     offset_width = int(cropping_position[1])  # (int)
-    target_height = int(image_size[0])  # (int)
-    target_width = int(image_size[1])  # (int)
+    target_height = int(data['target_height'])  # (int)
+    target_width = int(data['target_width'])  # (int)
     # Get cropping flag
     do_cropping = data['do_cropping']  # (string)
     # Get model type
@@ -342,18 +360,18 @@ def training(data, testing_subject, config_name):
         print("Length of test files: " + str(len(test_file_name_list)))
         print("------------------------------------")
 
-        list_train_ds = tf.data.Dataset.from_tensor_slices(train_file_name_list[:50])
-        list_val_ds = tf.data.Dataset.from_tensor_slices(val_file_name_list[:50])
-        files_test_ds = tf.data.Dataset.from_tensor_slices(test_file_name_list[:50])
+        list_train_ds = tf.data.Dataset.from_tensor_slices(train_file_name_list)
+        list_val_ds = tf.data.Dataset.from_tensor_slices(val_file_name_list)
+        files_test_ds = tf.data.Dataset.from_tensor_slices(test_file_name_list)
 
         images_train_ds_v2 = list_train_ds.map(lambda x:parse_image(x, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width))
-        images_train_batch_ds = images_train_ds_v2.batch(batch_size, drop_remainder=True)
+        images_train_batch_ds = images_train_ds_v2.batch(batch_size, drop_remainder=False)
 
         images_val_ds_v2 = list_val_ds.map(lambda x:parse_image(x, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width))
-        images_val_batch_ds = images_val_ds_v2.batch(batch_size, drop_remainder=True)
+        images_val_batch_ds = images_val_ds_v2.batch(batch_size, drop_remainder=False)
 
         image_test_ds_v2 = files_test_ds.map(lambda x: parse_image(x, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width))
-        images_test_batch_ds = image_test_ds_v2.batch(batch_size, drop_remainder=True)
+        images_test_batch_ds = image_test_ds_v2.batch(batch_size, drop_remainder=False)
 
         base_model_empty, model_type = get_model(selected_model,target_height, target_width, channels)
         print("\033[91mCurrent model: %s\033[0m" % model_type)
@@ -366,8 +384,8 @@ def training(data, testing_subject, config_name):
 
 
         avg = keras.layers.GlobalAveragePooling2D()(base_model_empty.output)
-        output = keras.layers.Dense(len(class_names), activation="softmax")(avg)
-        model_ready = keras.models.Model(inputs=base_model_empty.input, outputs=output)
+        out_put = keras.layers.Dense(len(class_names), activation="softmax")(avg)
+        model_ready = keras.models.Model(inputs=base_model_empty.input, outputs=out_put)
 
         optimizer = keras.optimizers.SGD(lr=learning_rate, momentum=the_momentum, nesterov=True, decay=the_decay)
 
