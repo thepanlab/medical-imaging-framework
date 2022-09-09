@@ -1,0 +1,5 @@
+{
+    "files_directory":"/home/pcallec/data_kidney_structure/CW_Kidney_Structure",
+    "output_results":"../results/dimensions_17S/",
+    "n_parallel_processes": "all"
+}
