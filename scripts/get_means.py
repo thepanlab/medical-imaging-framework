@@ -105,6 +105,34 @@ def get_subject(file_address, letter_search):
 
     return x.group(0)
 
+def get_subject_v2(file_address, config_json):
+    """
+    It gets the subject from the file address,
+    in order to recognize it uses the list of subjects.
+
+    Arguments:
+        file_address (str):  
+        config_json (dict):
+    Returns:
+        str: it returns letter_search plus numbers found
+    Raise:
+        ValueError: If the letter provided is not found preceding a number
+    """
+    file_name =  get_filename(file_address)
+
+    list_subjects = config_json["list_subjects"]
+    
+    subject_of_file = None
+    
+    for subject in list_subjects:
+        if subject in file_name:
+            subject_of_file = subject
+
+    if subject_of_file is None:
+        raise ValueError(f"The file '{file_name}' in '{file_address}' does not contain a subject in list provided {list_subjects}")
+
+    return subject_of_file
+
 def get_array_subjects_and_unique(a_filelist, config_json):
     """
     It gets array of subjects for each images as well as a list of uniques subjects
@@ -139,6 +167,37 @@ def get_array_subjects_and_unique(a_filelist, config_json):
 
     return a_subjects, l_unique_subject
 
+def get_array_subjects_and_unique_v2(a_filelist, config_json):
+    """
+    It gets array of subjects for each images as well as a list of uniques subjects
+    contained in all images
+
+    Arguments:
+        a_filelist (array of str):  
+        config_json (dict): 
+    Returns:
+        array of str: value of subject for each image
+        list of str: list with unique subjects
+    """
+
+    l_subjects = []
+
+    for item in a_filelist:
+        l_subjects.append(get_subject_v2(item, config_json))        
+
+    a_subjects = np.array(l_subjects)
+
+    set_subject = set(l_subjects)
+    l_unique_subject = list(set_subject)
+
+    # TODO
+    # Fix order by number after k
+    # e.g.
+    # Currenlty the sort list gives
+    # k1,k10,k2,k3, ....
+    l_unique_subject.sort()
+
+    return a_subjects, l_unique_subject
 
 def get_n_parallel_processes(config_json):
     """
@@ -278,14 +337,14 @@ def get_inner_loop_means_csv(l_unique_subject, a_filelist, a_subjects, config_js
     df_mean_inner = pd.DataFrame(columns = columns, 
                         index = indices)
 
-    for i_combinations, [index_test, index_val] in enumerate(inner_combinations):
-        df_mean_inner.loc[f"T_{index_test}", f"V_{index_val}"] = results_mean[i_combinations]
-    
     # This allow to deal with directories with and without /
     # os.path.join(output_directory,"means_nested_cv_inner_loop.csv")
     # Create subdirectory if it doesnt exit
     os.makedirs(output_directory, exist_ok=True)
 
+    for i_combinations, [index_test, index_val] in enumerate(inner_combinations):
+        df_mean_inner.loc[f"T_{index_test}", f"V_{index_val}"] = results_mean[i_combinations]
+    
     df_mean_inner.to_csv( os.path.join(output_directory,"means_nested_cv_inner_loop.csv") )
 
     return
@@ -374,7 +433,7 @@ def main():
     args = get_parser()
     config_json = get_json(args)
     a_filelist = get_listfiles(config_json)
-    a_subjects, l_unique_subject =  get_array_subjects_and_unique(a_filelist, config_json)
+    a_subjects, l_unique_subject =  get_array_subjects_and_unique_v2(a_filelist, config_json)
     get_inner_loop_means_csv(l_unique_subject, a_filelist, a_subjects, config_json)
     get_outer_loop_means_csv(l_unique_subject, a_filelist, a_subjects, config_json)
 
