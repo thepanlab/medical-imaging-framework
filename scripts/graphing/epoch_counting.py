@@ -1,3 +1,4 @@
+import summary_table as filereader
 from get_config import parse_json
 from termcolor import colored
 import pandas as pd
@@ -8,7 +9,7 @@ import os
 
 
 
-def output_csv(history_paths, output_path):
+def count_epochs(history_paths):
     """ Creates a csv file for every model's history """
     # Store output dataframes by model
     model_dfs = {}
@@ -20,7 +21,7 @@ def output_csv(history_paths, output_path):
         # Every subject is the kth test set (row), find the column values
         col_names = []
         for row in history_paths[model]:
-            row_name = 'test_' + row
+            row_name = row
             model_dfs[model][row_name] = {}
 
 
@@ -37,27 +38,77 @@ def output_csv(history_paths, output_path):
 
                 # Add to the model's dataframe 
                 col_name = path.split('/')[-2][-2:]
-                if col_name not in col_names:
-                    col_names.append(col_name)
                 model_dfs[model][row_name][col_name] = epochs
+    
+    # Return a dictionary of counts
+    return model_dfs
 
-        # Re-structure the dictionary to easy conversion
-        col_names.sort()
-        to_df = {}
-        for row in model_dfs[model]:
-            to_df[row] = [0] * int(col_names[-1][-1])
-            for col in model_dfs[model][row]:
-                to_df[row][int(col[-1])-1] = model_dfs[model][row][col]
 
-        # Convert the dictionary to a dataframe
-        model_dfs[model] = pd.DataFrame.from_dict(to_df, orient='index')
-        model_dfs[model].columns = ['val_e' + str(col) for col in model_dfs[model].columns]
 
-        # Print the dataframe to file
-        file_name = model + '_epochs.csv'
-        model_dfs[model].to_csv(os.path.join(output_path, file_name))
-        print(colored('Successfully printed ' + model + "'s epoch results to file.", 'green'))
+def print_counts(epochs, output_path):
+    """ This will output a CSV of the epoch-counts """
+    # Create a new dataframe to output
+    col_names = ["test_fold", "config", "val_fold", "epochs"]
+    df = pd.DataFrame(columns=col_names)
 
+    # Re-format data to match the columns above
+    for config in epochs:
+        for testing_fold in epochs[config]:
+            for validation_fold in epochs[config][testing_fold]:
+                
+                # Each row should contain the given columns
+                df = df.append({
+                    col_names[0]: testing_fold, 
+                    col_names[1]: config, 
+                    col_names[2]: validation_fold, 
+                    col_names[3]: epochs[config][testing_fold][validation_fold]
+                }, ignore_index=True)
+
+    # Print to file
+    file_name = 'epochs.csv'
+    df.to_csv(os.path.join(output_path, file_name), index=False)
+    print(colored('Successfully printed epoch results to: ' + file_name, 'green'))
+
+
+
+def print_stderr(epochs, data_path, output_path):
+    """ This will output a CSV of the average epoch standard errors """
+    # Get the necessary input files
+    true_paths, pred_paths = filereader.get_paths(data_path)
+
+    # Read in each file into a dictionary
+    true = filereader.read_data(true_paths)
+    pred = filereader.read_data(pred_paths)
+
+    # Get accuracies and standard error
+    accuracies, stderr = filereader.get_accuracies_and_stderr(true, pred)
+
+    # Create a new dataframe to output
+    col_names = ["test_fold", "config", "avg_epochs", "std_err"]
+    df = pd.DataFrame(columns=col_names)
+
+    # Re-format data to match the columns above
+    for config in epochs:
+        for test_fold in epochs[config]:
+
+            # Count epochs
+            epoch_total = 0
+            for validation_fold in epochs[config][test_fold]:
+                epoch_total += epochs[config][test_fold][validation_fold]
+
+                
+            # Each row should contain the given columns
+            df = df.append({
+                col_names[0]: test_fold, 
+                col_names[1]: config, 
+                col_names[2]: epoch_total / len(epochs[config][test_fold]), 
+                col_names[3]: stderr[config][test_fold]
+            }, ignore_index=True)
+
+    # Print to file
+    file_name = 'epoch_avg_and_stderr.csv'
+    df.to_csv(os.path.join(output_path, file_name), index=False)
+    print(colored('Successfully printed epoch averages/stderrs to: ' + file_name, 'green'))
                 
             
 
@@ -71,7 +122,17 @@ def main(config=None):
 
     # Get the necessary input files
     history_paths = path_getter.get_history_paths(config['data_path'])
-    output_csv(history_paths, os.path.join(config['output_path']))
+
+    # Count the number of epochs within every file
+    epochs = count_epochs(history_paths)
+
+    # Output the counts
+    print_counts(epochs, config['output_path'])
+
+    # Output the stderr
+    print_stderr(epochs, config['data_path'], config['output_path'])
+    
+
 
 
 if __name__ == "__main__":

@@ -21,16 +21,18 @@ def create_confusion_matrix(true_vals, pred_vals, results_path, file_name, label
     if len(true_vals) != len(pred_vals):
         raise Exception('The length of true and predicted values are not equal.')
 
-    # Create the axis labels
-    col_names = ['pred_' + l for l in labels]   # pd.MultiIndex.from_arrays([labels], names=["Predicted"])
-    ind_names = ['true_' + l for l in labels]   # pd.MultiIndex.from_arrays([labels], names=["Truth"])
-
     # Create the matrix
     conf_matrix = confusion_matrix(true_vals, pred_vals)
-    conf_matrix_df = pd.DataFrame(conf_matrix, columns=col_names, index=ind_names)
+    conf_matrix_df = pd.DataFrame(conf_matrix, columns=labels, index=labels)
+
+    # Create the extra-index/col names
+    conf_matrix_df.index = [["Truth"] * len(labels), conf_matrix_df.index] 
+    conf_matrix_df.columns = [["Predicted"] * len(labels), conf_matrix_df.columns] 
 
     # Output the results
+    name = os.path.join(results_path, file_name) + '_conf_matrix.csv'
     conf_matrix_df.to_csv(os.path.join(results_path, file_name) + '_conf_matrix.csv')
+
     print(colored("Confusion matrix created for " + file_name, 'green')) 
     return conf_matrix
 

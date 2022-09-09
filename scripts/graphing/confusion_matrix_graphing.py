@@ -20,6 +20,7 @@ def run_program(args):
             'label_types', 'output_path'
             )
         }
+        
     # For each item, run the program
     for model in pred_paths:
         for subject in pred_paths[model]:
@@ -28,6 +29,7 @@ def run_program(args):
                     # Get the program's arguments
                     json = generate_json(pred_paths, true_paths, model, subject, item, json)
                     confusion_matrix.main(json)
+
                 # Catch weird stuff
                 except Exception as err:
                     print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
