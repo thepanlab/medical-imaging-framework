@@ -8,13 +8,6 @@ import os
 
 
 
-def get_paths(data_path):
-    """ Gets a dictionary of paths to the predicted and true values """
-    true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True)
-    pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=True, getValidation=True)
-    return true_paths, pred_paths
-
-
 def read_data(paths):
     """ This will read in file-data into a config-subject dictionary """
     # Return this
@@ -147,7 +140,8 @@ def main(config=None):
         config = parse_json('summary_table_config.json')
 
     # Get the necessary input files
-    true_paths, pred_paths = get_paths(config['data_path'])
+    true_paths = path_getter.get_subfolder_files(config['data_path'], "true_label", isIndex=True, getValidation=True)
+    pred_paths = path_getter.get_subfolder_files(config['data_path'], "prediction", isIndex=True, getValidation=True)
 
     # Read in each file into a dictionary
     true = read_data(true_paths)

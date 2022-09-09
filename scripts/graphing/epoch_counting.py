@@ -1,4 +1,3 @@
-import summary_table as filereader
 from get_config import parse_json
 from termcolor import colored
 import pandas as pd
@@ -73,16 +72,6 @@ def print_counts(epochs, output_path):
 
 def print_stderr(epochs, data_path, output_path):
     """ This will output a CSV of the average epoch standard errors """
-    # Get the necessary input files
-    true_paths, pred_paths = filereader.get_paths(data_path)
-
-    # Read in each file into a dictionary
-    true = filereader.read_data(true_paths)
-    pred = filereader.read_data(pred_paths)
-
-    # Get accuracies and standard error
-    accuracies, stderr = filereader.get_accuracies_and_stderr(true, pred)
-
     # Create a new dataframe to output
     col_names = ["test_fold", "config", "avg_epochs", "std_err"]
     df = pd.DataFrame(columns=col_names)
@@ -91,18 +80,25 @@ def print_stderr(epochs, data_path, output_path):
     for config in epochs:
         for test_fold in epochs[config]:
 
-            # Count epochs
-            epoch_total = 0
+            # Count epochs, get mean
+            epoch_mean = 0
+            n_epochs = len(epochs[config][test_fold])
             for validation_fold in epochs[config][test_fold]:
-                epoch_total += epochs[config][test_fold][validation_fold]
+                epoch_mean += epochs[config][test_fold][validation_fold]
+            epoch_mean = epoch_mean / n_epochs
 
-                
+            #  Get standard deviation
+            stdev = 0
+            for validation_fold in epochs[config][test_fold]:
+                stdev += (epochs[config][test_fold][validation_fold] - epoch_mean)**2
+            stdev = math.sqrt(stdev / n_epochs)
+
             # Each row should contain the given columns
             df = df.append({
                 col_names[0]: test_fold, 
                 col_names[1]: config, 
-                col_names[2]: epoch_total / len(epochs[config][test_fold]), 
-                col_names[3]: stderr[config][test_fold]
+                col_names[2]: epoch_mean, 
+                col_names[3]: stdev / math.sqrt(n_epochs)
             }, ignore_index=True)
 
     # Print to file
