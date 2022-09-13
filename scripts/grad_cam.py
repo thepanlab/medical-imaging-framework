@@ -7,13 +7,8 @@ import tensorflow as tf
 from PIL import Image
 import pandas as pd
 import numpy as np
-import ultraimport
-import sys
+import get_config
 import os
-
-# Imports a module from a level below.
-# If moved to same level, use "import get_config".
-get_config = ultraimport('/home/jshaw/medical-imaging-framework/scripts/graphing/get_config.py')
 
 """
     Grad-CAM
@@ -31,7 +26,6 @@ get_config = ultraimport('/home/jshaw/medical-imaging-framework/scripts/graphing
     It will display a heatmap of the most influential points on an image according
     to the model. Each converted image is saved to a file of a similar name.
 """
-
 
 
 def load_config():
@@ -61,7 +55,6 @@ def load_config():
     )
 
 
-
 def get_images(addr):
     """ Get the image address(es) """
     # If a single image
@@ -79,14 +72,12 @@ def get_images(addr):
     return images
 
 
-
 def load_data(model_addr, mean_addr, mean_row, mean_col):
     """ Load the data from their addresses """
     model = keras.models.load_model(model_addr)
     mean = pd.read_csv(mean_addr, index_col=0)
     mean = mean.loc[mean_row, mean_col]
     return model, mean
-
 
 
 def preprocessing(img_addr, mean):
@@ -97,7 +88,6 @@ def preprocessing(img_addr, mean):
     else:
         img_centered = img
     return img_centered[np.newaxis, :, :, np.newaxis]
-
 
 
 def gradcam_heatmap(img, model, last_conv_layer_name, pred_index=None):
@@ -135,7 +125,6 @@ def gradcam_heatmap(img, model, last_conv_layer_name, pred_index=None):
     # For visualization purpose, we will also normalize the heatmap between 0 & 1
     heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
     return heatmap
-
 
 
 def save_gradcam_output(img_path, heatmap, cam_path, alpha=0.4):
@@ -177,12 +166,11 @@ def save_gradcam_output(img_path, heatmap, cam_path, alpha=0.4):
         superimposed_img.save(cam_path + '/' + new_img_name)
 
 
-
 def main():
     """ Main program """
     # Load the configuration file and data
     model_addr, mean_addr, img_addr, output_addr, alpha, \
-        mean_row, mean_col, last_conv_layer_name = load_config()
+    mean_row, mean_col, last_conv_layer_name = load_config()
 
     # Load the data needed for the program
     model, mean = load_data(model_addr, mean_addr, mean_row, mean_col)
@@ -192,7 +180,6 @@ def main():
 
     # Process every image
     for img_addr_i in img_addrs:
-
         # Preprocess the image
         img_processed = preprocessing(img_addr_i, mean)
 
@@ -201,8 +188,7 @@ def main():
 
         # Output the image result
         save_gradcam_output(img_addr_i, heatmap, cam_path=output_addr, alpha=alpha)
-    print(colored("Finished processing: " + img_addr_i, 'green'))
-
+        print(colored("Finished processing: " + img_addr_i, 'green'))
 
 
 if __name__ == "__main__":

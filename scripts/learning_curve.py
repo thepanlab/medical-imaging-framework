@@ -1,19 +1,13 @@
 from matplotlib import pyplot as plt
 from termcolor import colored
 import pandas as pd
-import numpy as np
 import regex as re
-import ultraimport
+import get_config
 import os
-
-# Imports a module from a level below.
-# If moved to same level, use "import get_config".
-get_config = ultraimport('/home/jshaw/medical-imaging-framework/scripts/graphing/get_config.py')
-
 
 
 def lc_loss(path, data_frame, config, name):
-    """ Creates the model loss plot using the defined configurations and saves it in the results directory. """ 
+    """ Creates the model loss plot using the defined configurations and saves it in the results directory. """
     # The current subject
     subject_num = get_subject_num(name)
 
@@ -57,12 +51,11 @@ def lc_loss(path, data_frame, config, name):
     print(colored("Loss Learning curve has been created for: " + name + "\n", 'green'))
 
 
-
 def lc_accuracy(path, data_frame, config, name):
-    """ Creates the model accuracy plot using the defined configurations and saves it in the results directory.  """ 
+    """ Creates the model accuracy plot using the defined configurations and saves it in the results directory.  """
     # The current subject
     subject_num = get_subject_num(name)
-    
+
     # Grabbing accuracy and val_accuracy data from passed dataframe
     acc = data_frame['accuracy']
     val_acc = data_frame['val_accuracy']
@@ -94,34 +87,30 @@ def lc_accuracy(path, data_frame, config, name):
     save_res = config['save_resolution']
     plt.savefig(os.path.join(path, name) + '_lc_accuracy' + '.' + save_format, format=save_format, dpi=save_res)
     plt.close()
-    print(colored("Accuracy Learning curve has been created for: " + name , 'green'))
-
+    print(colored("Accuracy Learning curve has been created for: " + name, 'green'))
 
 
 def get_subject_num(file_name):
     """ Gets the subject id """
-    try: 
+    try:
         subject_search = re.search('(e[0-9]_val_)', file_name)
         subject_num = subject_search.captures()[0]
         return subject_num
-    except: 
+    except:
         raise Exception(colored("File name does not contain 'e[0-9]_val_' format.", 'red'))
 
 
-
-def create_graphs(file_list, file_path, results_path, results_config):  
+def create_graphs(file_list, file_path, results_path, results_config):
     """ Create graphs for each item """
     # Looping through each file and creating needed graphs
     for file in file_list:
-
         # Reading in CSV file into a dataframe
-        results_df = pd.read_csv(os.path.join(file_path, file),index_col = 0)
+        results_df = pd.read_csv(os.path.join(file_path, file), index_col=0)
         file_name = re.sub('.csv', '', file)
 
         # Creating accuracy and loss plots
         lc_accuracy(results_path, results_df, results_config, file_name)
         lc_loss(results_path, results_df, results_config, file_name)
-
 
 
 def file_verification(files_list):
@@ -134,7 +123,6 @@ def file_verification(files_list):
         else:
             pass
     return verified_list
-
 
 
 def main(config=None):
@@ -154,7 +142,6 @@ def main(config=None):
     list_files = os.listdir(file_path)
     verified_list_files = file_verification(list_files)
     create_graphs(verified_list_files, file_path, results_path, config)
-
 
 
 if __name__ == "__main__":

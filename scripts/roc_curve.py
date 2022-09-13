@@ -5,15 +5,11 @@ from termcolor import colored
 from itertools import cycle
 import pandas as pd
 import numpy as np
-import ultraimport
-import os 
+import get_config
+import os
 
-# Imports a module from a level below.
-# If moved to same level, use "import get_config".
-get_config = ultraimport('/home/jshaw/medical-imaging-framework/scripts/graphing/get_config.py')
 
 # TODO: change title to include file name
-
 
 
 def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
@@ -32,7 +28,7 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
 
     # For each class-index, generate values
     for i in range(n_classes):
-        fpr[i], tpr[i], _ = roc_curve(true_val_bin[:,i], pred_vals[:,i])
+        fpr[i], tpr[i], _ = roc_curve(true_val_bin[:, i], pred_vals[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
 
     # Generate values for a ravelled array
@@ -77,8 +73,8 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
     # Create the plot
     for i, type_name, color in zip(classes, l_types, colors):
         plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                label='{0} (AUC = {1:0.2f})'
-                ''.format(type_name, roc_auc[i]))
+                 label='{0} (AUC = {1:0.2f})'
+                       ''.format(type_name, roc_auc[i]))
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
@@ -90,7 +86,6 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
     # Save the figure
     plt.savefig(os.path.join(output_path, file_name) + '_roc_curve.' + save_format, dpi=save_res)
     plt.close()
-
 
 
 def get_data(pred_path, true_path):
@@ -111,7 +106,6 @@ def get_data(pred_path, true_path):
 
     # Return true and predicted values
     return true, pred
-
 
 
 def main(config=None):
@@ -138,7 +132,6 @@ def main(config=None):
     # Create the curve
     create_roc_curve(true_val, pred_val, config, config['output_file_prefix'], output_path)
     print(colored("ROC curve created for: " + config['output_file_prefix'], "green"))
-
 
 
 if __name__ == "__main__":

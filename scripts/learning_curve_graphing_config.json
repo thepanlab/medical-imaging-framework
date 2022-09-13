@@ -1,13 +1,13 @@
 {
-  "input_path": "../data/model_data/Test_subject_e1/config_1/resnet_50_0_test_e1_val_e2/",
-  "output_path": "../results/learning_curve",
+  "data_path": "../data/model_data/",
+  "output_path": "./learning_output",
 
   "loss_line_color": "r",
   "val_loss_line_color": "b",
   "acc_line_color": "b",
   "val_acc_line_color": "r",
 
-  "font_family": "arial",
+  "font_family": "DejaVu Sans",
   "label_font_size": 12,
   "title_font_size": 12,
 
