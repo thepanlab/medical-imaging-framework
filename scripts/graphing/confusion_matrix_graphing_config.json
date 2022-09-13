@@ -1,7 +1,0 @@
-{
-    
-    "data_path":   "/home/jshaw/medical-imaging-framework/data/model_data/",
-    "output_path": "./confusion_output",
-
-    "label_types": ["fat","ligament","flavum","empty","spinal cord"]
-}
