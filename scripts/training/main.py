@@ -437,14 +437,14 @@ def training(data, testing_subject, config_name):
         print("Elapsed time during the whole program in seconds for fold: %s (test_%s_val_%s): " % (rot, test_subject, val_subject), time_lapse)
 
         print("Saving timing file for fold " + str(rot))
-        with open('%s/%s_%s_test_%s_val_%s/%s_%s_test_%s_val_%s_time_total.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+        with open('%s/%s_%s_test_%s_val_%s/%s_%s_test_%s_val_%s_time-total.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
             writer = csv.writer(f)
             writer.writerow([time_lapse])
             # np.save(f, np.array(time_lapse))
 
         val_pred = model_ready.predict(images_val_batch_ds)
         print("Saving prediction of validation for fold " + str(rot))
-        with open('%s/%s_%s_test_%s_val_%s/prediction/%s_%s_test_%s_val_%s_val_predicted.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+        with open('%s/%s_%s_test_%s_val_%s/prediction/%s_%s_test_%s_val_%s_val-predicted.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
             writer = csv.writer(f)
             for item in val_pred:
                 writer.writerow(item)
@@ -452,7 +452,7 @@ def training(data, testing_subject, config_name):
 
         test_pred = model_ready.predict(images_test_batch_ds)
         print("Saving prediction of test for fold " + str(rot))
-        with open('%s/%s_%s_test_%s_val_%s/prediction/%s_%s_test_%s_val_%s_test predicted.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+        with open('%s/%s_%s_test_%s_val_%s/prediction/%s_%s_test_%s_val_%s_test-predicted.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
             writer = csv.writer(f)
             for item in test_pred:
                 writer.writerow(item)
@@ -468,37 +468,37 @@ def training(data, testing_subject, config_name):
         pd_history_history = pd.DataFrame.from_dict(history.history)
         pd_history_history.to_csv('%s/%s_%s_test_%s_val_%s/%s_%s_test_%s_val_%s_history.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject))
 
-        with open('%s/%s_%s_test_%s_val_%s/true_label/%s_%s_test_%s_val_%s_val true label.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+        with open('%s/%s_%s_test_%s_val_%s/true_label/%s_%s_test_%s_val_%s_val-true-label.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
             writer = csv.writer(f)
             for item in val_label_list:
                 writer.writerow([item])
             # np.save(f, val_label_list)
 
-        with open('%s/%s_%s_test_%s_val_%s/true_label/%s_%s_test_%s_val_%s_test true label.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+        with open('%s/%s_%s_test_%s_val_%s/true_label/%s_%s_test_%s_val_%s_test-true-label.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
             writer = csv.writer(f)
             for item in test_label_list:
                 writer.writerow([item])
             # np.save(f, test_label_list)
 
-        with open('%s/%s_%s_test_%s_val_%s/file_name/%s_%s_test_%s_val_%s_val file.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+        with open('%s/%s_%s_test_%s_val_%s/file_name/%s_%s_test_%s_val_%s_val-file.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
             writer = csv.writer(f)
             for item in val_file_name_list:
                 writer.writerow([item])
             # np.save(f, val_file_name_list)
 
-        with open('%s/%s_%s_test_%s_val_%s/file_name/%s_%s_test_%s_val_%s_test file.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+        with open('%s/%s_%s_test_%s_val_%s/file_name/%s_%s_test_%s_val_%s_test-file.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
             writer = csv.writer(f)
             for item in test_file_name_list:
                 writer.writerow([item])
             # np.save(f, test_file_name_list)
 
-        with open('%s/%s_%s_test_%s_val_%s/true_label/%s_%s_test_%s_val_%s_test true label index.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+        with open('%s/%s_%s_test_%s_val_%s/true_label/%s_%s_test_%s_val_%s_test-true-label-index.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
             writer = csv.writer(f)
             for item in test_index_list:
                 writer.writerow([item])
             # np.save(f, test_index_list)
 
-        with open('%s/%s_%s_test_%s_val_%s/true_label/%s_%s_test_%s_val_%s_val true label index.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+        with open('%s/%s_%s_test_%s_val_%s/true_label/%s_%s_test_%s_val_%s_val-true-label-index.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
             writer = csv.writer(f)
             for item in val_index_list:
                 writer.writerow([item])
