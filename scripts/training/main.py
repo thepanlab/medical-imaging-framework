@@ -136,11 +136,18 @@ def get_label_subject(path,label_position ,class_names, subject_list):
 def parse_image(filename, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width):
 
     parts_0 = tf.strings.split(filename, ".")
-    parts = tf.strings.split(parts_0[0], "_")
-    label = parts[label_position]
+    complete = parts_0[0]
+    if len(parts_0) > 2:
+        for part in parts_0[1:-1]:
+            complete = tf.add(complete,part)
 
+
+    parts = tf.strings.split(complete, "_")
+    label = parts[label_position]
+    # tf.print("length:"+str(tf.shape(parts)))
     label_bool = (label == class_names)
     # To double check the file name and label is correct
+
     # tf.print(filename, label, output_stream=sys.stderr, sep=',')
 
     image = tf.io.read_file(filename)
@@ -506,6 +513,17 @@ for testing_subject in testing_subjects:
         f.close()
         config_name = configFile_path.split("/")[-1].split(".")[0]
         training(configurations, testing_subject, config_name)
+
+
+
+"""
+test_e1:
+        config_1:
+                resnet_50_1_test_e1
+
+
+"""
+
 
 """
 
