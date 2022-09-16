@@ -32,18 +32,32 @@ def create_parser():
 def split_folds(subject_list, testing_subject):
     """
         Split folds based on subject_list.
+        Just for inner loop, after selecting test subject and config file.
+        There's an option in config file "rotations",
+        "rotations": "all" means perform all the combinations,
+        or a number indicates how many rotations to perform for each of the test subject,
+        e.g.: "rotations": "3"
 
+        output e.g.: if there are 4 subjects, the test subject is "e1", the output would be:
+        [
+            {e1}, {e2}, {...}
+            {e1}, {e3}, {...}
+            {e1}, {e4}, {...}
+        ]
         :return: List of all folds combinations
     """
     folds = []
     for i, item_test in enumerate(subject_list):
+        # i is the test subject
         if item_test == testing_subject:
             for j, item_val in enumerate(subject_list):
+                # j is the test subject
                 if i != j:
                     folds.append({'train': [], 'val': [], 'test': []})
                     folds[-1]['test'].append(item_test)
                     folds[-1]['val'].append(item_val)
                     for k, item_train in enumerate(subject_list):
+                        # i is the training subject
                         if (i != k) and (j != k):
                             folds[-1]['train'].append(item_train)
     print("-----------------folds:")
@@ -106,8 +120,10 @@ def get_configFile_list(path):
     print(configFile_list)
     return configFile_list
 
+
+# Get labels, subject, class index
 def get_label_subject(path,label_position ,class_names, subject_list):
-    #"/home/ylliu/img_ps/ep_optic_axis/train/E4_1_fat_3_Optic%20axis/807_E4_1_fat_3_Optic%20axis.png"
+    #"/home/xx_fat_xxx/img_ps/ep_optic_axis/train/E4_1_fat_3_Optic%20axis/807_E4_1_fat_3_Optic%20axis.png"
     formatted_path=path.lower().replace("%20", " ")
     # Get all match the labels
     labels = [class_name for class_name in class_names if class_name in formatted_path]
@@ -122,6 +138,12 @@ def get_label_subject(path,label_position ,class_names, subject_list):
         temp = formatted_path.split('.')
         label_position=temp[0].split('_').index(labels[0])
 
+    # parts_0 = tf.strings.split(filename, ".")
+    # complete = parts_0[0]
+    # if len(parts_0) > 2:
+    #     for part in parts_0[1:-1]:
+    #         complete = tf.add(complete, part)
+
     idx=class_names.index(labels[0])
     # Get all match the subjects
     subjects = [subject for subject in subject_list if subject in formatted_path]
@@ -132,6 +154,7 @@ def get_label_subject(path,label_position ,class_names, subject_list):
         raise Exception("Error when getting subject from: " + path)
 
     return labels[0], idx, subjects[0], label_position
+
 
 def parse_image(filename, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width):
 
