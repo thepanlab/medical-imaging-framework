@@ -93,8 +93,8 @@ def lc_accuracy(path, data_frame, config, name):
 def get_subject_name(file_name):
     """ Gets the subject id """
     try:
-        subject_search = re.search('.*_test_.*_val_.*', file_name)
-        subject_name = subject_search.captures()[0]
+        subject_search = re.search('_test_.*_val_', file_name)
+        subject_name = subject_search.captures()[0].split("_")[2]
         return subject_name
     except:
         raise Exception(colored(f"Error: File name doesn't contain '*_test_*_val_*' format: \n\t{file_name}", 'red'))
