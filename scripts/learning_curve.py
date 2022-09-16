@@ -9,7 +9,7 @@ import os
 def lc_loss(path, data_frame, config, name):
     """ Creates the model loss plot using the defined configurations and saves it in the results directory. """
     # The current subject
-    subject_num = get_subject_num(name)
+    subject_num = get_subject_name(name)
 
     # Grabbing accuracy and val_accuracy data from passed dataframe
     loss = data_frame['loss']
@@ -54,7 +54,7 @@ def lc_loss(path, data_frame, config, name):
 def lc_accuracy(path, data_frame, config, name):
     """ Creates the model accuracy plot using the defined configurations and saves it in the results directory.  """
     # The current subject
-    subject_num = get_subject_num(name)
+    subject_num = get_subject_name(name)
 
     # Grabbing accuracy and val_accuracy data from passed dataframe
     acc = data_frame['accuracy']
@@ -90,14 +90,14 @@ def lc_accuracy(path, data_frame, config, name):
     print(colored("Accuracy Learning curve has been created for: " + name, 'green'))
 
 
-def get_subject_num(file_name):
+def get_subject_name(file_name):
     """ Gets the subject id """
     try:
-        subject_search = re.search('(e[0-9]_val_)', file_name)
-        subject_num = subject_search.captures()[0]
-        return subject_num
+        subject_search = re.search('.*_test_.*_val_.*', file_name)
+        subject_name = subject_search.captures()[0]
+        return subject_name
     except:
-        raise Exception(colored("File name does not contain 'e[0-9]_val_' format.", 'red'))
+        raise Exception(colored(f"Error: File name doesn't contain '*_test_*_val_*' format: \n\t{file_name}", 'red'))
 
 
 def create_graphs(file_list, file_path, results_path, results_config):

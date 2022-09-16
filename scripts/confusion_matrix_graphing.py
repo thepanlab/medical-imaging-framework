@@ -66,6 +66,12 @@ def get_mean_matrices(path_dict, input_path, output_path, labels):
             subset = [path for path in matrix_paths if config in path.split('/')[-1]]
             subset = [path for path in subset if ("test_" + test_fold + "_val") in path.split('/')[-1]]
 
+            # Check if length is valid for finding mean/stderr
+            if len(subset) <= 1:
+                print(colored(f"Warning: Mean/stderr calculation skipped for testing fold {test_fold} in {config}."
+                              + " Must have multiple validation folds.", 'yellow'))
+                continue
+
             # Read in all the relevant matrices
             mats = []
             for path in subset:
