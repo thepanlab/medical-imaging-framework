@@ -27,7 +27,8 @@ def run_program(args):
 
                 # Catch weird stuff
                 except Exception as err:
-                    print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
+                    raise err
+                    #print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
 
 
 def find_directories(data_path):

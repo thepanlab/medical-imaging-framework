@@ -32,7 +32,7 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
         roc_auc[i] = auc(fpr[i], tpr[i])
 
     # Generate values for a ravelled array
-    fpr["micro"], tpr["micro"], _ = roc_curve(true_val_bin.ravel(), pred_vals.ravel())
+    fpr["micro"], tpr["micro"], _ = roc_curve(true_val_bin.ravel(), pred_vals.ravel())  # TODO: error line
     roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
     # First aggregate all false positive rates
