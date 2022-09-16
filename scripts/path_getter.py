@@ -1,5 +1,6 @@
 from predicted_formatter import main as reformat
 from termcolor import colored
+import regex as re
 import os
 
 """
@@ -118,15 +119,16 @@ def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=Fa
                             target_paths.remove(file)
 
                 # Get only 'val' or 'test' files if specified
+                temp_paths = []
                 if getValidation:
                     for file in target_paths:
-                        if "_test true label index" in file.split("/")[-1] or \
-                                "_test predicted_index" in file.split("/")[-1]:
-                            target_paths.remove(file)
+                        if re.search('_test_.*_val_.*_val', file.split('/')[-1]) is not None:
+                            temp_paths.append(file)
                 elif getTesting:
                     for file in target_paths:
-                        if "_val true" in file.split("/")[-1] or "_val_predicted" in file.split("/")[-1]:
-                            target_paths.remove(file)
+                        if re.search('_test_.*_val_.*_test_', file.split('/')[-1]) is not None:
+                            temp_paths.append(file)
+                target_paths = temp_paths
 
                 # Append specifically indexed or not results to list if needed
                 if isIndex is None:
@@ -190,3 +192,28 @@ def get_history_paths(data_path):
 
     # Return results
     return histories
+
+
+def get_config_indexes(data_path):
+    """ Returns the config names and their index (E.x. config 1 -> resnet) """
+    # Return a dict
+    results = {}
+
+    # The test folds
+    test_subject_paths = get_subfiles(data_path)
+
+    # For each subject, get the configurations
+    for subject in test_subject_paths:
+        config_paths = get_subfiles(subject)
+
+        # For each model/config, find its contents
+        for config in config_paths:
+            config_id = config.split("/")[-1].split("_")[-1]
+
+            # Check if the model has contents
+            subfold_paths = get_subfiles(config)
+            if subfold_paths:
+                # Check that the dictionary contains the model/subject
+                model_name = subfold_paths[0].split('/')[-1].split('_')[0]
+                results[model_name] = config_id
+    return results

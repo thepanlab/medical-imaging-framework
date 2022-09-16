@@ -40,10 +40,10 @@ def count_epochs(history_paths):
     return model_dfs
 
 
-def print_counts(epochs, output_path):
+def print_counts(epochs, output_path, config_nums):
     """ This will output a CSV of the epoch-counts """
     # Create a new dataframe to output
-    col_names = ["test_fold", "config", "val_fold", "epochs"]
+    col_names = ["test_fold", "config", "config_index", "val_fold", "epochs"]
     df = pd.DataFrame(columns=col_names)
 
     # Re-format data to match the columns above
@@ -57,8 +57,9 @@ def print_counts(epochs, output_path):
                 df = df.append({
                     col_names[0]: testing_fold,
                     col_names[1]: config,
-                    col_names[2]: validation_fold,
-                    col_names[3]: epochs[config][testing_fold][validation_fold]
+                    col_names[2]: config_nums[config],
+                    col_names[3]: validation_fold,
+                    col_names[4]: epochs[config][testing_fold][validation_fold]
                 }, ignore_index=True)
 
     # Print to file
@@ -68,10 +69,10 @@ def print_counts(epochs, output_path):
     print(colored('Successfully printed epoch results to: ' + file_name, 'green'))
 
 
-def print_stderr(epochs, data_path, output_path):
+def print_stderr(epochs, output_path, config_nums):
     """ This will output a CSV of the average epoch standard errors """
     # Create a new dataframe to output
-    col_names = ["test_fold", "config", "avg_epochs", "std_err"]
+    col_names = ["test_fold", "config", "config-index", "avg_epochs", "std_err"]
     df = pd.DataFrame(columns=col_names)
 
     # Re-format data to match the columns above
@@ -95,8 +96,9 @@ def print_stderr(epochs, data_path, output_path):
             df = df.append({
                 col_names[0]: test_fold,
                 col_names[1]: config,
-                col_names[2]: epoch_mean,
-                col_names[3]: stdev / math.sqrt(n_val_folds)
+                col_names[2]: config_nums[config],
+                col_names[3]: epoch_mean,
+                col_names[4]: stdev / math.sqrt(n_val_folds)
             }, ignore_index=True)
 
     # Print to file
@@ -120,11 +122,14 @@ def main(config=None):
     # Count the number of epochs within every file
     epochs = count_epochs(history_paths)
 
+    # Get config nums (E.g config 1)
+    config_nums = path_getter.get_config_indexes(config['data_path'])
+
     # Output the counts
-    print_counts(epochs, config['output_path'])
+    print_counts(epochs, config['output_path'], config_nums)
 
     # Output the stderr
-    print_stderr(epochs, config['data_path'], config['output_path'])
+    print_stderr(epochs, config['output_path'], config_nums)
 
 
 if __name__ == "__main__":

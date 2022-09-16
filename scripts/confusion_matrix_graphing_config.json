@@ -1,5 +1,5 @@
 {
-  "data_path": "../data/model_data/",
+  "data_path": "../data/test_data/",
   "output_path": "./confusion_output",
   "average_stderr_output_path": "./confusion_avg_stderr_output",
 
