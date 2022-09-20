@@ -1,6 +1,6 @@
 {
-  "data_path": "../data/model_data/",
-  "output_path": "./roc_output",
+  "data_path": "../../data/model_data/",
+  "output_path": "../../results/roc_output",
 
   "line_width": "2",
   "label_types": [

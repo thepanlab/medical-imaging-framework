@@ -1,6 +1,6 @@
 {
-  "data_path": "../data/test_data/",
-  "output_path": "./learning_output",
+  "input_path": "../../data/model_data/Test_subject_e1/config_1/resnet_50_0_test_e1_val_e2/",
+  "output_path": "../../results/learning_curve",
 
   "loss_line_color": "r",
   "val_loss_line_color": "b",

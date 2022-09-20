@@ -1,0 +1,4 @@
+{
+  "data_path": "../../data/model_data/",
+  "output_path": "../../results/epoch_output/"
+}
