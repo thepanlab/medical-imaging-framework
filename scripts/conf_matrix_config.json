@@ -1,5 +1,0 @@
-{
-    "input_path":"/home/ecabello/medical-imaging-framework/medical-imaging-framework/data/Sample cm", 
-    "output_path":"/home/ecabello/medical-imaging-framework/medical-imaging-framework/results/confusion matrix", 
-    "label_types": ["fat","ligament","flavum","empty","spinal cord"]
-}
