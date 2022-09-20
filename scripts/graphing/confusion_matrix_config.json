@@ -1,0 +1,15 @@
+{
+  "pred_path": "../../data/model_data/Test_subject_e1/config_1/resnet_50_0_test_e1_val_e2/prediction/resnet_50_0_test_e1_val_e2_val_predicted_index.csv",
+  "true_path": "../../data/model_data/Test_subject_e1/config_1/resnet_50_0_test_e1_val_e2/true_label/resnet_50_0_test_e1_val_e2_val true label index.csv",
+
+  "output_path": "../../results/confusion_matrix",
+  "output_file_prefix": "resnet_50_0_test_e1_val_e2_val",
+
+  "label_types": [
+    "fat",
+    "ligament",
+    "flavum",
+    "empty",
+    "spinal cord"
+  ]
+}
