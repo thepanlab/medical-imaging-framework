@@ -1,5 +1,5 @@
 {
-  "data_path": "../../data/model_data/",
-  "output_path": "../../results/summary_output",
+  "data_path": "../../data/old_data/",
+  "output_path": "../../results/graphing/summary_output",
   "output_filename": "summary_table"
 }

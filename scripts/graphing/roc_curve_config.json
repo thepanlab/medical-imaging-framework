@@ -1,7 +1,7 @@
 {
   "pred_path": "../../data/model_data/Test_subject_e1/config_1/resnet_50_0_test_e1_val_e2/prediction/resnet_50_0_test_e1_val_e2_val_predicted.csv",
   "true_path": "../../data/model_data/Test_subject_e1/config_1/resnet_50_0_test_e1_val_e2/true_label/resnet_50_0_test_e1_val_e2_val true label index.csv",
-  "output_path": "../../results/roc_curve",
+  "output_path": "../../results/graphing/roc_curve",
   "output_file_prefix": "roc_e1_c1_val",
 
   "line_width": "2",

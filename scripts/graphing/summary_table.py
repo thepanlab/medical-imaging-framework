@@ -25,12 +25,6 @@ def read_data(paths):
                                         + test_fold + "' had no indexed CSV files detected. "
                                         + "Double-check the data files are there.", 'red'))
 
-            # Some Debug
-            if True:
-                print(colored(f"The testing fold '{test_fold}' for the configuration '{config}'" +
-                    f" has {len(paths[config][test_fold])} validation fold paths associated with it." +
-                    f" The paths are: \n", 'yellow') + colored('\n'.join(paths[config][test_fold]), 'blue') + '\n')
-
             # For each file, read and store it
             for validation_fold_path in paths[config][test_fold]:
                 val_fold = validation_fold_path.split("/")[-3].split("_")[-1]
@@ -70,11 +64,11 @@ def get_accuracies_and_stderr(true, pred):
                     totals[config][test_fold][val_fold]['correct'] / totals[config][test_fold][val_fold]['total']
 
     # Get accuracies and standard error for each config and test fold
-    accs = {}
-    errs = {}
+    total_accs = {}
+    total_errs = {}
     for config in totals:
-        accs[config] = {}
-        errs[config] = {}
+        total_accs[config] = {}
+        total_errs[config] = {}
         for test_fold in totals[config]:
 
             # Combine the accuracies, totals, and accuracies for each validation fold
@@ -87,7 +81,7 @@ def get_accuracies_and_stderr(true, pred):
                 total += totals[config][test_fold][val_fold]['total']
 
             # Get the total test fold accuracy
-            accs[config][test_fold] = correct / total
+            total_accs[config][test_fold] = correct / total
 
             # Get the mean accuracy
             n_val_folds = len(totals[config][test_fold])
@@ -97,16 +91,16 @@ def get_accuracies_and_stderr(true, pred):
             stdev = 0
             for val_fold in totals[config][test_fold]:
                 stdev += (totals[config][test_fold][val_fold]['accuracy'] - mean_acc) ** 2
-            stdev = math.sqrt(stdev / (n_val_folds))  # TODO nval-1?
+            stdev = math.sqrt(stdev / (n_val_folds - 1))
 
             # Get standard error = standard deviation/sqrt(N)
-            errs[config][test_fold] = stdev / math.sqrt(n_val_folds)
+            total_errs[config][test_fold] = stdev / math.sqrt(n_val_folds)    
 
     # Return accuracy
-    return accs, errs
+    return total_accs, total_errs
 
 
-def output(accuracies, standard_error, output_path):
+def total_output(accuracies, standard_error, output_path):
     """ Produces a table of accuracies and standard errors by config and fold """
     # Get names of columns and subjects
     config_names = list(accuracies.keys())
@@ -131,7 +125,9 @@ def output(accuracies, standard_error, output_path):
     # Create and save the Pandas dataframe
     df = pd.DataFrame(data=data, index=row_labels)
     df.index.names = ['test_fold']
+    df = df.sort_values(by=['test_fold'], ascending=True)
     df.to_csv(output_path + '.csv')
+
 
 
 def main(config=None):
@@ -154,7 +150,7 @@ def main(config=None):
     # Graph results
     if not os.path.exists(config['output_path']):
         os.makedirs(config['output_path'])
-    output(accuracies, stderr, os.path.join(config['output_path'], config['output_filename']))
+    total_output(accuracies, stderr, os.path.join(config['output_path'], config['output_filename']))
     print(colored("Finished writing the summary table.", 'green'))
 
 

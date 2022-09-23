@@ -90,6 +90,11 @@ def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=Fa
     # Will return a dictionary of arrays separated by model
     target_subfolder_files = {}
 
+    # Change both 'gets' to true if false
+    if not getValidation and not getTesting:
+        getValidation = True
+        getTesting = True
+
     # Get the existing subfolds
     subfolds = get_subfolds(data_path)
 
@@ -129,7 +134,7 @@ def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=Fa
                         if re.search('_test_.*_val_.*_test_', file.split('/')[-1]) is not None:
                             temp_paths.append(file)
                 target_paths = temp_paths
-
+                
                 # Append specifically indexed or not results to list if needed
                 if isIndex is None:
                     target_subfolder_files[model_name][subject_id].extend(target_paths)

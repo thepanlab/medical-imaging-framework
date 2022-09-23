@@ -1,7 +1,8 @@
 {
-  "data_path": "../../data/model_data/",
-  "output_path": "../../results/confusion_output",
-  "average_stderr_output_path": "../../results/confusion_avg_stderr_output",
+  "data_path": "../../data/old_data/",
+  "output_path": "../../results/graphing/confusion_output",
+  "average_stderr_output_path": "../../results/graphing/confusion_avg_stderr_output",
+  "label_stderr_output_path": "../../results/graphing/confusion_label_avg_stderr_output",
 
   "label_types": [
     "fat",
@@ -9,5 +10,11 @@
     "flavum",
     "empty",
     "spinal cord"
+  ],
+  "label_comparisons": [
+    ["fat", "ligament"],
+    ["ligament", "flavum"],
+    ["flavum", "spinal cord"]
   ]
+
 }

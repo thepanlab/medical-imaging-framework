@@ -32,9 +32,6 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
         roc_auc[i] = auc(fpr[i], tpr[i])
 
     # Generate values for a ravelled array
-    print(colored(f"File: {file_name}", 'blue'))
-    print(colored(f"True: {len(true_val_bin.ravel())}", 'blue'))
-    print(colored(f"Pred: {len(pred_vals.ravel())}", 'blue'))
     fpr["micro"], tpr["micro"], _ = roc_curve(true_val_bin.ravel(), pred_vals.ravel())  # TODO: error line
     roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
@@ -131,8 +128,6 @@ def main(config=None):
     if not os.path.exists(true_path):
         raise Exception(colored("Error: The true-value path is not valid!: " + true_path, 'red'))
     true_val, pred_val = get_data(pred_path, true_path)
-    print(colored(true_path.split('/')[-1], 'yellow'))
-    print(colored(pred_path.split('/')[-1], 'yellow'))
 
     # Create the curve
     create_roc_curve(true_val, pred_val, config, config['output_file_prefix'], output_path)

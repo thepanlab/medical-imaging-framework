@@ -27,8 +27,7 @@ def run_program(args):
 
                 # Catch weird stuff
                 except Exception as err:
-                    raise err
-                    #print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
+                    print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
 
 
 def find_directories(data_path):
@@ -36,10 +35,6 @@ def find_directories(data_path):
     # Get the paths of every prediction and true CSV, as well as the fold-names
     true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True)
     pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False, getValidation=True)
-
-    print(colored(len(true_paths['resnet']['e1']), 'blue'))
-    print(colored(len(pred_paths['resnet']['e1']), 'red'))
-
     return pred_paths, true_paths
 
 
