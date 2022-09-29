@@ -1,4 +1,4 @@
-from predicted_formatter import main as reformat
+from .predicted_formatter.predicted_formatter import main as reformat
 from termcolor import colored
 import regex as re
 import os

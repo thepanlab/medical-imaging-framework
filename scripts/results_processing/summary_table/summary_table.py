@@ -1,7 +1,7 @@
-from get_config import parse_json
+from util.get_config import parse_json
 from termcolor import colored
+from util import path_getter
 import pandas as pd
-import path_getter
 import math
 import os
 

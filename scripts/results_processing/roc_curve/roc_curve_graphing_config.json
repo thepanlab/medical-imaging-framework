@@ -1,6 +1,6 @@
 {
-  "data_path": "../../data/old_data/",
-  "output_path": "../../results/graphing/roc_output",
+  "data_path": "../../../data/old_data/",
+  "output_path": "../../../results/graphing/roc_output",
 
   "line_width": "2",
   "label_types": [

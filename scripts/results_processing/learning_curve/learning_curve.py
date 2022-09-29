@@ -1,8 +1,8 @@
 from matplotlib import pyplot as plt
 from termcolor import colored
+from util import get_config
 import pandas as pd
 import regex as re
-import get_config
 import os
 
 

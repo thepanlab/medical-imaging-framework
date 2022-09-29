@@ -1,7 +1,7 @@
-from get_config import parse_json
+from util.get_config import parse_json
 from termcolor import colored
-import learning_curve
-import path_getter
+from . import learning_curve
+from util import path_getter
 
 
 def run_program(args):

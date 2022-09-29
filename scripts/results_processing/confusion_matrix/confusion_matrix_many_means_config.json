@@ -1,0 +1,14 @@
+{
+  "data_path": "../../../data/old_data/",
+  "matrices_path": "../../../results/processed_output/confusion_matrix",
+  "means_output_path": "../../../results/processed_output/confusion_matrix_means",
+
+  "label_types": [
+    "fat",
+    "ligament",
+    "flavum",
+    "empty",
+    "spinal cord"
+  ]
+
+}

@@ -3,9 +3,9 @@ from sklearn.metrics import roc_curve, auc
 from matplotlib import pyplot as plt
 from termcolor import colored
 from itertools import cycle
+from util import get_config
 import pandas as pd
 import numpy as np
-import get_config
 import os
 
 

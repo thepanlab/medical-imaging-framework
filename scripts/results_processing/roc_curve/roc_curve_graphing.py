@@ -1,7 +1,7 @@
-from get_config import parse_json
+from util.get_config import parse_json
 from termcolor import colored
-import path_getter
-import roc_curve
+from util import path_getter
+from . import roc_curve
 
 
 def run_program(args):

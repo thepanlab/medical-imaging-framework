@@ -1,6 +1,6 @@
 from termcolor import colored
+from .. import path_getter
 import pandas as pd
-import path_getter
 import argparse
 import json
 
