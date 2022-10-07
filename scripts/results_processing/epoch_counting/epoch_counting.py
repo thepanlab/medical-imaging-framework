@@ -49,8 +49,6 @@ def print_counts(epochs, output_path, config_nums):
     # Create a new dataframe to output
     col_names = ["test_fold", "config", "config_index", "val_fold", "epochs"]
     df = pd.DataFrame(columns=col_names)
-    
-    print(colored(config_nums, 'yellow'))
 
     # Re-format data to match the columns above
     configs = list(epochs.keys())
