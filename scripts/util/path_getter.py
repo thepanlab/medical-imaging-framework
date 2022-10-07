@@ -213,7 +213,7 @@ def get_config_indexes(data_path):
 
         # For each model/config, find its contents
         for config in config_paths:
-            config_id = config.split("/")[-1].split("_")[-1]
+            config_id = config.split("/")[-1].split("_")[1]
 
             # Check if the model has contents
             subfold_paths = get_subfiles(config)
