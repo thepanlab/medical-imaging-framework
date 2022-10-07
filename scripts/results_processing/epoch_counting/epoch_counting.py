@@ -16,7 +16,6 @@ def count_epochs(history_paths):
         model_dfs[model] = {}
 
         # Every subject is the kth test set (row), find the column values
-        col_names = []
         for row in history_paths[model]:
             row_name = row
             model_dfs[model][row_name] = {}
@@ -30,11 +29,16 @@ def count_epochs(history_paths):
 
                 # Read the file for this column/subject, get number of rows (epochs)
                 data = pd.read_csv(path)
-                epochs = data.shape[0]
+                min_index = -1
+                min_epoch = float("inf")
+                for row in data['val_loss'].index:
+                    if data['val_loss'][row] < min_epoch:
+                        min_epoch = data['val_loss'][row]
+                        min_index = row
 
-                # Add to the model's dataframe 
+                # Add the epoch with the lowest loss the model's dataframe 
                 col_name = path.split("/")[-2].split("_")[-1]
-                model_dfs[model][row_name][col_name] = epochs
+                model_dfs[model][row_name][col_name] = min_index
 
     # Return a dictionary of counts
     return model_dfs
@@ -45,6 +49,8 @@ def print_counts(epochs, output_path, config_nums):
     # Create a new dataframe to output
     col_names = ["test_fold", "config", "config_index", "val_fold", "epochs"]
     df = pd.DataFrame(columns=col_names)
+    
+    print(colored(config_nums, 'yellow'))
 
     # Re-format data to match the columns above
     configs = list(epochs.keys())
