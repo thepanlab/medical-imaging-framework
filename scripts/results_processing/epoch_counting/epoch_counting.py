@@ -38,7 +38,7 @@ def count_epochs(history_paths):
 
                 # Add the epoch with the lowest loss the model's dataframe 
                 col_name = path.split("/")[-2].split("_")[-1]
-                model_dfs[model][row_name][col_name] = min_index
+                model_dfs[model][row_name][col_name] = min_index + 1
 
     # Return a dictionary of counts
     return model_dfs
