@@ -1,4 +1,4 @@
 {
-  "data_path": "../../../data/old_data/",
-  "output_path": "../../../results/graphing/epoch_output/"
+  "data_path": "../../../data/_loop_inner/",
+  "output_path": "../../../results/processed_output/epoch_output/"
 }

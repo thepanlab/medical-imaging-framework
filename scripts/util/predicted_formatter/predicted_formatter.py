@@ -72,15 +72,16 @@ def write_file(file_path, formatted_data):
             file.write(f"{item}\n")
 
 
-def main():
+def main(data_path=None):
     """ The Main Program """
     # Read the JSON file's arguments
-    config = read_json()
-    data_path = config["data_path"]
+    if data_path is None:
+        config = read_json()
+        data_path = config["data_path"]
 
     # Get a list of all files to translate
-    file_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False)
-
+    file_paths, is_outer = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False)
+    
     # Translate each file
     for model in file_paths:
         for test_subject in file_paths[model]:

@@ -6,7 +6,7 @@ import math
 import os
 
 
-def count_epochs(history_paths):
+def count_epochs(history_paths, is_outer):
     """ Creates a csv file for every model's history """
     # Store output dataframes by model
     model_dfs = {}
@@ -31,9 +31,13 @@ def count_epochs(history_paths):
                 data = pd.read_csv(path)
                 min_index = -1
                 min_epoch = float("inf")
-                for row in data['val_loss'].index:
-                    if data['val_loss'][row] < min_epoch:
-                        min_epoch = data['val_loss'][row]
+                if is_outer:
+                    key = 'loss'
+                else:
+                    key = 'val_loss'
+                for row in data[key].index:
+                    if data[key][row] < min_epoch:
+                        min_epoch = data[key][row]
                         min_index = row
 
                 # Add the epoch with the lowest loss the model's dataframe 
@@ -44,7 +48,7 @@ def count_epochs(history_paths):
     return model_dfs
 
 
-def print_counts(epochs, output_path, config_nums):
+def print_counts(epochs, output_path, config_nums, is_outer):
     """ This will output a CSV of the epoch-counts """
     # Create a new dataframe to output
     col_names = ["test_fold", "config", "config_index", "val_fold", "epochs"]
@@ -67,7 +71,10 @@ def print_counts(epochs, output_path, config_nums):
                 }, ignore_index=True)
 
     # Print to file
-    file_name = 'epochs.csv'
+    if is_outer:
+        file_name = 'epochs_outer.csv'
+    else:
+        file_name = 'epochs_inner.csv'
     df = df.sort_values(by=[col_names[0], col_names[2], col_names[1]], ascending=True)
     df.to_csv(os.path.join(output_path, file_name), index=False)
     print(colored('Successfully printed epoch results to: ' + file_name, 'green'))
@@ -106,7 +113,7 @@ def print_stderr(epochs, output_path, config_nums):
             }, ignore_index=True)
 
     # Print to file
-    file_name = 'epoch_avg_and_stderr.csv'
+    file_name = 'epoch_inner_avg_stderr.csv'
     df = df.sort_values(by=[col_names[0], col_names[1]], ascending=True)
     df.to_csv(os.path.join(output_path, file_name), index=False)
     print(colored('Successfully printed epoch averages/stderrs to: ' + file_name, 'green'))
@@ -122,18 +129,20 @@ def main(config=None):
 
     # Get the necessary input files
     history_paths = path_getter.get_history_paths(config['data_path'])
+    is_outer = path_getter.is_outer_loop(config['data_path'])
 
     # Count the number of epochs within every file
-    epochs = count_epochs(history_paths)
+    epochs = count_epochs(history_paths, is_outer)
 
     # Get config nums (E.g config 1)
     config_nums = path_getter.get_config_indexes(config['data_path'])
 
     # Output the counts
-    print_counts(epochs, config['output_path'], config_nums)
+    print_counts(epochs, config['output_path'], config_nums, is_outer)
 
     # Output the stderr
-    print_stderr(epochs, config['output_path'], config_nums)
+    if not is_outer:
+        print_stderr(epochs, config['output_path'], config_nums)
 
 
 if __name__ == "__main__":
