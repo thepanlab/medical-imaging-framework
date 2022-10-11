@@ -1,7 +1,8 @@
+from results_processing.confusion_matrix import confusion_matrix
 from util.get_config import parse_json
-from . import confusion_matrix
 from termcolor import colored
 from util import path_getter
+import traceback
 import os
 
 
@@ -15,12 +16,13 @@ def find_directories(data_path):
         dict: Two dictionaries of prediction and truth paths.
     """
     # Get the paths of every prediction and true CSV, as well as the fold-names
+    is_outer = path_getter.is_outer_loop(data_path)
     pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=True, getValidation=True)
     true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True)
-    return pred_paths, true_paths
+    return pred_paths, true_paths, is_outer
 
 
-def run_program(args, pred_paths, true_paths):
+def run_program(args, pred_paths, true_paths, is_outer):
     """ Run the program for each item.
 
     Args:
@@ -34,6 +36,11 @@ def run_program(args, pred_paths, true_paths):
             'label_types', 'output_path'
         )
     }
+    
+    if is_outer:
+        json['output_path'] = os.path.abspath(os.path.join(json['output_path'], 'outer_loop'))
+    else:
+        json['output_path'] = os.path.abspath(os.path.join(json['output_path'], 'inner_loop'))
 
     # For each item, run the program
     for model in pred_paths:
@@ -46,7 +53,8 @@ def run_program(args, pred_paths, true_paths):
 
                 # Catch weird stuff
                 except Exception as err:
-                    print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
+                    print(colored(f"Exception caught.\n\t{str(err)}", "red"))
+                    print(colored(f"{traceback.format_exc()}\n", "yellow"))
 
 
 def generate_json(pred_paths, true_paths, config, subject, item, json):
@@ -77,8 +85,8 @@ def main():
     """ The Main Program. """
     # Get program configuration and run using its contents
     config = parse_json(os.path.abspath('confusion_matrix_many_config.json'))
-    pred_paths, true_paths = find_directories(config["data_path"])
-    run_program(config, pred_paths, true_paths)
+    pred_paths, true_paths, is_outer = find_directories(config["data_path"])
+    run_program(config, pred_paths, true_paths, is_outer)
 
 
 if __name__ == "__main__":
