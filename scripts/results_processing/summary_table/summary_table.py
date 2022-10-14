@@ -58,8 +58,8 @@ def get_accuracies_and_stderr(true, pred):
         dict: Two dictionaries of relative and real accuracies and standard error. Sorted by config and test fold.
     """
     # Get a table of accuracy for every config
-    acc_tables = {'weighted': {}, 'unweighted': {}, 'f1': {}, 'f1_weighted': {}}
-    acc_functions = {'weighted': weighted_acc, 'unweighted': unweighted_acc, 'f1': f1, 'f1_weighted': f1}
+    acc_tables = {'weighted': {}, 'unweighted': {}, 'f1_weighted': {}}
+    acc_functions = {'weighted': weighted_acc, 'unweighted': unweighted_acc, 'f1_weighted': f1}
     for key in acc_tables:
         for config in pred:
             acc_tables[key][config] = {}
@@ -72,15 +72,13 @@ def get_accuracies_and_stderr(true, pred):
                     # Get the metrics of the test-val pair
                     pred_vals = pred[config][test_fold][val_fold]
                     true_vals = true[config][test_fold][val_fold]
-                    if key == 'f1':
-                        acc_tables[key][config][test_fold][val_fold] = acc_functions[key](y_true=true_vals, y_pred=pred_vals, average=None)
-                    elif key == 'f1_weighted':
+                    if key == 'f1_weighted':
                         acc_tables[key][config][test_fold][val_fold] = acc_functions[key](y_true=true_vals, y_pred=pred_vals, average='weighted')
                     else:
                         acc_tables[key][config][test_fold][val_fold] = acc_functions[key](y_true=true_vals, y_pred=pred_vals)
                     
     # Get the means of the absolute and relative accuracies
-    mean_accs = {'weighted': {}, 'unweighted': {}, 'f1': {}, 'f1_weighted': {}}
+    mean_accs = {'weighted': {}, 'unweighted': {}, 'f1_weighted': {}}
     for key in mean_accs:
         for config in acc_tables[key]:
             mean_accs[key][config] = {}
@@ -96,7 +94,7 @@ def get_accuracies_and_stderr(true, pred):
                 mean_accs[key][config][test_fold] /= n_val_folds
                    
     # Calculate the standard error of the means
-    mean_errs = {'weighted': {}, 'unweighted': {}, 'f1': {}, 'f1_weighted': {}}
+    mean_errs = {'weighted': {}, 'unweighted': {}, 'f1_weighted': {}}
     for key in mean_errs:
         for config in acc_tables[key]:
             mean_errs[key][config] = {}
@@ -149,10 +147,7 @@ def total_output(accuracies, standard_error, output_path, output_file, round_to,
         "acc_err": standard_error['unweighted'],
         "acc_err_weighted": standard_error['weighted'],
         
-        "f1": accuracies['f1'], 
-        "f1_weighted": accuracies['f1_weighted'], 
-        
-        "f1_err": standard_error['f1'],
+        "f1_weighted": accuracies['f1_weighted'],
         "f1_err_weighted": standard_error['f1_weighted']
     }
     for key in dfs:

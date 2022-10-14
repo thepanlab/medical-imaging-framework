@@ -1,12 +1,12 @@
 {
     "prediction_output": "../../results/predictions",
-    "data_input": {
-        "example": "../../data/ep_intensity/E1_2_ligament_1_Intensity",
-        "example1": "../../data/ep_intensity/E1_2_ligament_1_Intensity"
+    "test_subject_data_input": {
+        "e1": "../../data/ep_intensity/Test_subject_e1",
+        "e2": "../../data/ep_intensity/Test_subject_e2"
     },
     "model_input": {
-        "InceptionV3_2_test_e1_val_e4": "../../data/_loop_inner/Test_subject_e1/config_1_InceptionV3/InceptionV3_2_test_e1_val_e4/model/InceptionV3_2_test_e1_val_e4_resnet50.h5",
-        "resnet_50_1_test_e6_val_e2": "../../data/_loop_inner/Test_subject_e6/config_2_Resnet50/resnet_50_1_test_e6_val_e2/model/resnet_50_1_test_e6_val_e2_resnet50.h5"
+        "Inception": "../../data/_loop_inner/Test_subject_e1/config_1_InceptionV3/InceptionV3_2_test_e1_val_e4/model/InceptionV3_2_test_e1_val_e4_resnet50.h5",
+        "resnet": "../../data/_loop_inner/Test_subject_e6/config_2_Resnet50/resnet_50_1_test_e6_val_e2/model/resnet_50_1_test_e6_val_e2_resnet50.h5"
     },
 
     "batch_size": 8,
@@ -14,7 +14,7 @@
     "image_settings": {
         "mean": 0,
         "use_mean": "false",
-        "class_names": "fat,ligament,flavum,epidural-space,spinalcord",
+        "class_names": "fat,ligament,flavum,epidural space,spinal cord",
         "channels": 1,
         "do_cropping" : "false",
         "offset_height": 0,
