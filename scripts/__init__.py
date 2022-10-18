@@ -1,5 +1,6 @@
-from . import results_processing, util
+from . import results_processing, training, util
 __all__ = [
     'results_processing',
+    'training',
     'util'
 ]

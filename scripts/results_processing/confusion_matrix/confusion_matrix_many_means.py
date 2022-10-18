@@ -1,13 +1,12 @@
 from util.get_config import parse_json
 from termcolor import colored
-from util import path_getter
 from statistics import mode
 import pandas as pd
 import regex as re
 import os
 
 
-def get_input_matrices(matrices_path):
+def get_input_matrices(matrices_path, is_outer):
     """ Finds the existing configs, test folds, and validations folds of all matrices.
 
     Args:
@@ -36,24 +35,29 @@ def get_input_matrices(matrices_path):
         for path in config_paths:
             
             # Search for the test-fold name from the file name
-            test_fold = re.search('_test_.*_val_.*_val', path).captures()[0].split("_")[2]
-            if test_fold not in organized_paths[config]:
-                organized_paths[config][test_fold] = {}
-                organized_shapes[config][test_fold] = {}
+            if not is_outer:
+                test_fold = re.search('_test_.*_val_.*_val', path).captures()[0].split("_")[2]            
+                if test_fold not in organized_paths[config]:
+                    organized_paths[config][test_fold] = {}
+                    organized_shapes[config][test_fold] = {}
+            else:
+                test_fold = re.search('.*_test_.*_test.*', path).captures()[0].split("_")[2]
                 
-            # Search for the val-fold name from the file name, read the csv
-            val_fold = re.search('_test_.*_val_.*_val', path).captures()[0].split("_")[4]
-            organized_paths[config][test_fold][val_fold] = pd.read_csv(os.path.join(matrices_path, path), header=[0, 1], index_col=[0, 1])
-
-            # Search for the shape-value from the file name
-            shape = int(re.search('index_.*_conf_matrix.csv', path).captures()[0].split("_")[1])
-            organized_shapes[config][test_fold][val_fold] = shape
+            # Search for the val-fold name from the file name, read the csv, and get shape
+            if not is_outer:
+                val_fold = re.search('_test_.*_val_.*_val', path).captures()[0].split("_")[4]
+                shape = int(re.search('.*_.*_conf_matrix.csv', path).captures()[0].split("_")[1])
+                organized_shapes[config][test_fold][val_fold] = shape
+            else:
+                shape = int(re.search('.*_.*_conf_matrix.csv', path).captures()[0].split("_")[1])
+                organized_shapes[config][test_fold] = shape
 
     # Return the dictionary of organized matrices
+    print(colored(organized_paths, 'blue'))
     return organized_paths, organized_shapes
 
 
-def get_matrices_of_mode_shape(shapes, matrices):
+def get_matrices_of_mode_shape(shapes, matrices, is_outer):
     """ Finds the mode length of all predictions that exist within a data folder.
         Checks if matrices should be considered in the mean value.
 
@@ -67,32 +71,46 @@ def get_matrices_of_mode_shape(shapes, matrices):
     # Get the mode of ALL the prediction shapes
     shapes_mode = []
     for config in matrices:
+        print(colored(matrices, 'green'))
         for test_fold in matrices[config]:
-            for val_fold in matrices[config][test_fold]:
-                shapes_mode.append(shapes[config][test_fold][val_fold])
+            if not is_outer:
+                for val_fold in matrices[config][test_fold]:
+                    shapes_mode.append(shapes[config][test_fold][val_fold])
+            else:
+                shapes_mode.append(shapes[config][test_fold])
+    print(colored(shapes_mode, 'red'))
     shapes_mode = mode(shapes_mode)
 
     # Remove matrices whose prediction value length do not match the mode
     for config in matrices:
+        if is_outer:
+            config_matrices = []
         for test_fold in matrices[config]:
             
             # Each testing fold will have an array of coresponding validation matrices
-            test_fold_matrices = []
-            for val_fold in matrices[config][test_fold]:
-                val_fold_shape = shapes[config][test_fold][val_fold]
-                if val_fold_shape == shapes_mode:
-                    test_fold_matrices.append(matrices[config][test_fold][val_fold])
-                else:
-                    print(colored(
-                        f"Warning: Not including the validation fold {val_fold} in the mean of ({config}, {test_fold})." +
-                        f"\n\tThe predictions expected to have {shapes_mode} rows, but got {val_fold_shape} rows.\n",
-                        "yellow"))
-            matrices[config][test_fold] = test_fold_matrices
+            if not is_outer:
+                test_fold_matrices = []
+                for val_fold in matrices[config][test_fold]:
+                    val_fold_shape = shapes[config][test_fold][val_fold]
+                    if val_fold_shape == shapes_mode:
+                        test_fold_matrices.append(matrices[config][test_fold][val_fold])
+                    else:
+                        print(colored(
+                            f"Warning: Not including the validation fold {val_fold} in the mean of ({config}, {test_fold})." +
+                            f"\n\tThe predictions expected to have {shapes_mode} rows, but got {val_fold_shape} rows.\n",
+                            "yellow"))
+                matrices[config][test_fold] = test_fold_matrices
+            else:
+                test_fold_shape = shapes[config][test_fold]
+                if test_fold_shape == shapes_mode:
+                    config_matrices.append(matrices[config][test_fold])
+        if is_outer:
+            matrices[config] = config_matrices
     return matrices
 
 
 
-def get_mean_matrices(matrices, shapes, output_path, labels):
+def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer):
     """ This function gets the mean confusion matrix of every inner loop.
 
     Args:
@@ -105,7 +123,7 @@ def get_mean_matrices(matrices, shapes, output_path, labels):
     if not os.path.exists(output_path): os.makedirs(output_path)
 
     # Get the valid matrices
-    all_valid_matrices = get_matrices_of_mode_shape(shapes, matrices)
+    all_valid_matrices = get_matrices_of_mode_shape(shapes, matrices, is_outer)
 
     # The names of the rows/columns of every output matrix
     index_labels = [["Truth"] * len(labels), labels]
@@ -193,15 +211,18 @@ def get_mean_matrices(matrices, shapes, output_path, labels):
                     matrix_weighted_err["Predicted"][col]["Truth"][row] /= n_items - 1
 
             # Output ALL matrices
-            output_folder = os.path.join(output_path, f'{config}_{test_fold}/',)
+            if is_outer:
+                output_folder = os.path.join(output_path, f'{config}_{test_fold}/','outer_loop')
+            else:
+                output_folder = os.path.join(output_path, f'{config}_{test_fold}/','inner_loop')
             if not os.path.exists(output_folder): os.makedirs(output_folder)
-            matrix_avg.round(2).to_csv(os.path.join(
+            matrix_avg.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean.csv'))
-            matrix_weighted_avg.round(2).to_csv(os.path.join(
+            matrix_weighted_avg.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean_weighted.csv'))
-            matrix_err.round(2).to_csv(os.path.join(
+            matrix_err.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean_stderr.csv'))
-            matrix_weighted_err.round(2).to_csv(os.path.join(
+            matrix_weighted_err.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean_stderr_weighted.csv'))
             print(colored(f"Mean confusion matrix results created for {test_fold} in {config} \n", 'green'))
 
@@ -212,10 +233,10 @@ def main():
     config = parse_json(os.path.abspath('confusion_matrix_many_means_config.json'))
 
     # Read in the matrices to average
-    matrices, shapes = get_input_matrices(config['matrices_path'])
+    matrices, shapes = get_input_matrices(config['matrices_path'], config['is_outer'])
 
     # Average the matrices
-    get_mean_matrices(matrices, shapes, config['means_output_path'], config['label_types'])
+    get_mean_matrices(matrices, shapes, config['means_output_path'], config['label_types'], config['round_to'], config['is_outer'])
 
 
 if __name__ == "__main__":

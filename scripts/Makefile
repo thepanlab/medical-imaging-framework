@@ -52,6 +52,16 @@ learning_curve_graphing:
 	cd results_processing/learning_curve && python3 -m results_processing.learning_curve.learning_curve_graphing ${OPTIONS}
 
 
+prediction: ## Creates predictions from a given set of inputs.
+prediction: 
+	cd training/prediction && python3 -m prediction ${OPTIONS}
+
+
+prediction_results: ## Creates a dataframe of existing prediction results.
+prediction_results: 
+	cd results_processing/prediction_results && python3 -m prediction_results ${OPTIONS}
+
+
 roc_curve: ## Creates a ROC curve from the specified data.
 roc_curve: 
 	cd results_processing/roc_curve && python3 -m results_processing.roc_curve.roc_curve ${OPTIONS}
@@ -65,5 +75,3 @@ roc_curve_graphing:
 summary_table: ## Creates a summary table from the specified data folder.
 summary_table: 
 	cd results_processing/summary_table && python3 -m results_processing.summary_table.summary_table ${OPTIONS}
-
-
