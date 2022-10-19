@@ -64,9 +64,17 @@ def create_confusion_matrix(true_vals, pred_vals, results_path, file_name, label
     if len(true_vals) != len(pred_vals):
         raise Exception(colored(f'The length of true and predicted values are not equal: \n' +
                                 f'\tTrue: {len(true_vals)} | Predicted: {len(pred_vals)}', 'red'))
-
+    import numpy as np
+    
+    # Match the values to the labels
+    if type(labels) == dict:
+        conf_matrix = confusion_matrix(true_vals, pred_vals, labels=list(labels.values()))
+    elif type(labels) == list:
+        conf_matrix = confusion_matrix(true_vals, pred_vals, labels=labels)
+    else:
+        conf_matrix = confusion_matrix(true_vals, pred_vals)
+        
     # Create the matrix
-    conf_matrix = confusion_matrix(true_vals, pred_vals)
     conf_matrix_df = pd.DataFrame(conf_matrix, columns=labels, index=labels)
 
     # Create the extra-index/col names

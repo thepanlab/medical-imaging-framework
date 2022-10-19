@@ -16,7 +16,11 @@ def get_input_matrices(matrices_path, is_outer):
         dict: A dictionary of matrix-dataframes amd their prediction shapes, organized by config and testing fold.
     """
     # Get the confusion matrix paths that were created earlier
-    all_paths = os.listdir(matrices_path)
+    try:
+        all_paths = os.listdir(matrices_path)
+    except:
+        print(colored("Error: could not read matrices path. Are you sure it's correct?", 'red'))
+        exit(-1)
     organized_paths = {}
     organized_shapes = {}
 
@@ -34,26 +38,34 @@ def get_input_matrices(matrices_path, is_outer):
         organized_shapes[config] = {}
         for path in config_paths:
             
-            # Search for the test-fold name from the file name
-            if not is_outer:
-                test_fold = re.search('_test_.*_val_.*_val', path).captures()[0].split("_")[2]            
-                if test_fold not in organized_paths[config]:
-                    organized_paths[config][test_fold] = {}
-                    organized_shapes[config][test_fold] = {}
-            else:
-                test_fold = re.search('.*_test_.*_test.*', path).captures()[0].split("_")[2]
+            try:
+                filename = path.split('/')[-1]
                 
-            # Search for the val-fold name from the file name, read the csv, and get shape
-            if not is_outer:
-                val_fold = re.search('_test_.*_val_.*_val', path).captures()[0].split("_")[4]
-                shape = int(re.search('.*_.*_conf_matrix.csv', path).captures()[0].split("_")[1])
-                organized_shapes[config][test_fold][val_fold] = shape
-            else:
-                shape = int(re.search('.*_.*_conf_matrix.csv', path).captures()[0].split("_")[1])
-                organized_shapes[config][test_fold] = shape
+                # Search for the test-fold name from the file name
+                if not is_outer:
+                    test_fold = re.search('_test_.*_val_.*_val', filename).captures()[0].split("_")[2]            
+                    if test_fold not in organized_paths[config]:
+                        organized_paths[config][test_fold] = {}
+                        organized_shapes[config][test_fold] = {}
+                else:
+                    test_fold = re.search('.*_test_.*_test.*', filename).captures()[0].split("_")[2]
+                    
+                # Search for the val-fold name from the file name, read the csv, and get shape
+                if not is_outer:
+                    val_fold = re.search('_test_.*_val_.*_val', filename).captures()[0].split("_")[4]
+                    shape = re.findall(r'\d+', filename)[-1]
+                    organized_shapes[config][test_fold][val_fold] = shape
+                    organized_paths[config][test_fold][val_fold] = os.path.join(matrices_path, path)
+                else:
+                    shape = int(re.search('_.*_conf_matrix.csv', filename).captures()[0].split("_")[1])
+                    organized_shapes[config][test_fold] = shape
+                    organized_paths[config][test_fold] = os.path.join(matrices_path, path)
+            except:
+                print(colored(f"Error: could not extract information from the confusion matrix file name: {path}\n\t" + 
+                              "Are you sure this is from the inner/outer loop?", 'red'))
+                exit(-1)
 
     # Return the dictionary of organized matrices
-    print(colored(organized_paths, 'blue'))
     return organized_paths, organized_shapes
 
 
@@ -71,14 +83,12 @@ def get_matrices_of_mode_shape(shapes, matrices, is_outer):
     # Get the mode of ALL the prediction shapes
     shapes_mode = []
     for config in matrices:
-        print(colored(matrices, 'green'))
         for test_fold in matrices[config]:
             if not is_outer:
                 for val_fold in matrices[config][test_fold]:
                     shapes_mode.append(shapes[config][test_fold][val_fold])
             else:
                 shapes_mode.append(shapes[config][test_fold])
-    print(colored(shapes_mode, 'red'))
     shapes_mode = mode(shapes_mode)
 
     # Remove matrices whose prediction value length do not match the mode
@@ -119,6 +129,9 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
         output_path(string): The path to write the average matrices to.
         labels(list(str)): The labels of the matrix data.
     """
+    if type(labels) == dict:
+        labels = list(labels.keys())
+    
     # Check that the output folder exists.
     if not os.path.exists(output_path): os.makedirs(output_path)
 
@@ -144,20 +157,26 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
                 continue
 
             # The mean of confusion matrices and the weighted matrices
+            if type(labels) == dict:
+                labels = list(labels.keys())
             matrix_avg = pd.DataFrame(0.0, columns=labels, index=labels)
             matrix_weighted_avg = pd.DataFrame(0.0, columns=labels, index=labels)
             matrix_avg.index = matrix_weighted_avg.index = index_labels
             matrix_avg.columns = matrix_weighted_avg.columns = columns_labels
+
+            # See if more than one item to average
+            can_weight = len(valid_matrices) > 1
 
             # The original weighted matrix values
             weighted_values = {}
 
             # Loop through every validation fold and sum the totals and weighted totals
             for val_index in range(len(valid_matrices)):
-                val_fold = valid_matrices[val_index]
-                weighted_values[val_index] = pd.DataFrame(0, columns=labels, index=labels)
-                weighted_values[val_index].index = index_labels
-                weighted_values[val_index].columns = columns_labels
+                val_fold = pd.read_csv(valid_matrices[val_index], index_col=[0,1], header=[0,1])
+                if can_weight:
+                    weighted_values[val_index] = pd.DataFrame(0, columns=labels, index=labels)
+                    weighted_values[val_index].index = index_labels
+                    weighted_values[val_index].columns = columns_labels
                 for row in labels:
 
                     # Count the row total and add column-row items to total
@@ -170,7 +189,10 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
                     # Add to the weighted total
                     for col in labels:
                         item = val_fold["Predicted"][col]["Truth"][row]
-                        weighted_item = item / row_total
+                        if row_total != 0:
+                            weighted_item = item / row_total
+                        else:
+                            weighted_item = 0
                         weighted_values[val_index]["Predicted"][col]["Truth"][row] = weighted_item
                         matrix_weighted_avg["Predicted"][col]["Truth"][row] += weighted_item
                         
@@ -188,12 +210,10 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
 
             # Sum the differences between the true and mean values squared. Divide by the num matrices minus one.
             for val_index in range(len(valid_matrices)):
-                val_fold = valid_matrices[val_index]
+                val_fold = pd.read_csv(valid_matrices[val_index], index_col=[0,1], header=[0,1])
                 for row in labels:
                     for col in labels:
-
-                        #print(colored(matrix_avg["Predicted"][col]["Truth"][row]/ n_items, 'red'))
-
+                        
                         # Sum the (true - mean) ^ 2
                         true = val_fold["Predicted"][col]["Truth"][row]
                         mean = matrix_avg["Predicted"][col]["Truth"][row]
@@ -218,13 +238,14 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
             if not os.path.exists(output_folder): os.makedirs(output_folder)
             matrix_avg.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean.csv'))
-            matrix_weighted_avg.round(round_to).to_csv(os.path.join(
-                output_folder, f'{config}_{test_fold}_conf_matrix_mean_weighted.csv'))
             matrix_err.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean_stderr.csv'))
-            matrix_weighted_err.round(round_to).to_csv(os.path.join(
-                output_folder, f'{config}_{test_fold}_conf_matrix_mean_stderr_weighted.csv'))
-            print(colored(f"Mean confusion matrix results created for {test_fold} in {config} \n", 'green'))
+            if not matrix_weighted_avg.empty:
+                matrix_weighted_avg.round(round_to).to_csv(os.path.join(
+                    output_folder, f'{config}_{test_fold}_conf_matrix_mean_weighted.csv'))
+                matrix_weighted_err.round(round_to).to_csv(os.path.join(
+                    output_folder, f'{config}_{test_fold}_conf_matrix_mean_stderr_weighted.csv'))
+            print(colored(f"Mean confusion matrix results created for {test_fold} in {config}", 'green'))
 
 
 def main():

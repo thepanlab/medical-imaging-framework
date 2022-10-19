@@ -1,5 +1,4 @@
-from . import prediction, image_parser
+from . import image_parser
 __all__ = [
-    'prediction',
     'image_parser'
 ]
