@@ -26,9 +26,20 @@ def find_images(data_path):
     return path_getter.get_subfolder_files(data_path, "file_name")
 
 
+"""
+   two for inner loop: test subject and validation subject 
+   For outer loop, just test subject
+   
+filepath and filename
+
+"""
+
 def compare_values(output_path, pred_paths, true_paths, image_paths, label_types, is_outer):
     # Dataframe column order
-    cols = ['subject', 'filename', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match']
+    if is_outer:
+        cols = ['test_subject', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filename', 'filepath']
+    else:
+        cols = ['test_subject', 'val_subject', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filename', 'filepath']
     
     # Iterate through each prediction-truth-filepath trio
     for config in pred_paths:
@@ -51,15 +62,20 @@ def compare_values(output_path, pred_paths, true_paths, image_paths, label_types
                     img_file = [t for t in image_paths[config][test_fold] if (f"_test_{test_fold}_val_{val_fold}_val" in t.split('/')[-1])][0]
                 
                 # Read in the data
-                pred_label_index = pd.read_csv(pred_file, header=None)
-                true_label_index = pd.read_csv(true_file, header=None)
-                filename = pd.read_csv(img_file, header=None)
-                file_result = pd.DataFrame({
-                    'subject': [test_fold]*len(pred_label_index),
-                    'filename': filename[0].values.tolist(),
-                    'true_label_index': true_label_index[0].values.tolist(),
-                    'pred_label_index': pred_label_index[0].values.tolist()
-                })
+                pred_label_index = pd.read_csv(pred_file, header=None)[0].values.tolist()
+                true_label_index = pd.read_csv(true_file, header=None)[0].values.tolist()
+                filepaths = pd.read_csv(img_file, header=None)[0].values.tolist()
+                filenames = [f.split('/')[-1] for f in filepaths]
+                result_dict = {
+                    'test_subject': [test_fold]*len(pred_label_index),
+                    'true_label_index': true_label_index,
+                    'pred_label_index': pred_label_index,
+                    'filename': filenames,
+                    'filepath': filepaths
+                }
+                if not is_outer:
+                    result_dict['val_subject'] = [val_fold]*len(pred_label_index)
+                file_result = pd.DataFrame(result_dict)
                 
                 # Compare the values to create new columns
                 file_result['true_label'] = file_result.apply(lambda row: label_types[str(row.true_label_index)], axis=1)
@@ -74,7 +90,7 @@ def compare_values(output_path, pred_paths, true_paths, image_paths, label_types
 
 
 def print_results(filepath, config, results):
-    results.sort_values(by=['subject']).to_csv(os.path.join(filepath, f'{config}_prediction_info.csv'), index=False)
+    results.sort_values(by=['test_subject']).to_csv(os.path.join(filepath, f'{config}_prediction_info.csv'), index=False)
     print(colored(f"Successfully output the results for {config}.", 'magenta'))
                     
 
