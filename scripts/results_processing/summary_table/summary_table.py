@@ -130,8 +130,6 @@ def total_output(accuracies, standard_error, output_path, output_file, round_to,
     test_folds = list(accuracies['unweighted'][config_names[0]].keys())
     
     # Alter output path
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
     if is_outer:
         output_path = os.path.join(output_path, 'outer_loop')
     else:
@@ -165,7 +163,7 @@ def total_output(accuracies, standard_error, output_path, output_file, round_to,
         df.index.names = ['test_fold']
         df = df.sort_values(by=['test_fold'], ascending=True)
         if is_outer:
-            df.round(round_to).to_csv(f'{output_path}/summary_table_outer_{key}.csv')
+            df.round(round_to).to_csv(f'{output_path}/{output_file}_outer_{key}.csv')
         else:
             df.round(round_to).to_csv(f'{output_path}/{output_file}_inner_{key}.csv')
 
