@@ -1,8 +1,8 @@
 {
-  "input_model_address": "../../../data/Grad_CAM_test_data/model_outer_K3.h5",
-  "input_means_address": "../../../data/Grad_CAM_test_data/means_nested_cv_outer_loop.csv",
-  "input_img_address": "../../../data/Grad_CAM_test_data/85_k3_medulla.jpg",
-  "output_image_address": "../../../results/processed_output/grad_cam_output",
+  "input_model_address": "../data/Grad_CAM_test_data/model_outer_K3.h5",
+  "input_means_address": "../data/Grad_CAM_test_data/means_nested_cv_outer_loop.csv",
+  "input_img_address": "../data/Grad_CAM_test_data/85_k3_medulla.jpg",
+  "output_image_address": "../results/processed_output/grad_cam_output",
 
   "alpha": 0.7,
   "mean_row": "T_k3",

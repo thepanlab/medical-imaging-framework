@@ -1,6 +1,6 @@
 {
-  "data_path": "../../../data/_loop_inner/",
-  "output_path": "../../../results/processed_output/learning_output",
+  "data_path": "../data/_loop_inner/",
+  "output_path": "../results/processed_output/learning_output",
 
   "loss_line_color": "r",
   "val_loss_line_color": "b",

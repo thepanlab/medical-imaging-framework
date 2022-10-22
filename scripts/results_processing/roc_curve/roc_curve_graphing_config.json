@@ -1,6 +1,6 @@
 {
-  "data_path": "../../../data/_loop_inner/",
-  "output_path": "../../../results/processed_output/roc_output",
+  "data_path": "../data/_loop_inner/",
+  "output_path": "../results/processed_output/roc_output",
 
   "line_width": "2",
   "label_types": [

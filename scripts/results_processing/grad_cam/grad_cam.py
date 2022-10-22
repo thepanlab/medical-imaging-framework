@@ -31,7 +31,7 @@ import os
 def load_config():
     """ Load the JSON configuration file """
     # Get the configuration
-    config = get_config.parse_json('grad_cam_config.json')
+    config = get_config.parse_json('./results_processing/grad_cam/grad_cam_config.json')
 
     # Check if the given input files exist
     files = ['input_model_address', 'input_means_address', 'input_img_address']

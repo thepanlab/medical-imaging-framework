@@ -155,9 +155,9 @@ def total_output(accuracies, standard_error, output_path, output_file, round_to,
             
         # Create and save the Pandas dataframe
         if is_outer:
-            df.round(round_to).to_csv(f'{output_path}/{output_file}_{config}_outer.csv')
+            df.to_csv(f'{output_path}/{output_file}_{config}_outer.csv')
         else:
-            df.round(round_to).to_csv(f'{output_path}/{output_file}_{config}_inner.csv')
+            df.to_csv(f'{output_path}/{output_file}_{config}_inner.csv')
 
 
 def main(config=None):
@@ -168,7 +168,7 @@ def main(config=None):
     """
     # Obtain a dictionary of configurations
     if config is None:
-        config = parse_json('metrics_table_config.json')
+        config = parse_json('./results_processing/metrics_table/metrics_table_config.json')
 
     # Get the necessary input files
     true_paths = path_getter.get_subfolder_files(config['data_path'], "true_label", isIndex=True, getValidation=True)

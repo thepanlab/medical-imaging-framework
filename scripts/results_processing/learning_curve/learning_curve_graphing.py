@@ -33,7 +33,7 @@ def run_program(args):
 def main():
     """ The Main Program. """
     # Get program configuration and run using its contents
-    config = parse_json('learning_curve_graphing_config.json')
+    config = parse_json('./results_processing/learning_curve/learning_curve_graphing_config.json')
     run_program(config)
 
 

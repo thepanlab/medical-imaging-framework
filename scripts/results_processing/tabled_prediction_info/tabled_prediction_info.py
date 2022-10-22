@@ -97,7 +97,7 @@ def print_results(filepath, config, results):
 def main():
     """ The Main Program. """
     # Get program configuration and run using its contents
-    config = parse_json(os.path.abspath('tabled_prediction_info_config.json'))
+    config = parse_json('./results_processing/tabled_prediction_info/tabled_prediction_info_config.json')
     pred_paths, true_paths, is_outer = find_directories(config["data_path"])
     print(colored(f"Successfully read in the prediction and truth paths.", 'green'))
     image_paths = find_images(config["data_path"])

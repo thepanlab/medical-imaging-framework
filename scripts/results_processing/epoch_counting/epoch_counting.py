@@ -123,7 +123,7 @@ def main(config=None):
     """ The main body of the program """
     # Obtain a dictionary of configurations
     if config is None:
-        config = parse_json('epoch_counting_config.json')
+        config = parse_json('./results_processing/epoch_counting/epoch_counting_config.json')
     if not os.path.exists(config['output_path']):
         os.makedirs(config['output_path'])
 

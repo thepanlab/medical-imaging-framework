@@ -1,6 +1,6 @@
 {
   "data_path": "/data/jshaw/medical-imaging-framework/results/predictions/prediction_values",
-  "output_path": "../../../results/processed_output/confusion_matrix",
+  "output_path": "../results/processed_output/confusion_matrix",
 
   "label_types": {
     "fat": 0,

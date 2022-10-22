@@ -84,7 +84,7 @@ def generate_json(pred_paths, true_paths, config, subject, item, json):
 def main():
     """ The Main Program. """
     # Get program configuration and run using its contents
-    config = parse_json(os.path.abspath('confusion_matrix_many_config.json'))
+    config = parse_json(os.path.abspath('./results_processing/confusion_matrix/confusion_matrix_many_config.json'))
     pred_paths, true_paths, is_outer = find_directories(config["data_path"])
     run_program(config, pred_paths, true_paths, is_outer)
 

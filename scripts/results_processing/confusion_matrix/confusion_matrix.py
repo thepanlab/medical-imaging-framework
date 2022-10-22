@@ -96,7 +96,7 @@ def main(config=None):
     """
     # Check that the output path exists
     if config is None:
-        config = parse_json(os.path.abspath('confusion_matrix_config.json'))
+        config = parse_json(os.path.abspath('./results_processing/confusion_matrix/confusion_matrix_config.json'))
     output_path = config['output_path']
     if not os.path.exists(output_path):
         os.makedirs(output_path)

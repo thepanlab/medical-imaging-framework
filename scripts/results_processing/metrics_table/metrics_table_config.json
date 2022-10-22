@@ -1,6 +1,6 @@
 {
-  "data_path": "../../../data/_loop_inner/",
-  "output_path": "../../../results/processed_output/metrics_output",
+  "data_path": "../data/_loop_inner/",
+  "output_path": "../results/processed_output/metrics_output",
   "output_filename": "metrics_table",
 
   "round_to": 6

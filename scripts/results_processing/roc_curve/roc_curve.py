@@ -113,7 +113,7 @@ def main(config=None):
 
     # Obtaining dictionary of configurations from json file
     if config is None:
-        config = get_config.parse_json('roc_curve_config.json')
+        config = get_config.parse_json('./results_processing/roc_curve/roc_curve_config.json')
 
     # Check that the output path exists
     output_path = config['output_path']

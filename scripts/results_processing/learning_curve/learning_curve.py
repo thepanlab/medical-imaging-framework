@@ -129,7 +129,7 @@ def main(config=None):
     """ The main program """
     # Obtaining dictionary of configurations from json file
     if config is None:
-        config = get_config.parse_json('learning_curve_config.json')
+        config = get_config.parse_json('./results_processing/learning_curve/learning_curve_config.json')
 
     # Grab file directories 
     file_path = config['input_path']

@@ -53,7 +53,7 @@ def generate_json(pred_paths, true_paths, model, subject, item, json):
 def main():
     """ The Main Program. """
     # Get program configuration and run using its contents
-    config = parse_json('roc_curve_graphing_config.json')
+    config = parse_json('./results_processing/roc_curve/roc_curve_graphing_config.json')
     run_program(config)
 
 

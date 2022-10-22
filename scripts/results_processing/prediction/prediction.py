@@ -1,3 +1,4 @@
+from util.get_config import parse_json
 from training import image_parser
 from termcolor import colored
 from tensorflow import keras
@@ -10,25 +11,6 @@ import os
 # Hide tensorflow console output
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
-
-
-def parse_json(default_config_file_name):
-    """ 
-        Reads in the configuration from a JSON file. 
-
-        default_config_file_name: The default config input.
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-j', '--json', '--load_json',
-        help='Load settings from a JSON file.',
-        required=False,
-        default=default_config_file_name
-    )
-    args = parser.parse_args()
-    with open(args.json) as config_file:
-        config = json.load(config_file)
-    return config
 
 
 def get_images(data_input, class_names):
@@ -257,7 +239,7 @@ def main(config=None):
     """
     # Obtain a dictionary of configurations
     if config is None:
-        config = parse_json('prediction_config.json')
+        config = parse_json('./results_processing/prediction/prediction_config.json')
 
     # Check that output directories exist
     if not os.path.exists(config['prediction_output']): os.makedirs(config['prediction_output'])

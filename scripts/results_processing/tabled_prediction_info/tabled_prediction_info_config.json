@@ -1,6 +1,6 @@
 {
-  "data_path": "../../../data/_loop_inner/",
-  "output_path": "../../../results/processed_output/tabled_prediction_info",
+  "data_path": "../data/_loop_inner/",
+  "output_path": "../results/processed_output/tabled_prediction_info",
 
   "label_types": {
     "0": "fat",

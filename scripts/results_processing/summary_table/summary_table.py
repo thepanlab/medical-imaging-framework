@@ -176,7 +176,7 @@ def main(config=None):
     """
     # Obtain a dictionary of configurations
     if config is None:
-        config = parse_json('summary_table_config.json')
+        config = parse_json('./results_processing/summary_table/summary_table_config.json')
 
     # Get the necessary input files
     true_paths = path_getter.get_subfolder_files(config['data_path'], "true_label", isIndex=True, getValidation=True)

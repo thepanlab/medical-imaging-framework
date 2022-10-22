@@ -119,7 +119,6 @@ def get_matrices_of_mode_shape(shapes, matrices, is_outer):
     return matrices
 
 
-
 def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer):
     """ This function gets the mean confusion matrix of every inner loop.
 
@@ -251,7 +250,7 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
 def main():
     """ The Main Program. """
     # Get program configuration and run using its contents
-    config = parse_json(os.path.abspath('confusion_matrix_many_means_config.json'))
+    config = parse_json(os.path.abspath('./results_processing/confusion_matrix/confusion_matrix_many_means_config.json'))
 
     # Read in the matrices to average
     matrices, shapes = get_input_matrices(config['matrices_path'], config['is_outer'])
