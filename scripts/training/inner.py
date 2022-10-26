@@ -25,7 +25,7 @@ def create_parser():
     parser = argparse.ArgumentParser(description='Medical Image', fromfile_prefix_chars='@')
     # High-level commands
     parser.add_argument('--config_file', '-config_file', type=str, default=None, help='Path to a config file')
-    parser.add_argument('--config_folder', '-config_folder', type=str, default='./config_files', help="Path to a config files folder(not trailing '/')")
+    parser.add_argument('--config_folder', '-config_folder', type=str, default='./Default_config_files', help="Path to a config files folder(not trailing '/')")
     return parser
 
 
@@ -125,18 +125,26 @@ def get_configFile_list(path):
 def get_label_subject(path,label_position ,class_names, subject_list):
     #"/home/xx_fat_xxx/img_ps/ep_optic_axis/train/E4_1_fat_3_Optic%20axis/807_E4_1_fat_3_Optic%20axis.png"
     formatted_path=path.lower().replace("%20", " ")
+    # Remove the file extension
+    temp = formatted_path.split('.')
+    fileName_remove_extension = temp[0]
+    if len(temp) > 2:
+        for part in parts_0[1:-1]:
+            fileName_remove_extension = fileName_remove_extension + part
+    # fileName_remove_extension split by "_"
+    fileName_parts = fileName_remove_extension.split('_')
+
     # Get all match the labels
-    labels = [class_name for class_name in class_names if class_name in formatted_path]
+    labels = [class_name for class_name in class_names if class_name in fileName_parts]
     # Assuming only 1 label will be obtained, otherwise throw exception
-    if len(labels) > 1:
+    if len(set(labels)) > 1:
         raise Exception("Duplicate labels extracted from: " + path)
     elif len(labels) < 1:
         raise Exception("Error when getting label from: " + path)
 
     # Update label index within the filename, this line only perform once
     if label_position==-1:
-        temp = formatted_path.split('.')
-        label_position=temp[0].split('_').index(labels[0])
+        label_position=fileName_parts.index(labels[0])
 
     # parts_0 = tf.strings.split(filename, ".")
     # complete = parts_0[0]
@@ -146,9 +154,9 @@ def get_label_subject(path,label_position ,class_names, subject_list):
 
     idx=class_names.index(labels[0])
     # Get all match the subjects
-    subjects = [subject for subject in subject_list if subject in formatted_path]
+    subjects = [subject for subject in subject_list if subject in fileName_parts]
     # Assuming only 1 subject will be obtained, otherwise throw exception
-    if len(subjects) > 1:
+    if len(set(subjects)) > 1:
         raise Exception("Duplicate subjects extracted from: " + path)
     elif len(subjects) < 1:
         raise Exception("Error when getting subject from: " + path)
@@ -167,6 +175,7 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
 
     parts = tf.strings.split(complete, "_")
     label = parts[label_position]
+    # tf.print(label)
     # tf.print("length:"+str(tf.shape(parts)))
     label_bool = (label == class_names)
     # To double check the file name and label is correct
@@ -268,6 +277,8 @@ def training(data, testing_subject, config_name):
     channels = int(data['channels'])  # (int)
     # Get the mean
     mean = float(data['mean'])  # (int)
+    # Shuffle the folds
+    shuffle_the_folds = data['shuffle_the_folds']  # (string)
     # Get use_mean
     use_mean = data['use_mean']  # (string)
     # Get cropping position
@@ -296,9 +307,14 @@ def training(data, testing_subject, config_name):
         os.makedirs("%s/Test_subject_%s/%s" % (results_path, testing_subject, config_name))
     results_path = results_path + '/Test_subject_' + testing_subject + '/' + config_name
 
-
+    # [2][3,4,5,6,7,8]
+    # [3][2,4,5,6,7,8]
+    # [4][2,3,5,6,7,8]
     # Generate folds based on subject list
     folds = split_folds(subject_list, testing_subject)
+    # Shuffle the folds if needed
+    if shuffle_the_folds == "true":
+        random.shuffle(folds)
     # Get the rotations to perform for this training
     if rotations_config == 'all' or int(rotations_config) >= len(folds):
         rotations = len(folds)
@@ -328,7 +344,8 @@ def training(data, testing_subject, config_name):
         label_index_list_all.append(idx)
         subject_list_all.append(subject)
 
-
+    print("Unique labels numbers:" + str(len(set(label_list_all))))
+    print("Unique labels:" + str(set(label_list_all)))
 
 
 
@@ -390,6 +407,26 @@ def training(data, testing_subject, config_name):
         print("Length of test files: " + str(len(test_file_name_list)))
         print("------------------------------------")
 
+        # with open('%s/val.csv' % (results_path), 'w') as f:
+        #     writer = csv.writer(f)
+        #     for item in val_file_name_list:
+        #         writer.writerow(item)
+        #     # np.save(f, val_pred)
+        #
+        # with open('%s/test.csv' % (results_path), 'w') as f:
+        #     writer = csv.writer(f)
+        #     for item in test_file_name_list:
+        #         writer.writerow(item)
+        #     # np.save(f, val_pred)
+        # with open('%s/train.csv' % (results_path), 'w') as f:
+        #     writer = csv.writer(f)
+        #     for item in train_file_name_list:
+        #         writer.writerow(item)
+        #     # np.save(f, val_pred)
+        # print(set(subject_list_all))
+        # break
+
+
         list_train_ds = tf.data.Dataset.from_tensor_slices(train_file_name_list)
         list_val_ds = tf.data.Dataset.from_tensor_slices(val_file_name_list)
         files_test_ds = tf.data.Dataset.from_tensor_slices(test_file_name_list)
@@ -418,7 +455,9 @@ def training(data, testing_subject, config_name):
         model_ready = keras.models.Model(inputs=base_model_empty.input, outputs=out_put)
 
         optimizer = keras.optimizers.SGD(lr=learning_rate, momentum=the_momentum, nesterov=True, decay=the_decay)
-
+        # for old epidural data 3c
+        # optimizer = keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False,
+        #                                   name="Adam")
         early_stopping_cb = keras.callbacks.EarlyStopping(monitor='val_loss',
                                                           patience=the_patience,
                                                           restore_best_weights=True)
@@ -464,6 +503,13 @@ def training(data, testing_subject, config_name):
             writer = csv.writer(f)
             writer.writerow([time_lapse])
             # np.save(f, np.array(time_lapse))
+
+        print("Saving classes name file for fold " + str(rot))
+        with open('%s/%s_%s_test_%s_val_%s/%s_%s_test_%s_val_%s_classes-names.csv' % (results_path, model_type, rot, test_subject, val_subject, model_type, rot, test_subject, val_subject), 'w') as f:
+            writer = csv.writer(f)
+            for idx, item in enumerate(class_names):
+                data_tuples = zip(item, str(idx))
+                writer.writerow(data_tuples)
 
         val_pred = model_ready.predict(images_val_batch_ds)
         print("Saving prediction of validation for fold " + str(rot))
