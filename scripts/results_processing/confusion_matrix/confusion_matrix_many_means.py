@@ -37,7 +37,6 @@ def get_input_matrices(matrices_path, is_outer):
         organized_paths[config] = {}
         organized_shapes[config] = {}
         for path in config_paths:
-            
             try:
                 filename = path.split('/')[-1]
                 
@@ -48,7 +47,7 @@ def get_input_matrices(matrices_path, is_outer):
                         organized_paths[config][test_fold] = {}
                         organized_shapes[config][test_fold] = {}
                 else:
-                    test_fold = re.search('.*_test_.*_test.*', filename).captures()[0].split("_")[2]
+                    test_fold = re.search('.*_test_.*_val.*', filename).captures()[0].split("_")[2]
                     
                 # Search for the val-fold name from the file name, read the csv, and get shape
                 if not is_outer:
@@ -146,7 +145,9 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
         for test_fold in matrices[config]:
 
             # Check shape is the mode for each validation fold
-            valid_matrices = all_valid_matrices[config][test_fold]
+            valid_matrices = all_valid_matrices[config]
+            if not is_outer:
+                valid_matrices = valid_matrices[test_fold]
 
             # Check if length is valid for finding mean/stderr
             n_items = len(valid_matrices)
