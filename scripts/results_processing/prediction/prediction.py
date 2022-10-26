@@ -152,7 +152,7 @@ def output_results(prediction_results, timing_results, label_pos, input_filepath
             if not os.path.exists(os.path.join(dirpath, 'prediction')): os.makedirs(os.path.join(dirpath, 'prediction'))
             if not os.path.exists(os.path.join(dirpath, 'true_label')): os.makedirs(os.path.join(dirpath, 'true_label'))
             if not os.path.exists(os.path.join(dirpath, 'file_name')): os.makedirs(os.path.join(dirpath, 'file_name'))
-            prefix = f"{model}_{model_i}_test_{subject}_val"
+            prefix = f"{model}_{model_i}_test_{subject}_test"
                 
             # Print the prediction probability values
             preds = pd.DataFrame(prediction_results[model][subject])
@@ -167,7 +167,7 @@ def output_results(prediction_results, timing_results, label_pos, input_filepath
             print(colored(f"\t Wrote the indexed predictions.", 'cyan'))
             
             # Print the true labels
-            trues = pd.DataFrame(f.split('/')[-1].split('_')[3] for f in input_filepaths[subject])
+            trues = pd.DataFrame(i for file in input_filepaths[subject] for i in file.split('/')[-1].split('.')[0].split('_') if i in class_names)
             filename = os.path.join(dirpath, f"true_label/{prefix}_true_label.csv")
             trues.to_csv(filename, index=False, header=False)
             print(colored(f"\t Wrote the true values.", 'cyan'))
