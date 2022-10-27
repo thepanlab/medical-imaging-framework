@@ -212,7 +212,7 @@ def output_results(prediction_results, timing_results, label_pos, input_filepath
         
         # Print the predicted labels
         filename = os.path.join(out_mets, f"{model}_prediction_info.csv")
-        predicted_labels.sort_values(by=['subject']).to_csv(filename, index=False)
+        predicted_labels.sort_values(by=['test_subject']).to_csv(filename, index=False)
         print(colored(f"Successfully output the predicted labels for: model '{model}'\n", 'green'))
                  
 
