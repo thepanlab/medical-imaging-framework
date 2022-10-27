@@ -134,7 +134,7 @@ def output_results(prediction_results, timing_results, label_pos, input_filepath
         return: None.
     """    
     # Output results to file
-    columns_predicted_labels = ['subject', 'filename', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match']
+    columns_predicted_labels = ['test_subject', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filename', 'filepath']
     for model in prediction_results:
         predicted_labels = pd.DataFrame(columns=columns_predicted_labels)
         for subject in prediction_results[model]:
@@ -198,13 +198,14 @@ def output_results(prediction_results, timing_results, label_pos, input_filepath
                 max_label = class_names[max_index]
                 label = trues.values[i][0]
                 predicted_labels = pd.concat([predicted_labels, pd.DataFrame.from_dict({
-                    'subject': [subject],
-                    'filename': [img_file],
+                    'test_subject': [subject],
                     'true_label': [label],
                     'true_label_index': [class_names[label]],
                     'pred_label': [max_label],
                     'pred_label_index': [max_index],
-                    'match': [class_names[label] == max_index]                        
+                    'match': [class_names[label] == max_index],
+                    'filename': [img_file.split('/')[-1]],                      
+                    'filepath': [img_file]                      
                 })], ignore_index=True)
             print(colored(f"\t Got the prediction info.", 'cyan'))
             print(colored(f"\t Finished writing the predictions.", 'green'))
