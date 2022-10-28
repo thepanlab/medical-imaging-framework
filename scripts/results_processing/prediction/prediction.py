@@ -192,7 +192,7 @@ def output_results(prediction_results, timing_results, label_pos, input_filepath
             
             # Get the prediction info for every image
             for i in range(len(input_filepaths[subject])):
-                img_file = input_filepaths[subject][i].split('/')[-1]
+                img_file = input_filepaths[subject][i]
                 predictions = list(prediction_results[model][subject][i])
                 max_index = predictions.index(max(predictions))
                 max_label = class_names[max_index]
