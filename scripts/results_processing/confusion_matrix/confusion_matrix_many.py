@@ -36,11 +36,6 @@ def run_program(args, pred_paths, true_paths, is_outer):
             'label_types', 'output_path'
         )
     }
-    
-    if is_outer:
-        json['output_path'] = os.path.abspath(os.path.join(json['output_path'], 'outer_loop'))
-    else:
-        json['output_path'] = os.path.abspath(os.path.join(json['output_path'], 'inner_loop'))
 
     # For each item, run the program
     for model in pred_paths:

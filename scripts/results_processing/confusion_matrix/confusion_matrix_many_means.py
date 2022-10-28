@@ -6,7 +6,7 @@ import regex as re
 import os
 
 
-def get_input_matrices(matrices_path, is_outer):
+def get_input_matrices(matrices_path):
     """ Finds the existing configs, test folds, and validations folds of all matrices.
 
     Args:
@@ -32,40 +32,40 @@ def get_input_matrices(matrices_path, is_outer):
         organized_paths[config].append(path)
 
     # For each config, separate by testing fold
+    is_outer = False
     for config in organized_paths:
         config_paths = organized_paths[config]
         organized_paths[config] = {}
         organized_shapes[config] = {}
         for path in config_paths:
-            try:
-                filename = path.split('/')[-1]
+            filename = path.split('/')[-1]
                 
-                # Search for the test-fold name from the file name
-                if not is_outer:
+            # Search for the test-fold name from the file name
+            if not is_outer:
+                try:
                     test_fold = re.search('_test_.*_val_.*_val', filename).captures()[0].split("_")[2]            
                     if test_fold not in organized_paths[config]:
                         organized_paths[config][test_fold] = {}
                         organized_shapes[config][test_fold] = {}
-                else:
-                    test_fold = re.search('.*_test_.*_val.*', filename).captures()[0].split("_")[2]
-                    
-                # Search for the val-fold name from the file name, read the csv, and get shape
-                if not is_outer:
-                    val_fold = re.search('_test_.*_val_.*_val', filename).captures()[0].split("_")[4]
-                    shape = re.findall(r'\d+', filename)[-1]
-                    organized_shapes[config][test_fold][val_fold] = shape
-                    organized_paths[config][test_fold][val_fold] = os.path.join(matrices_path, path)
-                else:
-                    shape = int(re.search('_.*_conf_matrix.csv', filename).captures()[0].split("_")[1])
-                    organized_shapes[config][test_fold] = shape
-                    organized_paths[config][test_fold] = os.path.join(matrices_path, path)
-            except:
-                print(colored(f"Error: could not extract information from the confusion matrix file name: {path}\n\t" + 
-                              "Are you sure this is from the inner/outer loop?", 'red'))
-                exit(-1)
+                except:
+                    is_outer = True
+                    test_fold = re.search('.*_test_.*_test.*', filename).captures()[0].split("_")[2]
+            else:
+                test_fold = re.search('.*_test_.*_test.*', filename).captures()[0].split("_")[2]
+                
+            # Search for the val-fold name from the file name, read the csv, and get shape
+            if not is_outer:
+                val_fold = re.search('_test_.*_val_.*_val', filename).captures()[0].split("_")[4]
+                shape = re.findall(r'\d+', filename)[-1]
+                organized_shapes[config][test_fold][val_fold] = shape
+                organized_paths[config][test_fold][val_fold] = os.path.join(matrices_path, path)
+            else:
+                shape = int(re.search('_.*_conf_matrix.csv', filename).captures()[0].split("_")[1])
+                organized_shapes[config][test_fold] = shape
+                organized_paths[config][test_fold] = os.path.join(matrices_path, path)
 
     # Return the dictionary of organized matrices
-    return organized_paths, organized_shapes
+    return organized_paths, organized_shapes, is_outer
 
 
 def get_matrices_of_mode_shape(shapes, matrices, is_outer):
@@ -231,10 +231,7 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
                     matrix_weighted_err["Predicted"][col]["Truth"][row] /= n_items - 1
 
             # Output ALL matrices
-            if is_outer:
-                output_folder = os.path.join(output_path, f'{config}_{test_fold}/','outer_loop')
-            else:
-                output_folder = os.path.join(output_path, f'{config}_{test_fold}/','inner_loop')
+            output_folder = os.path.join(output_path, f'{config}_{test_fold}/')
             if not os.path.exists(output_folder): os.makedirs(output_folder)
             matrix_avg.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean.csv'))
@@ -254,10 +251,10 @@ def main():
     config = parse_json(os.path.abspath('./results_processing/confusion_matrix/confusion_matrix_many_means_config.json'))
 
     # Read in the matrices to average
-    matrices, shapes = get_input_matrices(config['matrices_path'], config['is_outer'])
+    matrices, shapes, is_outer = get_input_matrices(config['matrices_path'])
 
     # Average the matrices
-    get_mean_matrices(matrices, shapes, config['means_output_path'], config['label_types'], config['round_to'], config['is_outer'])
+    get_mean_matrices(matrices, shapes, config['means_output_path'], config['label_types'], config['round_to'], is_outer)
 
 
 if __name__ == "__main__":

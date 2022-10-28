@@ -20,6 +20,7 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
 
     # Binarize the labels
     true_val_bin = label_binarize(true_vals, classes=classes)
+    print(true_val_bin[:,:])
 
     # Create dictionaries for true pos, false pos, and roc values
     fpr = dict()

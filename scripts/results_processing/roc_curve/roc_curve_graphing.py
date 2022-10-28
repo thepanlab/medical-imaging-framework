@@ -20,14 +20,9 @@ def run_program(args):
     for model in pred_paths:
         for subject in pred_paths[model]:
             for item in range(len(pred_paths[model][subject])):
-                try:
-                    # Get the program's arguments
-                    json = generate_json(pred_paths, true_paths, model, subject, item, json)
-                    roc_curve.main(json)
-
-                # Catch weird stuff
-                except Exception as err:
-                    print(colored("Exception caught.\n\t" + str(err) + "\n", "red"))
+                # Get the program's arguments
+                json = generate_json(pred_paths, true_paths, model, subject, item, json)
+                roc_curve.main(json)
 
 
 def find_directories(data_path):

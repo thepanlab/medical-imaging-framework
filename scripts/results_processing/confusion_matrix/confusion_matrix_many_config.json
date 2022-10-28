@@ -1,5 +1,5 @@
 {
-  "data_path": "/data/jshaw/medical-imaging-framework/results/predictions/prediction_values",
+  "data_path": "../data/_loop_inner",
   "output_path": "../results/processed_output/confusion_matrix",
 
   "label_types": {

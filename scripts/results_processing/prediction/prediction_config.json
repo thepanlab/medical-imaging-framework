@@ -1,12 +1,10 @@
 {
     "prediction_output": "../results/predictions",
     "test_subject_data_input": {
-        "e1": "../data/ep_intensity/Test_subject_e1",
-        "e2": "../data/ep_intensity/Test_subject_e2"
+        "e1": "../data/ep_intensity/Test_subject_e1"
     },
     "model_input": {
-        "Inception": "../data/_loop_inner/Test_subject_e1/config_1_InceptionV3/InceptionV3_2_test_e1_val_e4/model/InceptionV3_2_test_e1_val_e4_resnet50.h5",
-        "resnet": "../data/_loop_inner/Test_subject_e6/config_2_Resnet50/resnet_50_1_test_e6_val_e2/model/resnet_50_1_test_e6_val_e2_resnet50.h5"
+        "Inception": "../data/_loop_outer/Test_subject_k2/config_1_resnet_50/resnet_50_test_k2/model/resnet_50_test_k2_resnet50.h5"
     },
 
     "batch_size": 8,

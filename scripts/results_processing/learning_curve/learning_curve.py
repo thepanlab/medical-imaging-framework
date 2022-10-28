@@ -13,7 +13,10 @@ def lc_loss(path, data_frame, config, name):
 
     # Grabbing accuracy and val_accuracy data from passed dataframe
     loss = data_frame['loss']
-    val_loss = data_frame['val_loss']
+    try:
+        val_loss = data_frame['val_loss']
+    except:
+        val_loss = data_frame['loss']
 
     # Establishing the plot's colors
     loss_line_color = config['loss_line_color']
@@ -58,7 +61,10 @@ def lc_accuracy(path, data_frame, config, name):
 
     # Grabbing accuracy and val_accuracy data from passed dataframe
     acc = data_frame['accuracy']
-    val_acc = data_frame['val_accuracy']
+    try:
+        val_acc = data_frame['val_accuracy']
+    except:
+        val_acc = data_frame['accuracy']
 
     # Establishing the plot's colors
     acc_line_color = config['acc_line_color']
@@ -93,11 +99,16 @@ def lc_accuracy(path, data_frame, config, name):
 def get_subject_name(file_name):
     """ Gets the subject id """
     try:
-        subject_search = re.search('_test_.*_val_', file_name)
+        subject_search = re.search('_test_.*_val_history', file_name)
         subject_name = subject_search.captures()[0].split("_")[2]
         return subject_name
     except:
-        raise Exception(colored(f"Error: File name doesn't contain '*_test_*_val_*' format: \n\t{file_name}", 'red'))
+        try:
+            subject_search = re.search('_test_.*_history', file_name)
+            subject_name = subject_search.captures()[0].split("_")[2]
+            return subject_name
+        except:
+            raise Exception(colored(f"Error: File name doesn't contain '_test_*_val_history' or '*_test_*_history format: \n\t{file_name}", 'red'))
 
 
 def create_graphs(file_list, file_path, results_path, results_config):
@@ -147,3 +158,4 @@ def main(config=None):
 if __name__ == "__main__":
     """ Executes the program """
     main()
+    

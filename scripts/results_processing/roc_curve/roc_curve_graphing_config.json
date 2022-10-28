@@ -1,5 +1,5 @@
 {
-  "data_path": "../data/_loop_inner/",
+  "data_path": "../data/_loop_outer",
   "output_path": "../results/processed_output/roc_output",
 
   "line_width": "2",
