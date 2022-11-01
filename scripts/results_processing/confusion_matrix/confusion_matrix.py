@@ -5,11 +5,6 @@ import pandas as pd
 import os
 
 
-
-
-# TODO: include preprocessing of the prob values (can be found in E3b-Processing predictions first few cells)
-
-
 def get_data(pred_path, true_path):
     """ Reads in the labels and predictions from CSV.
 

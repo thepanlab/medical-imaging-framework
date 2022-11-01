@@ -16,13 +16,12 @@ def find_directories(data_path):
         dict: Two dictionaries of prediction and truth paths.
     """
     # Get the paths of every prediction and true CSV, as well as the fold-names
-    is_outer = path_getter.is_outer_loop(data_path)
     pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=True, getValidation=True)
     true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True)
-    return pred_paths, true_paths, is_outer
+    return pred_paths, true_paths
 
 
-def run_program(args, pred_paths, true_paths, is_outer):
+def run_program(args, pred_paths, true_paths):
     """ Run the program for each item.
 
     Args:
@@ -80,8 +79,8 @@ def main():
     """ The Main Program. """
     # Get program configuration and run using its contents
     config = parse_json(os.path.abspath('./results_processing/confusion_matrix/confusion_matrix_many_config.json'))
-    pred_paths, true_paths, is_outer = find_directories(config["data_path"])
-    run_program(config, pred_paths, true_paths, is_outer)
+    pred_paths, true_paths = find_directories(config["data_path"])
+    run_program(config, pred_paths, true_paths)
 
 
 if __name__ == "__main__":

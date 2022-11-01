@@ -66,13 +66,19 @@ def read_models(model_input):
 
 
 def predict_images(image_paths, models, batch_size, class_names, image_config):
-    """
-        Predicts values of images for each given model.
+    """ Predicts values of images for each given model.
 
-        data: A dictionary of key-array form, containing images.
-        models: A dictionary of key-model form.
-        return: A key-model-array dictionary of prediction results.
-    """   
+    Args:
+        image_paths (dict): A dictionary of key-array form, containing images.
+        models (dict): A dictionary of key-model form.
+        batch_size (int): The size of the prediction subsets.
+        class_names (str): Names of the prediction classes.
+        image_config (dict): Image configuration.
+
+    Returns:
+        tuple: The prediction results and timing results
+    """
+    
     # Image args
     class_names = image_config['class_names'].split(',')
     target_height = int(image_config['target_height'])
@@ -122,17 +128,21 @@ def predict_images(image_paths, models, batch_size, class_names, image_config):
             prediction_results[model][subject] = pred
             print(colored(f"Successfully computed the predictions for: model '{model}' and input '{subject}'", 'green'))
         print(' ')
-    return prediction_results, timing_results, label_position
+    return prediction_results, timing_results
 
 
-def output_results(prediction_results, timing_results, label_pos, input_filepaths, class_names, out_vals, out_mets):
+def output_results(prediction_results, timing_results, input_filepaths, class_names, out_vals, out_mets):
+    """ Output the prediction results to CSV file.
+
+    Args:
+        prediction_results (dict): A key-model-array dictionary of prediction results.
+        timing_results (dict): The times of predictions.
+        input_filepaths (dict): The true values (images.)
+        class_names (str): Names of the prediction classes.
+        out_vals (str): Directory output path of the values.
+        out_mets (str): Directory output path of the metrics.
     """
-        Output the prediction results to CSV file.
-
-        prediction_results: A key-model-array dictionary of prediction results.
-        output_directory: The directory to output the predictions to.
-        return: None.
-    """    
+    
     # Output results to file
     columns_predicted_labels = ['test_subject', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filename', 'filepath']
     for model in prediction_results:
@@ -217,10 +227,10 @@ def output_results(prediction_results, timing_results, label_pos, input_filepath
                  
 
 def main(config=None):
-    """ 
-        The main body of the program.
+    """ The main body of the program.
 
-        config: The input configuration, as a dictionary. (Optional)
+    Args:
+        config (dict, optional): The input configuration, as a dictionary. Defaults to None.
     """
     # Obtain a dictionary of configurations
     if config is None:
@@ -243,10 +253,10 @@ def main(config=None):
     print(colored('Input models sucessfully read.\n', 'green'))
 
     # Predict the images
-    prediction_results, timing_results, label_pos = predict_images(data, models, config['batch_size'], class_names, config["image_settings"])
+    prediction_results, timing_results = predict_images(data, models, config['batch_size'], class_names, config["image_settings"])
 
     # Output the results
-    output_results(prediction_results, timing_results, label_pos, data, class_names, out_vals, out_mets)
+    output_results(prediction_results, timing_results, data, class_names, out_vals, out_mets)
     
 
 if __name__ == "__main__":

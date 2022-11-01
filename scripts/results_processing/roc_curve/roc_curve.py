@@ -9,18 +9,22 @@ import numpy as np
 import os
 
 
-# TODO: change title to include file name
-
-
 def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
-    """ Creates the ROC Graph. """
+    """ Creates the ROC Graph.
+
+    Args:
+        true_vals (list): A list of true values.
+        pred_vals (list): A list of predicted values.
+        roc_config (dict): The configuration for the program.
+        file_name (str): The name of the output file.
+        output_path (str): The name of the output directory.
+    """
     # Assuming true_vals is a numpy array
     classes = np.unique(true_vals)
     n_classes = len(classes)
 
     # Binarize the labels
     true_val_bin = label_binarize(true_vals, classes=classes)
-    print(true_val_bin[:,:])
 
     # Create dictionaries for true pos, false pos, and roc values
     fpr = dict()
@@ -90,14 +94,22 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
 
 
 def get_data(pred_path, true_path):
-    """ Reads in the labels and predictions from CSV. """
+    """ Reads in the labels and predictions from CSV.
+
+    Args:
+        pred_path (str): The path to a predictions file.
+        true_path (str): The path to a truth file.
+
+    Returns:
+        list: Two lists of true and predicted values.
+    """
     # Read CSV file
     pred = pd.read_csv(pred_path, header=None).to_numpy()
     true = pd.read_csv(true_path, header=None).to_numpy()
 
     # Get shapes
-    pred_rows, pred_cols = pred.shape
-    true_rows, true_cols = true.shape
+    pred_rows, _ = pred.shape
+    true_rows, _ = true.shape
 
     # Make the number of rows equal, in case uneven [[ TODO: Keep in with official data? ]]
     if pred_rows > true_rows:
@@ -110,7 +122,11 @@ def get_data(pred_path, true_path):
 
 
 def main(config=None):
-    """ The main program. """
+    """ The main program.
+
+    Args:
+        config (dict, optional): A custom configuration. Defaults to None.
+    """
 
     # Obtaining dictionary of configurations from json file
     if config is None:

@@ -46,9 +46,9 @@ learning_curve:
 	python3 -W ignore -m results_processing.learning_curve.learning_curve -j ${j}
 
 
-learning_curve_graphing: ## Creates many learning curves from the specified data folder.
-learning_curve_graphing: 
-	python3 -W ignore -m results_processing.learning_curve.learning_curve_graphing -j ${j}
+learning_curve_many: ## Creates many learning curves from the specified data folder.
+learning_curve_many: 
+	python3 -W ignore -m results_processing.learning_curve.learning_curve_many -j ${j}
 
 
 metrics_table: ## Creates a metrics_table for the given data folder.
@@ -66,9 +66,9 @@ roc_curve:
 	python3 -W ignore -m results_processing.roc_curve.roc_curve -j ${j}
 
 
-roc_curve_graphing: ## Creates many ROC curves from the specified data folder.
-roc_curve_graphing: 
-	python3 -W ignore -m results_processing.roc_curve.roc_curve_graphing -j ${j}
+roc_curve_many: ## Creates many ROC curves from the specified data folder.
+roc_curve_many: 
+	python3 -W ignore -m results_processing.roc_curve.roc_curve_many -j ${j}
 
 
 summary_table: ## Creates a summary table from the specified data folder.

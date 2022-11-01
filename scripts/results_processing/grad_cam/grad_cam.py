@@ -10,26 +10,17 @@ import pandas as pd
 import numpy as np
 import os
 
-"""
-    Grad-CAM
-    
-    This file takes in a JSON configuration file that lists:
-        - input_model_address: The file location of a trained model.
-        - input_means_address: A csv file of mean values (optional)
-        - input_img_address: A folder or specific image file to read
-        - output_image_address: The file location to place output heatmaps into.
-        - alpha: Changes the output image's appearance.
-        - mean_row: The row-location of the mean value in the csv.
-        - mean_col: The column-location of the mean value in the csv.
-        - last_conv_layer_name: The last layer of activations in the model.
-        
-    It will display a heatmap of the most influential points on an image according
-    to the model. Each converted image is saved to a file of a similar name.
-"""
-
 
 def load_config():
-    """ Load the JSON configuration file """
+    """ Load the JSON configuration file
+
+    Raises:
+        Exception: If a file does not exist.
+        Exception: If a file is empty.
+
+    Returns:
+        tuple: Returns various values from the configuration file.
+    """
     # Get the configuration
     config = get_config.parse_json('./results_processing/grad_cam/grad_cam_config.json')
 
@@ -56,7 +47,14 @@ def load_config():
 
 
 def get_images(addr):
-    """ Get the image address(es) """
+    """ Get the image address(es)
+
+    Args:
+        addr (str): A path to an image or a folder.
+
+    Returns:
+        list: A list of images.
+    """
     # If a single image
     if addr.endswith(".jpg") or addr.endswith(".png"):
         print(colored("There is one image to be processed.", 'green'))
@@ -73,7 +71,17 @@ def get_images(addr):
 
 
 def load_data(model_addr, mean_addr, mean_row, mean_col):
-    """ Load the data from their addresses """
+    """ Load the data from their addresses
+
+    Args:
+        model_addr (str): Path to the model.
+        mean_addr (str): Path to the means.
+        mean_row (str): Row to use within the file.
+        mean_col (str): Column to use within the file.
+
+    Returns:
+        tuple: The loaded model and mean.
+    """
     model = keras.models.load_model(model_addr)
     mean = pd.read_csv(mean_addr, index_col=0)
     mean = mean.loc[mean_row, mean_col]
@@ -81,7 +89,15 @@ def load_data(model_addr, mean_addr, mean_row, mean_col):
 
 
 def preprocessing(img_addr, mean):
-    """ Preprocess the image """
+    """ Preprocess the image
+
+    Args:
+        img_addr (str): The image address.
+        mean (float): The mean value to compare to.
+
+    Returns:
+        image: An altered image.
+    """
     img = np.array(Image.open(img_addr).convert('L'))
     if mean is not None:
         img_centered = img - mean
@@ -91,7 +107,17 @@ def preprocessing(img_addr, mean):
 
 
 def gradcam_heatmap(img, model, last_conv_layer_name, pred_index=None):
-    """ Generate a Grad-CAM heatmap """
+    """ Generate a Grad-CAM heatmap
+
+    Args:
+        img (image): An image to create a heatmap from
+        model (keras.models): A trained model.
+        last_conv_layer_name (str): Layer within the model.
+        pred_index (int, optional): Gets an index from the predictions. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
     # First, we create a model that maps the input image to the activations
     #   of the last conv layer as well as the output predictions.
     grad_model = tf.keras.models.Model(
@@ -128,7 +154,14 @@ def gradcam_heatmap(img, model, last_conv_layer_name, pred_index=None):
 
 
 def save_gradcam_output(img_path, heatmap, cam_path, alpha=0.4):
-    """ Save the Grad-CAM output to a file """
+    """ Save the Grad-CAM output to a file.
+
+    Args:
+        img_path (str): Path to save image to.
+        heatmap (image): The processed image.
+        cam_path (str): The output directory.
+        alpha (float, optional): The superimposed image alpha. Defaults to 0.4.
+    """
     # Load the original image
     img = keras.preprocessing.image.load_img(img_path)
     img = keras.preprocessing.image.img_to_array(img)

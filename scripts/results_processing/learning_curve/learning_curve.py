@@ -7,7 +7,14 @@ import os
 
 
 def lc_loss(path, data_frame, config, name):
-    """ Creates the model loss plot using the defined configurations and saves it in the results directory. """
+    """ Creates the model loss plot using the defined configurations and saves it in the results directory.
+
+    Args:
+        path (str): Path to save the figure to.
+        data_frame (pandas.DataFrame): A data frame of the loss data.
+        config (dict): A dictionary of configuration values.
+        name (str): Name of the subject.
+    """
     # The current subject
     subject_num = get_subject_name(name)
 
@@ -55,7 +62,14 @@ def lc_loss(path, data_frame, config, name):
 
 
 def lc_accuracy(path, data_frame, config, name):
-    """ Creates the model accuracy plot using the defined configurations and saves it in the results directory.  """
+    """ Creates the model accuracy plot using the defined configurations and saves it in the results directory.
+
+    Args:
+        path (str): Path to save the figure to.
+        data_frame (pandas.DataFrame): A data frame of the loss data.
+        config (dict): A dictionary of configuration values.
+        name (str): Name of the subject.
+    """
     # The current subject
     subject_num = get_subject_name(name)
 
@@ -97,7 +111,17 @@ def lc_accuracy(path, data_frame, config, name):
 
 
 def get_subject_name(file_name):
-    """ Gets the subject id """
+    """ Gets the subject id
+
+    Args:
+        file_name (str): Name of the input file.
+
+    Raises:
+        Exception: When the file name has an incorrect format.
+
+    Returns:
+        str: The subject's name.
+    """
     try:
         subject_search = re.search('_test_.*_val_history', file_name)
         subject_name = subject_search.captures()[0].split("_")[2]
@@ -112,7 +136,14 @@ def get_subject_name(file_name):
 
 
 def create_graphs(file_list, file_path, results_path, results_config):
-    """ Create graphs for each item """
+    """ Create graphs for each item
+
+    Args:
+        file_list (list): A list of all files to process.
+        file_path (str): File output path.
+        results_path (ste): Path to output the file to.
+        results_config (dict): A configuration.
+    """
     # Looping through each file and creating needed graphs
     for file in file_list:
         # Reading in CSV file into a dataframe
@@ -125,7 +156,14 @@ def create_graphs(file_list, file_path, results_path, results_config):
 
 
 def file_verification(files_list):
-    """ Verifies files are valid """
+    """ Verifies files are valid
+
+    Args:
+        files_list (list): A list of file names
+
+    Returns:
+        list: A list of good file names.
+    """
     verified_list = []
     for file in files_list:
         history_check = re.search("history", file)
@@ -137,7 +175,11 @@ def file_verification(files_list):
 
 
 def main(config=None):
-    """ The main program """
+    """ The main program.
+
+    Args:
+        config (dict, optional): A custom configuration. Defaults to None.
+    """
     # Obtaining dictionary of configurations from json file
     if config is None:
         config = get_config.parse_json('./results_processing/learning_curve/learning_curve_config.json')

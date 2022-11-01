@@ -7,7 +7,18 @@ import os
 
 
 def count_epochs(history_paths, is_outer):
-    """ Creates a csv file for every model's history """
+    """ Reads in the history paths and finds the ideal loss.
+
+    Args:
+        history_paths (dict): A dictionary of file locations.
+        is_outer (bool): If this data is from the outer loop or not.
+
+    Raises:
+        Exception: When no history files exist for some item.
+
+    Returns:
+        dict: A dictionary of minimum epoch losses.
+    """
     # Store output dataframes by model
     model_dfs = {}
 
@@ -49,7 +60,14 @@ def count_epochs(history_paths, is_outer):
 
 
 def print_counts(epochs, output_path, config_nums, is_outer):
-    """ This will output a CSV of the epoch-counts """
+    """ This will output a CSV of the epoch counts.
+
+    Args:
+        epochs (dict): Dictionary of epochs with minimum loss.
+        output_path (str): Path to write files into.
+        config_nums (dict): The configuration indexes of the data.
+        is_outer (bool): If this data is from the outer loop.
+    """
     # Create a new dataframe to output
     col_names = ["test_fold", "config", "config_index", "val_fold", "epochs"]
     df = pd.DataFrame(columns=col_names)
@@ -81,7 +99,13 @@ def print_counts(epochs, output_path, config_nums, is_outer):
 
 
 def print_stderr(epochs, output_path, config_nums):
-    """ This will output a CSV of the average epoch standard errors """
+    """ This will output a CSV of the average epoch standard errors.
+
+    Args:
+        epochs (dict): Dictionary of epochs with minimum loss.
+        output_path (str): Path to write files into.
+        config_nums (dict): The configuration indexes of the data.
+    """
     # Create a new dataframe to output
     col_names = ["test_fold", "config", "config-index", "avg_epochs", "std_err"]
     df = pd.DataFrame(columns=col_names)

@@ -23,18 +23,27 @@ def find_directories(data_path):
 
 
 def find_images(data_path):
+    """ Finds the images within a directory.
+
+    Args:
+        data_path (str): Path to a directory.
+
+    Returns:
+        dict: Dictionary of subfiles.
+    """
     return path_getter.get_subfolder_files(data_path, "file_name")
 
 
-"""
-   two for inner loop: test subject and validation subject 
-   For outer loop, just test subject
-   
-filepath and filename
-
-"""
-
 def compare_values(output_path, pred_paths, true_paths, image_paths, label_types, is_outer):
+    """ Compares the true and predicted values and gets other info.
+    Args:
+        output_path (str): Directory to output to.
+        pred_paths (dict): Paths to the predictions.
+        true_paths (dict): Paths to the true values.
+        image_paths (dict): Paths to the images.
+        label_types (dict): A list of labels and their index.
+        is_outer (bool): If the data is from the outer loop.
+    """
     # Dataframe column order
     if is_outer:
         cols = ['test_subject', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filename', 'filepath']
@@ -90,6 +99,13 @@ def compare_values(output_path, pred_paths, true_paths, image_paths, label_types
 
 
 def print_results(filepath, config, results):
+    """ Prints the data to file.
+
+    Args:
+        filepath (str): Path to print to.
+        config (str): The name of the configuration.
+        results (pandas.DataFrame): Results of the predictions.
+    """
     results.sort_values(by=['test_subject']).to_csv(os.path.join(filepath, f'{config}_prediction_info.csv'), index=False)
     print(colored(f"Successfully output the results for {config}.", 'magenta'))
                     
