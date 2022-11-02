@@ -1,3 +1,4 @@
+from results_processing.tabled_prediction_info import tabled_prediction_info
 from util.get_config import parse_json
 from training import image_parser
 from termcolor import colored
@@ -131,7 +132,7 @@ def predict_images(image_paths, models, batch_size, class_names, image_config):
     return prediction_results, timing_results
 
 
-def output_results(prediction_results, timing_results, input_filepaths, class_names, out_vals, out_mets):
+def output_results(prediction_results, timing_results, input_filepaths, class_names, out_vals):
     """ Output the prediction results to CSV file.
 
     Args:
@@ -146,7 +147,6 @@ def output_results(prediction_results, timing_results, input_filepaths, class_na
     # Output results to file
     columns_predicted_labels = ['test_subject', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filename', 'filepath']
     for model in prediction_results:
-        predicted_labels = pd.DataFrame(columns=columns_predicted_labels)
         for subject in prediction_results[model]:
                 
             # The files will stored in a particular context
@@ -199,31 +199,6 @@ def output_results(prediction_results, timing_results, input_filepaths, class_na
             filename = os.path.join(dirpath, f"{prefix}_time_total.csv")
             time.to_csv(filename, index=False, header=False)
             print(colored(f"\t Wrote the timing.", 'cyan'))
-            
-            # Get the prediction info for every image
-            for i in range(len(input_filepaths[subject])):
-                img_file = input_filepaths[subject][i]
-                predictions = list(prediction_results[model][subject][i])
-                max_index = predictions.index(max(predictions))
-                max_label = class_names[max_index]
-                label = trues.values[i][0]
-                predicted_labels = pd.concat([predicted_labels, pd.DataFrame.from_dict({
-                    'test_subject': [subject],
-                    'true_label': [label],
-                    'true_label_index': [class_names[label]],
-                    'pred_label': [max_label],
-                    'pred_label_index': [max_index],
-                    'match': [class_names[label] == max_index],
-                    'filename': [img_file.split('/')[-1]],                      
-                    'filepath': [img_file]                      
-                })], ignore_index=True)
-            print(colored(f"\t Got the prediction info.", 'cyan'))
-            print(colored(f"\t Finished writing the predictions.", 'green'))
-        
-        # Print the predicted labels
-        filename = os.path.join(out_mets, f"{model}_prediction_info.csv")
-        predicted_labels.sort_values(by=['test_subject']).to_csv(filename, index=False)
-        print(colored(f"Successfully output the predicted labels for: model '{model}'\n", 'green'))
                  
 
 def main(config=None):
@@ -256,7 +231,17 @@ def main(config=None):
     prediction_results, timing_results = predict_images(data, models, config['batch_size'], class_names, config["image_settings"])
 
     # Output the results
-    output_results(prediction_results, timing_results, data, class_names, out_vals, out_mets)
+    output_results(prediction_results, timing_results, data, class_names, out_vals)
+    
+    # Output tabled info
+    if config['output_tabled_info']:
+        table_config = {
+            "data_path": out_vals,
+            "output_path": out_mets,
+            "label_types": {str(class_names.index(label)): label for label in class_names}
+        }
+        tabled_prediction_info.main(table_config)
+        print(colored('Successfully printed the tabeled info.', 'green'))
     
 
 if __name__ == "__main__":

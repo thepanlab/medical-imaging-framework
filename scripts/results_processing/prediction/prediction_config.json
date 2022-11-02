@@ -8,6 +8,7 @@
     },
 
     "batch_size": 8,
+    "output_tabled_info": true,
 
     "image_settings": {
         "mean": 0,
