@@ -46,9 +46,9 @@ def compare_values(output_path, pred_paths, true_paths, image_paths, label_types
     """
     # Dataframe column order
     if is_outer:
-        cols = ['test_subject', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filename', 'filepath']
+        cols = ['test_subject',                'filename', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filepath']
     else:
-        cols = ['test_subject', 'val_subject', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filename', 'filepath']
+        cols = ['test_subject', 'val_subject', 'filename', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filepath']
     
     # Iterate through each prediction-truth-filepath trio
     for config in pred_paths:
@@ -110,10 +110,11 @@ def print_results(filepath, config, results):
     print(colored(f"Successfully output the results for {config}.", 'magenta'))
                     
 
-def main():
+def main(config=None):
     """ The Main Program. """
     # Get program configuration and run using its contents
-    config = parse_json('./results_processing/tabled_prediction_info/tabled_prediction_info_config.json')
+    if config is None:
+        config = parse_json('./results_processing/tabled_prediction_info/tabled_prediction_info_config.json')
     pred_paths, true_paths, is_outer = find_directories(config["data_path"])
     print(colored(f"Successfully read in the prediction and truth paths.", 'green'))
     image_paths = find_images(config["data_path"])
