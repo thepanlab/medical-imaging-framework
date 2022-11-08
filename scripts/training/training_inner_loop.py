@@ -244,7 +244,7 @@ def create_model(hyperparameters, model_type, target_height, target_width, class
     return model, model_type
 
 
-def output_results(output_path, testing_subject, validation_subject, rotation, model, model_type, history, time_elapsed, lists, class_names):
+def output_results(output_path, testing_subject, validation_subject, rotation, model, model_type, history, time_elapsed, datasets, class_names):
     """ Output results from the trained model.
         
         -- Input Parameters ------------------------
@@ -256,7 +256,7 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
         model_type (str): The model name.
         history (keras History): The history outputted by the fitting function.
         time_elapsed (double): The elapsed time from the fitting phase.
-        lists (dict): A dictionary of various values for the data-splits.
+        datasets (dict): A dictionary of various values for the data-splits.
         class_names (list of str): .
         --------------------------------------------
     """
@@ -283,26 +283,26 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
     metrics = {
         f"{file_prefix}_time-total.csv": [[time_elapsed]],
         
-        f"prediction/{file_prefix}_val_predicted.csv":  model.predict(lists['validation']['ds']),
+        f"prediction/{file_prefix}_val_predicted.csv":  model.predict(datasets['validation']['ds']),
         
-        f"true_label/{file_prefix}_val_true_label.csv":  lists['validation']['labels'],
-        f"true_label/{file_prefix}_test_true_label.csv": lists['testing']['labels'],
+        f"true_label/{file_prefix}_val_true_label.csv":  datasets['validation']['labels'],
+        f"true_label/{file_prefix}_test_true_label.csv": datasets['testing']['labels'],
         
-        f'true_label/{file_prefix}_val_true_label_index.csv':  [lists['validation']['indexes']],
-        f'true_label/{file_prefix}_test_true_label_index.csv': [lists['testing']['indexes']],
+        f'true_label/{file_prefix}_val_true_label_index.csv':  [datasets['validation']['indexes']],
+        f'true_label/{file_prefix}_test_true_label_index.csv': [datasets['testing']['indexes']],
         
-        f'file_name/{file_prefix}_val_file.csv':  lists['validation']['files'],
-        f'file_name/{file_prefix}_test_file.csv': lists['testing']['files'] 
+        f'file_name/{file_prefix}_val_file.csv':  datasets['validation']['files'],
+        f'file_name/{file_prefix}_test_file.csv': datasets['testing']['files'] 
     }
-    if lists['testing']['ds'] is None:
+    if datasets['testing']['ds'] is None:
         print(colored(
             f"Non-fatal Error: evaluation was skipped for the test subject {testing_subject} and val subject {validation_subject}. " + 
             f"There were no files in the testing dataset.\n",
             'yellow'
         ))
     else:
-        metrics[f"{file_prefix}_test_evaluation.csv"] =  model.evaluate(lists['testing']['ds'])
-        metrics[f"prediction/{file_prefix}_test_predicted.csv"] =  model.predict(lists['testing']['ds'])
+        metrics[f"{file_prefix}_test_evaluation.csv"] =  model.evaluate(datasets['testing']['ds'])
+        metrics[f"prediction/{file_prefix}_test_predicted.csv"] =  model.predict(datasets['testing']['ds'])
     for metric in metrics:
         with open(f"{path_prefix}/{metric}", 'w') as fp:
             writer = csv.writer(fp)
@@ -328,7 +328,7 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
     
     # Train for every rotation specified
     for rotation in range(rotations):
-        lists = {
+        datasets = {
             'testing':    {'files': [], 'indexes': [], 'labels': [], 'ds': None},
             'training':   {'files': [], 'indexes': [], 'labels': [], 'ds': None},
             'validation': {'files': [], 'indexes': [], 'labels': [], 'ds': None}
@@ -338,24 +338,24 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
         validation_subject = folds[rotation]['validation'][0]
         testing_subject = folds[rotation]['testing'][0]
 
-        # Fill out the lists of information
+        # Fill out the datasets of information
         for index, file in enumerate(files):
-            key = ''
+            dataset = ''
             if indexes['subjects'][index] == validation_subject:
-                key = 'validation'
+                dataset = 'validation'
             elif indexes['subjects'][index] == testing_subject:
-                key = 'testing'
+                dataset = 'testing'
             else:
-                key = 'training'
-            lists[key]['files'].append(file)
-            lists[key]['indexes'].append(index)
-            lists[key]['labels'].append(indexes['labels'][index])
+                dataset = 'training'
+            datasets[dataset]['files'].append(file)
+            datasets[dataset]['indexes'].append(index)
+            datasets[dataset]['labels'].append(indexes['labels'][index])
             
         # Get the datasets for each phase
-        for key in lists:
-            if not lists[key]['files']:
+        for dataset in datasets:
+            if not datasets[dataset]['files']:
                 continue
-            ds = tf.data.Dataset.from_tensor_slices(lists[key]['files'])
+            ds = tf.data.Dataset.from_tensor_slices(datasets[dataset]['files'])
             ds_map = ds.map(lambda x:parse_image(
                 x,                                                  # filename
                 config['hyperparameters']['mean'],                  # mean
@@ -369,7 +369,7 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
                 config['target_height'],                            # target_height
                 config['target_width']                              # target_width
             ))
-            lists[key]['ds'] = ds_map.batch(config['hyperparameters']['batch_size'], drop_remainder=False)
+            datasets[dataset]['ds'] = ds_map.batch(config['hyperparameters']['batch_size'], drop_remainder=False)
             
         # Create the model to train
         model, model_type = create_model(
@@ -388,7 +388,7 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
         )
         
         # If the datasets are empty, cannot train
-        if lists['validation']['ds'] is None or lists['training']['ds'] is None:
+        if datasets['validation']['ds'] is None or datasets['training']['ds'] is None:
             print(colored(
                 f"Non-fatal Error: training was skipped for the test subject {testing_subject} and val subject {validation_subject}. " + 
                 f"There were no files in the training and/or validation datasets.\n",
@@ -399,15 +399,15 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
         # Train the model
         time_start = perf_counter()
         history = model.fit(
-            lists['training']['ds'],
-            validation_data=lists['validation']['ds'],
+            datasets['training']['ds'],
+            validation_data=datasets['validation']['ds'],
             epochs=config['hyperparameters']['epochs'],
             callbacks=[early_stopping_callbacks]
         )
         time_elapsed = perf_counter() - time_start
         
         # Output the results
-        output_results(config['output_path'], testing_subject, validation_subject, rotation, model, model_type, history, time_elapsed, lists, config['class_names'])
+        output_results(config['output_path'], testing_subject, validation_subject, rotation, model, model_type, history, time_elapsed, datasets, config['class_names'])
         print(colored(f"Finished training for test subject {testing_subject} and val subject {validation_subject}.\n", 'green'))
         
 
