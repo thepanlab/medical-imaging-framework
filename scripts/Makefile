@@ -1,4 +1,5 @@
 j ?=
+args ?=
 
 define find.functions
 	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
@@ -79,3 +80,11 @@ summary_table:
 tabled_prediction_info: ## Creates a dataframe of existing prediction results.
 tabled_prediction_info: 
 	python3 -W ignore -m results_processing.tabled_prediction_info.tabled_prediction_info -j ${j}
+
+
+## -------------------------------------------------------------------------- ##
+
+
+training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'"
+training_inner_loop: 
+	python3 -W ignore -m training.training_inner_loop $(args)

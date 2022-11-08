@@ -80,7 +80,7 @@ def main(data_path=None):
         data_path = config["data_path"]
 
     # Get a list of all files to translate
-    file_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False)
+    file_paths, is_outer = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False)
     
     # Translate each file
     for model in file_paths:

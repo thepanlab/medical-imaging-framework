@@ -1,4 +1,8 @@
-from . import image_parser
+from .all_misc import create_model
+from . import image_parser, inner_modules, training_inner_loop
 __all__ = [
-    'image_parser'
+    'create_model',
+    'image_parser',
+    'inner_modules',
+    'training_inner_loop'
 ]

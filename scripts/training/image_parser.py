@@ -1,9 +1,9 @@
 from termcolor import colored
 import tensorflow as tf
+import sys
 import os
 
-def parse_image(filename, mean, use_mean, class_names, label_position, channels, 
-                do_cropping, offset_height, offset_width, target_height, target_width):
+def parse_image(filename, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width):   
     parts_0 = tf.strings.split(filename, ".")
     complete = parts_0[0]
     if len(parts_0) > 2:
@@ -13,8 +13,7 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
     label = parts[label_position]
     label_bool = (label == class_names)
     image = tf.io.read_file(filename)
-    image = tf.io.decode_image(image, channels=channels, dtype=tf.float32,
-                               name=None, expand_animations=False)
+    image = tf.io.decode_image(image, channels=channels, dtype=tf.float32, name=None, expand_animations=False)
     if do_cropping == 'true':
        image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)
     if use_mean == 'true':
