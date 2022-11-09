@@ -285,14 +285,14 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
         
         f"prediction/{file_prefix}_val_predicted.csv":  model.predict(datasets['validation']['ds']),
         
-        f"true_label/{file_prefix}_val_true_label.csv":  datasets['validation']['labels'],
-        f"true_label/{file_prefix}_test_true_label.csv": datasets['testing']['labels'],
+        f"true_label/{file_prefix}_val_true_label.csv":  [datasets['validation']['labels']],
+        f"true_label/{file_prefix}_test_true_label.csv": [datasets['testing']['labels']],
         
         f'true_label/{file_prefix}_val_true_label_index.csv':  [datasets['validation']['indexes']],
         f'true_label/{file_prefix}_test_true_label_index.csv': [datasets['testing']['indexes']],
         
-        f'file_name/{file_prefix}_val_file.csv':  datasets['validation']['files'],
-        f'file_name/{file_prefix}_test_file.csv': datasets['testing']['files'] 
+        f'file_name/{file_prefix}_val_file.csv':  [datasets['validation']['files']],
+        f'file_name/{file_prefix}_test_file.csv': [datasets['testing']['files'] ]
     }
     if datasets['testing']['ds'] is None:
         print(colored(
