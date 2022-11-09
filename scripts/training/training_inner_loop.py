@@ -262,7 +262,7 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
     """
     # Check if the output paths exist
     file_prefix = f"{model_type}_{rotation}_test_{testing_subject}_val_{validation_subject}"
-    path_prefix = os.path.join(output_path, file_prefix)
+    path_prefix = os.path.join(output_path, f'Test_subject_{testing_subject}', file_prefix)
     create_folders(path_prefix, ['prediction', 'true_label', 'file_name', 'model'])
     
     # Save the model
@@ -338,7 +338,7 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
         validation_subject = folds[rotation]['validation'][0]
         testing_subject = folds[rotation]['testing'][0]
 
-        # Fill out the datasets of information
+        # Fill out the datasets' information
         for index, file in enumerate(files):
             dataset = ''
             if indexes['subjects'][index] == validation_subject:
