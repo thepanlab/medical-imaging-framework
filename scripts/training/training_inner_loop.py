@@ -48,7 +48,6 @@ def generate_folds(subject_list, test_subject, in_rotations, do_shuffle):
                 if (i != k) and (j != k):
                     subject_fold['training'].append(training_subject)
             folds.append(subject_fold)
-    print(colored(f"There are {len(folds)} folds for {test_subject}.", 'magenta'))
     
     # Shuffle the data and get the number of training rotations
     if do_shuffle:
@@ -174,9 +173,6 @@ def training_prep(config, test_subject):
     # Let the subjects be of the same case
     config['subject_list'] = [s.lower() for s in config['subject_list']]
     
-    # Create the output directories
-    create_folders(config['output_path'], names=[f"Test_subject_{test_subject}/{config['selected_model_name']}"])
-    
     # The files to train with and info about its contents
     files = get_files(config['data_input_directory'])
     indexes, label_position = get_indexes(files, config['class_names'], config['subject_list'])
@@ -257,7 +253,7 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
         history (keras History): The history outputted by the fitting function.
         time_elapsed (double): The elapsed time from the fitting phase.
         datasets (dict): A dictionary of various values for the data-splits.
-        class_names (list of str): .
+        class_names (list of str): The class names of the data.
         --------------------------------------------
     """
     # Check if the output paths exist
@@ -273,42 +269,49 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
     history.to_csv(f"{path_prefix}/{file_prefix}_history.csv")
     
     # Write the class names
-    with open(f"{path_prefix}/{file_prefix}_class_names.csv", 'w') as fp:
-        writer = csv.writer(fp)
-        for idx, item in enumerate(class_names):
-            data_tuples = zip(item, str(idx))
-            writer.writerow(data_tuples)
+    with open(f"{path_prefix}/{file_prefix}_class_names.csv", 'w', encoding='utf-8') as fp:
+        for idx in range(len(class_names)):
+            row = f"{class_names[idx]}, {idx}\n"
+            fp.write(row)
     
     # Save the various model metrics
     metrics = {
-        f"{file_prefix}_time-total.csv": [[time_elapsed]],
+        f"{file_prefix}_time-total.csv": [time_elapsed],  # Training time
         
-        f"prediction/{file_prefix}_val_predicted.csv":  model.predict(datasets['validation']['ds']),
+        f"prediction/{file_prefix}_val_predicted.csv":  model.predict(datasets['validation']['ds']), # Predicted probability results
         
-        f"true_label/{file_prefix}_val_true_label.csv":  [datasets['validation']['labels']],
-        f"true_label/{file_prefix}_test_true_label.csv": [datasets['testing']['labels']],
+        f"true_label/{file_prefix}_val_true_label.csv":  datasets['validation']['labels'], # True labels (validation)
+        f"true_label/{file_prefix}_test_true_label.csv": datasets['testing']['labels'],    # True labels (testing)
         
-        f'true_label/{file_prefix}_val_true_label_index.csv':  [datasets['validation']['indexes']],
-        f'true_label/{file_prefix}_test_true_label_index.csv': [datasets['testing']['indexes']],
+        f'true_label/{file_prefix}_val_true_label_index.csv':  datasets['validation']['indexes'], # True index (validation)
+        f'true_label/{file_prefix}_test_true_label_index.csv': datasets['testing']['indexes'],    # True index (testing)
         
-        f'file_name/{file_prefix}_val_file.csv':  [datasets['validation']['files']],
-        f'file_name/{file_prefix}_test_file.csv': [datasets['testing']['files'] ]
+        f'file_name/{file_prefix}_val_file.csv':  datasets['validation']['files'], # Input file names (validation)
+        f'file_name/{file_prefix}_test_file.csv': datasets['testing']['files']     # Input file names (testing)
     }
+    
+    # If possible, write the metrics using the testing dataset
     if datasets['testing']['ds'] is None:
         print(colored(
             f"Non-fatal Error: evaluation was skipped for the test subject {testing_subject} and val subject {validation_subject}. " + 
-            f"There were no files in the testing dataset.\n",
+            f"There were no files in the testing dataset.",
             'yellow'
         ))
     else:
-        metrics[f"{file_prefix}_test_evaluation.csv"] =  model.evaluate(datasets['testing']['ds'])
-        metrics[f"prediction/{file_prefix}_test_predicted.csv"] =  model.predict(datasets['testing']['ds'])
+        metrics[f"{file_prefix}_test_evaluation.csv"] =  model.evaluate(datasets['testing']['ds'])          # The evaluation results
+        metrics[f"prediction/{file_prefix}_test_predicted.csv"] =  model.predict(datasets['testing']['ds']) # Predictions using the testing dataset
+    
+    # Write metrics iterively
     for metric in metrics:
-        with open(f"{path_prefix}/{metric}", 'w') as fp:
+        with open(f"{path_prefix}/{metric}", 'w', encoding='utf-8') as fp:
             writer = csv.writer(fp)
-            for item in metrics[metric]:
-                writer.writerow(item)
-    print(colored(f"Finished writing results to file for {model_type}'s testing subject {testing_subject} and validation subject {validation_subject}.", 'green'))
+            if metric.endswith('predicted.csv'):
+                for item in metrics[metric]:
+                    writer.writerow(item)
+            else:
+                for item in metrics[metric]:
+                    writer.writerow([item])
+    print(colored(f"Finished writing results to file for {model_type}'s testing subject {testing_subject} and validation subject {validation_subject}.\n", 'green'))
         
 
 def training_loop(config, test_subject, files, folds, rotations, indexes, label_position):
@@ -324,10 +327,11 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
         label_position (int): Location in the filename of the label.
         --------------------------------------------
     """
-    print(colored(f'Beginning the training loop for {test_subject}.'))
+    print(colored(f'Beginning the training loop for {test_subject}.', 'green'))
     
     # Train for every rotation specified
     for rotation in range(rotations):
+        print(colored(f'-- Rotation {rotation}/{rotations} for {test_subject} ---------------------------------------', 'magenta'))
         datasets = {
             'testing':    {'files': [], 'indexes': [], 'labels': [], 'ds': None},
             'training':   {'files': [], 'indexes': [], 'labels': [], 'ds': None},
@@ -394,7 +398,7 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
                 f"There were no files in the training and/or validation datasets.\n",
                 'yellow'
             ))
-            return
+            continue
         
         # Train the model
         time_start = perf_counter()
@@ -407,8 +411,8 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
         time_elapsed = perf_counter() - time_start
         
         # Output the results
+        print(colored(f"Finished training for testing subject {testing_subject} and validation subject {validation_subject}.", 'green'))
         output_results(config['output_path'], testing_subject, validation_subject, rotation, model, model_type, history, time_elapsed, datasets, config['class_names'])
-        print(colored(f"Finished training for test subject {testing_subject} and val subject {validation_subject}.\n", 'green'))
         
 
 """ Main functions -------------------------------------------- """
@@ -421,13 +425,17 @@ def main():
     # Parse the command line arguments
     configs = parse_training_configs('./training/training_config_files')
     for config in configs:
-        print(colored(f"-----------------------------------------\nStarting training for config: {config['selected_model_name']}\n", 'magenta'))
         
         # Make sure the subject list is of the same case
         config['subject_list'] = [s.lower() for s in config['subject_list']]
         
         # Train for each test subject
         for test_subject in config['subject_list']:
+            print(colored(
+                f"\n\n===========================================================\n" + 
+                f"Starting training for {test_subject} in {config['selected_model_name']}\n"
+                , 'magenta'
+            ))
             files, folds, rotations, indexes, label_position = training_prep(config, test_subject)
             training_loop(config, test_subject, files, folds, rotations, indexes, label_position)
     
