@@ -41,7 +41,7 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
     label = tf.strings.split(path_substring, "_")[label_position]
     label_bool = (label == class_names)
     
-    # Read the image
+    # Read the image --> TODO modify this for 3D images
     image = tf.io.read_file(filename)
     image = tf.io.decode_image(image, channels=channels, dtype=tf.float32, name=None, expand_animations=False)
     
