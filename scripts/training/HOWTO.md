@@ -1,10 +1,10 @@
 # Running the Inner Training Loop
 
 So you want to run the inner training loop, huh? That can be done in just ***one*** simple step:
-1. Run the command "*make training_inner_loop*" from the *scripts* folder.
-   * To use a particular json file, run: "*make training_inner_loop args='--file ./path/to/file.json'*"
-   * To use a particular folder that contains on or more json files, run: "*make training_inner_loop args='--folder ./path/to/folder/"
-   * Else, the program automatically uses the folder: "*./scripts/training/training_config_files/*"
+1. Run the command " *make training_inner_loop* " from the *scripts* folder.
+   * To use a particular json file, run: " *make training_inner_loop args='--file ./path/to/file.json'* "
+   * To use a particular folder that contains one or more json files, run: " *make training_inner_loop args='--folder ./path/to/folder/' "
+   * Else, the program automatically uses the folder: " *./scripts/training/training_config_files/* "
 
 <br> <hr>
 
