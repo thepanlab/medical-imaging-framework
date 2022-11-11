@@ -24,6 +24,8 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
     """
     print(colored(f'Beginning the training loop for {test_subject}.', 'green'))
     
+    # rotation --> n_folds TODO
+    
     # Train for every rotation specified
     for rotation in range(rotations):
         print(colored(f'-- Rotation {rotation}/{rotations} for {test_subject} ---------------------------------------', 'magenta'))
@@ -54,6 +56,8 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
         for dataset in datasets:
             if not datasets[dataset]['files']:
                 continue
+            
+            # TODO this is where images are parsed. Change for 3D data?
             ds = tf.data.Dataset.from_tensor_slices(datasets[dataset]['files'])
             ds_map = ds.map(lambda x:parse_image(
                 x,                                                  # filename
