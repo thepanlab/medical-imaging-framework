@@ -1,7 +1,8 @@
 {
     "prediction_output": "../results/predictions",
     "test_subject_data_input": {
-        "e1": "../data/ep_intensity/Test_subject_e1"
+        "e1": "/data/jshaw/medical-imaging-framework/data/ep_intensity_ORIG/Test_subject_e1",
+        "e2": "/data/jshaw/medical-imaging-framework/data/ep_intensity_ORIG/Test_subject_e1"
     },
     "model_input": {
         "Inception": "../data/_loop_outer/Test_subject_k2/config_1_resnet_50/resnet_50_test_k2/model/resnet_50_test_k2_resnet50.h5"

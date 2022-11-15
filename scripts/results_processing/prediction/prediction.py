@@ -1,6 +1,6 @@
 from results_processing.tabled_prediction_info import tabled_prediction_info
+from training.training_modules.image_parser import parse_image
 from util.get_config import parse_json
-from training import image_parser
 from termcolor import colored
 from tensorflow import keras
 import pandas as pd

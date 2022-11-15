@@ -3,47 +3,11 @@ from termcolor import colored
 from tensorflow import keras
 from util import get_config
 import matplotlib.cm as cm
-from os.path import exists
 import tensorflow as tf
 from PIL import Image
 import pandas as pd
 import numpy as np
 import os
-
-
-def load_config():
-    """ Load the JSON configuration file
-
-    Raises:
-        Exception: If a file does not exist.
-        Exception: If a file is empty.
-
-    Returns:
-        tuple: Returns various values from the configuration file.
-    """
-    # Get the configuration
-    config = get_config.parse_json('./results_processing/grad_cam/grad_cam_config.json')
-
-    # Check if the given input files exist
-    files = ['input_model_address', 'input_means_address', 'input_img_address']
-    for file in files:
-        addr = config[file]
-        if not exists(addr):
-            raise Exception(colored("Error: The following file does not exist! " + addr))
-        if os.stat(addr).st_size == 0:
-            raise Exception("Error: The following file is empty! " + addr)
-
-    # Return the json contents as variables
-    return (
-        config['input_model_address'],
-        config['input_means_address'],
-        config['input_img_address'],
-        config['output_image_address'],
-        config['alpha'],
-        config['mean_row'],
-        config['mean_col'],
-        config['last_conv_layer_name']
-    )
 
 
 def get_images(addr):
@@ -57,7 +21,6 @@ def get_images(addr):
     """
     # If a single image
     if addr.endswith(".jpg") or addr.endswith(".png"):
-        print(colored("There is one image to be processed.", 'green'))
         return [addr]
 
     # If a folder
@@ -112,7 +75,7 @@ def gradcam_heatmap(img, model, last_conv_layer_name, pred_index=None):
     Args:
         img (image): An image to create a heatmap from
         model (keras.models): A trained model.
-        last_conv_layer_name (str): Layer within the model.
+        last_conv_layer_name (str): The last convolutional layer within the model.
         pred_index (int, optional): Gets an index from the predictions. Defaults to None.
 
     Returns:
@@ -120,6 +83,7 @@ def gradcam_heatmap(img, model, last_conv_layer_name, pred_index=None):
     """
     # First, we create a model that maps the input image to the activations
     #   of the last conv layer as well as the output predictions.
+    #  Input 0 of layer expected shape=(None, 241, 181, 1)
     grad_model = tf.keras.models.Model(
         [model.inputs],
         [model.get_layer(last_conv_layer_name).output, model.output]
@@ -199,17 +163,21 @@ def save_gradcam_output(img_path, heatmap, cam_path, alpha=0.4):
         superimposed_img.save(cam_path + '/' + new_img_name)
 
 
-def main():
-    """ Main program """
-    # Load the configuration file and data
-    model_addr, mean_addr, img_addr, output_addr, alpha, \
-    mean_row, mean_col, last_conv_layer_name = load_config()
+def main(config=None):
+    """ The main program.
+
+    Args:
+        config (dict, optional): A custom configuration. Defaults to None.
+    """
+    # Obtaining dictionary of configurations from the json file
+    if config is None:
+        config = get_config.parse_json('./results_processing/grad_cam/grad_cam_config.json')
 
     # Load the data needed for the program
-    model, mean = load_data(model_addr, mean_addr, mean_row, mean_col)
+    model, mean = load_data(config["input_model_address"], config["input_means_address"], config["mean_row"], config["mean_col"])
 
     # If a folder of images, read the folder or else just use the one image
-    img_addrs = get_images(img_addr)
+    img_addrs = get_images(config["input_img_address"])
 
     # Process every image
     for img_addr_i in img_addrs:
@@ -217,10 +185,10 @@ def main():
         img_processed = preprocessing(img_addr_i, mean)
 
         # Generate a heatmap from the model
-        heatmap = gradcam_heatmap(img_processed, model, last_conv_layer_name)
+        heatmap = gradcam_heatmap(img_processed, model, config["last_conv_layer_name"])
 
         # Output the image result
-        save_gradcam_output(img_addr_i, heatmap, cam_path=output_addr, alpha=alpha)
+        save_gradcam_output(img_addr_i, heatmap, cam_path=config["output_image_address"], alpha=config["alpha"])
         print(colored("Finished processing: " + img_addr_i, 'green'))
 
 

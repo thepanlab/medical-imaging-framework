@@ -37,9 +37,15 @@ epoch_counting: ## Counts the number of epochs within a particular data folder.
 epoch_counting: 
 	python3 -W ignore -m results_processing.epoch_counting.epoch_counting -j ${j}
 
+
 grad_cam: ## Creates heatmap images from a specified item or data folder.
 grad_cam: 
 	python3 -W ignore -m results_processing.grad_cam.grad_cam -j ${j}
+
+
+grad_cam_many: ## Creates heatmap images from a specified data folder.
+grad_cam_many: 
+	python3 -W ignore -m results_processing.grad_cam.grad_cam_many -j ${j}
 
 
 learning_curve: ## Creates a learning curve from the specified data.
@@ -85,6 +91,6 @@ tabled_prediction_info:
 ## -------------------------------------------------------------------------- ##
 
 
-training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'"
+training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
 training_inner_loop: 
 	python3 -W ignore -m training.training_inner_loop $(args)
