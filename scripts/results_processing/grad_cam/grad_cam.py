@@ -56,7 +56,7 @@ def preprocessing(img_addr):
     Returns:
         image: An altered image.
     """
-    img = Image.open(img_addr).convert('L') #.resize((181, 241))
+    img = Image.open(img_addr).convert('L').resize((181, 241))
     return np.array(img)[np.newaxis, :, :, np.newaxis]
 
 def check_layer_name(layer_names, name):
@@ -102,13 +102,13 @@ def gradcam_heatmap(img, model, last_conv_layer_name, pred_index=None):
     """ Generate a Grad-CAM gradcam
 
     Args:
-        img (image): An image to create a gradcam from
+        img (image): An image to create a gradcam from.
         model (keras.models): A trained model.
         last_conv_layer_name(str): The convolutional layer name.
         pred_index (int, optional): Gets an index from the predictions. Defaults to None.
 
     Returns:
-        image: A gradcam image.
+        image: A heatmap image.
     
     """
     
@@ -141,22 +141,22 @@ def gradcam_heatmap(img, model, last_conv_layer_name, pred_index=None):
 
     # We multiply each channel in the feature map array
     #   by "how important this channel is" with regard to the top predicted class
-    #   then sum all the channels to obtain the gradcam class activation
+    #   then sum all the channels to obtain the heatmap class activation
     last_conv_layer_output = last_conv_layer_output[0]
-    gradcam = last_conv_layer_output @ pooled_grads[..., tf.newaxis]
-    gradcam = tf.squeeze(gradcam)
+    heatmap = last_conv_layer_output @ pooled_grads[..., tf.newaxis]
+    heatmap = tf.squeeze(heatmap)
 
-    # For visualization purpose, we will also normalize the gradcam between 0 & 1
-    gradcam = tf.maximum(gradcam, 0) / tf.math.reduce_max(gradcam)
-    return gradcam
+    # For visualization purpose, we will also normalize the heatmap between 0 & 1
+    heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)
+    return heatmap
 
 
-def save_gradcam_output(img_path, gradcam, cam_path, alpha=0.4):
+def save_gradcam_output(img_path, heatmap, cam_path, alpha=0.4):
     """ Save the Grad-CAM output to a file.
 
     Args:
         img_path (str): Path to save image to.
-        gradcam (image): The processed image.
+        heatmap (image): The processed image.
         cam_path (str): The output directory.
         alpha (float, optional): The superimposed image alpha. Defaults to 0.4.
     """
@@ -164,29 +164,29 @@ def save_gradcam_output(img_path, gradcam, cam_path, alpha=0.4):
     img = keras.preprocessing.image.load_img(img_path)
     img = keras.preprocessing.image.img_to_array(img)
 
-    # Rescale gradcam to a range 0-255
-    gradcam = np.uint8(255 * gradcam)
+    # Rescale heatmap to a range 0-255
+    heatmap = np.uint8(255 * heatmap)
 
-    # Use jet colormap to colorize gradcam
+    # Use jet colormap to colorize heatmap
     jet = cm.get_cmap("jet")
 
     # Use RGB values of the colormap
     jet_colors = jet(np.arange(256))[:, :3]
-    jet_gradcam = jet_colors[gradcam]
+    jet_heatmap = jet_colors[heatmap]
 
-    # Create an image with RGB colorized gradcam
-    jet_gradcam = keras.preprocessing.image.array_to_img(jet_gradcam)
-    jet_gradcam = jet_gradcam.resize((img.shape[1], img.shape[0]))
-    jet_gradcam = keras.preprocessing.image.img_to_array(jet_gradcam)
+    # Create an image with RGB colorized heatmap
+    jet_heatmap = keras.preprocessing.image.array_to_img(jet_heatmap)
+    jet_heatmap = jet_heatmap.resize((img.shape[1], img.shape[0]))
+    jet_heatmap = keras.preprocessing.image.img_to_array(jet_heatmap)
 
-    # Superimpose the gradcam on original image
-    superimposed_img = jet_gradcam * alpha + img
+    # Superimpose the heatmap on original image
+    superimposed_img = jet_heatmap * alpha + img
     superimposed_img = keras.preprocessing.image.array_to_img(superimposed_img)
 
     # Get the new image name
     input_img_name = img_path.split('/')[-1]
     base_img_name = input_img_name.split('.')[0]
-    new_img_name = base_img_name + "_gradcam.jpg"
+    new_img_name = base_img_name + "_heatmap.jpg"
 
     # Save the superimposed image
     if not os.path.exists(cam_path):
@@ -215,11 +215,11 @@ def main(config=None):
         # Preprocess the image
         img_processed = preprocessing(img_addr_i)
 
-        # Generate a gradcam from the model
-        gradcam = gradcam_heatmap(img_processed, model, config['last_conv_layer_name'])
+        # Generate a heatmap from the model
+        heatmap = gradcam_heatmap(img_processed, model, config['last_conv_layer_name'])
 
         # Output the image result
-        save_gradcam_output(img_addr_i, gradcam, cam_path=config["output_image_address"], alpha=config["alpha"])
+        save_gradcam_output(img_addr_i, heatmap, cam_path=config["output_image_address"], alpha=config["alpha"])
         print(colored("Finished processing: " + img_addr_i, 'green'))
 
 
