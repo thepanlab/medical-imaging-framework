@@ -56,7 +56,7 @@ def preprocessing(img_addr):
     Returns:
         image: An altered image.
     """
-    img = Image.open(img_addr).convert('L').resize((181, 241))
+    img = Image.open(img_addr).convert('L') #.resize((181, 241))
     return np.array(img)[np.newaxis, :, :, np.newaxis]
 
 def check_layer_name(layer_names, name):
