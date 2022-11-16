@@ -85,8 +85,10 @@ def get_layer_name(model, last_conv_layer_name):
         model (keras.Model): The input model to derive the layers from.
         last_conv_layer_name (str): The target layer.
     """
+    print(model.summary())
+    
     layer_names = [layer["config"]["name"] for layer in model.get_config()["layers"]]
-    layer_names.sort()
+    layer_names
     last_conv_layer_name = check_layer_name(layer_names, last_conv_layer_name)
     if not last_conv_layer_name:
         for name in layer_names:
