@@ -105,7 +105,7 @@ def generate_json_and_run(json_init, input_path, output_path):
         input_path (str): A path to the input image.
         output_path (str): A path to the output folder.
 
-    """
+    """    
     this_json = json_init.copy()
     this_json['input_img_address'] = input_path
     this_json['output_image_address'] = output_path
@@ -113,14 +113,20 @@ def generate_json_and_run(json_init, input_path, output_path):
 
 
 def run_program(image_addrs, config):
+    """ Runs the main program for each image
+
+    Args:
+        image_addrs (list of str): Locations of all images.
+        config (dict): This program's configuration.
+    """
+    # Get the layer to use for all items.
+    last_conv_layer_name = grad_cam.get_layer_name(grad_cam.load_data(config['input_model_address']), config["last_conv_layer_name"])
+    
     # All outputs will use the base items given in the configuration
     json_init = {
         'input_model_address': config['input_model_address'],
-        'input_means_address': config['input_means_address'],
-        'alpha': config['alpha'],
-        'mean_row': config['mean_row'],
-        'mean_col': config['mean_col'],
-        'last_conv_layer_name': config['last_conv_layer_name']
+        'last_conv_layer_name': last_conv_layer_name,
+        'alpha': config['alpha']
     }
     
     # If the addresses come in a list, output to the same directory

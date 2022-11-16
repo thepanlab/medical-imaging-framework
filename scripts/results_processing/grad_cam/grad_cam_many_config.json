@@ -1,14 +1,10 @@
 {
   "input_model_address": "../data/grad_cam/model/InceptionV3_0_test_e1_val_e2_resnet50.h5",
-  "input_means_address": "../data/grad_cam/means/means.csv",
-
   "input_directory_or_tabled_info": "../results/processed_output/tabled_prediction_info/resnet_prediction_info.csv",
   "output_directory": "../results/processed_output/grad_cam",
 
   "alpha": 0.7,
-  "mean_row": "T_k3",
-  "mean_col": "mean_test",
-  "last_conv_layer_name": "conv2d_121",
+  "last_conv_layer_name": "",
 
   "query":{
     "test_subject": ["k2", "k4"],
