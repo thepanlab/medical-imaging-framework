@@ -1,6 +1,12 @@
+import numpy as np
 import tensorflow as tf
 
 from tensorflow import keras as K
+from skimage import io
+
+
+def io_read(filename):
+    return io.imread(filename.numpy().decode())
 
 def parse_image(filename, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width): 
     """ Parses an image from some given filename and various parameters.
@@ -33,7 +39,7 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
     # Remove the file extention
     path_substring = tf.strings.regex_replace(
         image_path,
-        ".png|.jpg|.jpeg", 
+        ".png|.jpg|.jpeg|.tiff|.csv", 
         ""
     )
     
@@ -42,9 +48,23 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
     label_bool = (label == class_names)
     
     # Read the image --> TODO modify this for 3D images
+    # .csv has to be handled differently than other image types - has to be read and reshaped
+    
+    """
+    Previous: 
     image = tf.io.read_file(filename)
     image = tf.io.decode_image(image, channels=channels, dtype=tf.float32, name=None, expand_animations=False)
+    """
+
+    ext = tf.strings.split(image_path, ".")[1]
+    if ext == 'csv':
+        image = np.genfromtxt(filename)
+        image.reshape()
+    else:
+        # Any other type can be handled by this
+        image = tf.py_function(io_read, filename, tf.float32)
     
+
     # Crop the image
     if do_cropping == 'true':
        image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)

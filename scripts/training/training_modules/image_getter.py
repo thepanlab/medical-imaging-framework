@@ -40,7 +40,7 @@ def _flatten_dir(path, files):
     for item in os.listdir(os.path.abspath(path)):
         full_path = os.path.join(path, item)
         if os.path.isfile(full_path):
-            if full_path.endswith((".png", ".jpg", ".jpeg")):
+            if full_path.endswith((".png", ".jpg", ".jpeg", ".tiff", ".csv")):
                 files.append(full_path)
             else:
                 print(colored(f"Warning: Non-image file detected: '{full_path}'"))
