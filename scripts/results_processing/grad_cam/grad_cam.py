@@ -1,3 +1,6 @@
+"""
+Implementation based on https://keras.io/examples/vision/grad_cam/
+"""
 from IPython.display import Image
 from termcolor import colored
 from tensorflow import keras
