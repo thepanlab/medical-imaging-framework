@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from tensorflow import keras as K
 from skimage import io
+from abc import ABC, abstractclassmethod
 
 
 def io_read(filename):
@@ -73,3 +74,49 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
     if use_mean == 'true':
         image = image - mean / 255
     return image, tf.argmax(label_bool)
+
+
+""" Abstract ImageReader class
+"""
+class ImageReader():
+    def __init__(self):
+        return
+    
+    @abstractmethod
+    def io_read(filename):
+        #return io.imread(filename.numpy().decode())
+        pass
+
+    @abstractmethod
+    def parse_image(file):
+        pass
+
+
+""" 
+"""
+class ImageReaderGlobal(ImageReader):
+    def __init__(self):
+        ImageReader.__init__(self)
+        return
+
+    def io_read(filename):
+        return
+
+    def parse_image(file):
+        return
+
+
+"""
+"""
+class ImageReaderCSV(ImageReader):
+    def __init__(self):
+        ImageReader.__init__(self)
+        return
+
+    def io_read(filename):
+        image = np.genfromtxt(filename)
+        image.reshape()
+        return
+
+    def parse_image(file):
+        return
