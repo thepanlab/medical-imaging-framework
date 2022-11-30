@@ -1,6 +1,6 @@
 from training.training_modules.result_outputter import output_results
 from training.training_modules.model_creator import TrainingModel
-from training.training_modules.image_parser import parse_image
+from training.training_modules.image_parser import ImageReader, ImageReaderGlobal, ImageReaderCSV
 from termcolor import colored
 from time import perf_counter
 from tensorflow import keras
@@ -57,9 +57,13 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
             if not datasets[dataset]['files']:
                 continue
             
-            # TODO this is where images are parsed. Change for 3D data?
             ds = tf.data.Dataset.from_tensor_slices(datasets[dataset]['files'])
-            ds_map = ds.map(lambda x:parse_image(
+            
+            # Create the ImageReader objects, then decide which to use
+            imreader = ImageReaderGlobal()
+            csvreader = ImageReaderCSV()
+
+            ds_map = ds.map(lambda x: imreader.parse_image(
                 x,                                                  # filename
                 config['hyperparameters']['mean'],                  # mean
                 config['hyperparameters']['use_mean'],              # use_mean
@@ -71,6 +75,20 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
                 config['hyperparameters']['cropping_position'][1],  # offset_width
                 config['target_height'],                            # target_height
                 config['target_width']                              # target_width
+            ) 
+            if tf.strings.split(x, '.')[-1] != 'csv' 
+            else csvreader.parse_image(
+                x,                                                  # filename
+                config['hyperparameters']['mean'],                  # mean
+                config['hyperparameters']['use_mean'],              # use_mean
+                config['class_names'],                              # class_names
+                label_position,                                     # label_position
+                config['hyperparameters']['channels'],              # channels
+                config['hyperparameters']['do_cropping'],           # do_cropping
+                config['hyperparameters']['cropping_position'][0],  # offset_height
+                config['hyperparameters']['cropping_position'][1],  # offset_width
+                config['target_height'],                            # target_height
+                config['target_width']                              # target_width     
             ))
             datasets[dataset]['ds'] = ds_map.batch(config['hyperparameters']['batch_size'], drop_remainder=False)
             
