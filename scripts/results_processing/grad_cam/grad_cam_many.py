@@ -21,6 +21,10 @@ def filter_file_list(path_list, query):
         if query[item]:
             for i in query[item]:
                 path_list = [path for path in path_list if i in path.split('/')[-1]]
+    if query["cutoff_number_of_results"] > 0:
+        path_list = path_list[:query["cutoff_number_of_results"]]
+    if query["sort_images"]:
+        path_list.sort()
     return path_list
 
 
@@ -50,6 +54,12 @@ def filter_csv(csv, query):
             for pair in query[item]:
                 new_df = pd.concat([new_df, csv[ (csv[pair_items[item][0]]==pair[0]) & (csv[pair_items[item][1]]==pair[1]) ]])
             csv = new_df
+            
+    # If needed, sort and limit the files/rows
+    if query["cutoff_number_of_results"] > 0:
+        csv = csv.head(query["cutoff_number_of_results"])
+    if query["sort_images"]:
+        csv = csv.sort_values(by=['filename'])
     
     # Separate files by test subject
     path_dict = {}
@@ -105,14 +115,14 @@ def generate_json_and_run(json_init, input_path, output_path):
         input_path (str): A path to the input image.
         output_path (str): A path to the output folder.
 
-    """    
+    """
     this_json = json_init.copy()
     this_json['input_img_address'] = input_path
     this_json['output_image_address'] = output_path
     grad_cam.main(this_json)
 
 
-def run_program(image_addrs, config):
+def run_program(image_addrs, config, limit):
     """ Runs the main program for each image
 
     Args:
@@ -121,6 +131,7 @@ def run_program(image_addrs, config):
     """
     # Get the layer to use for all items.
     last_conv_layer_name = grad_cam.get_layer_name(grad_cam.load_data(config['input_model_address']), config["last_conv_layer_name"])
+    run_count = 1
     
     # All outputs will use the base items given in the configuration
     json_init = {
@@ -145,8 +156,8 @@ def run_program(image_addrs, config):
                         config['output_directory'],
                         f"subject_{subject}/{true_label}_correct"
                     )
-                    generate_json_and_run(json_init, path, output_path)
-                
+                    generate_json_and_run(json_init, path, output_path, limit, run_count)
+                    
                 # Else, separate incorrect images by the predicted label
                 for pred_label in image_addrs[subject][true_label]['incorrect']:
                     for path in image_addrs[subject][true_label]['incorrect'][pred_label]:
@@ -171,7 +182,7 @@ def main(config=None):
     img_addrs = filter_images(config["input_directory_or_tabled_info"], config["query"])
     
     # Run the program for each image address
-    run_program(img_addrs, config)
+    run_program(img_addrs, config, config["query"]['cutoff_number_of_results'])
     print(colored("Finished processing all images.", 'magenta'))
 
 

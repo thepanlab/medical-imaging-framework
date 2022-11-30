@@ -4,9 +4,12 @@
   "output_directory": "../results/processed_output/grad_cam",
 
   "alpha": 0.7,
-  "last_conv_layer_name": "",
+  "last_conv_layer_name": "mixed8",
 
   "query":{
+    "cutoff_number_of_results": -1,
+    "sort_images": true,
+
     "test_subject": ["k2", "k4"],
 
     "match": [true, false],
