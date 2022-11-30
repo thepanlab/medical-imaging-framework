@@ -61,7 +61,7 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
             
             # Create the ImageReader objects, then decide which to use
             imreader = ImageReaderGlobal()
-            csvreader = ImageReaderCSV()
+            csvreader = ImageReaderCSV(configs=config)
 
             ds_map = ds.map(lambda x: imreader.parse_image(
                 x,                                                  # filename
@@ -76,20 +76,25 @@ def training_loop(config, test_subject, files, folds, rotations, indexes, label_
                 config['target_height'],                            # target_height
                 config['target_width']                              # target_width
             ) 
-            if tf.strings.split(x, '.')[-1] != 'csv' 
-            else csvreader.parse_image(
-                x,                                                  # filename
-                config['hyperparameters']['mean'],                  # mean
-                config['hyperparameters']['use_mean'],              # use_mean
-                config['class_names'],                              # class_names
-                label_position,                                     # label_position
-                config['hyperparameters']['channels'],              # channels
-                config['hyperparameters']['do_cropping'],           # do_cropping
-                config['hyperparameters']['cropping_position'][0],  # offset_height
-                config['hyperparameters']['cropping_position'][1],  # offset_width
-                config['target_height'],                            # target_height
-                config['target_width']                              # target_width     
-            ))
+            if tf.strings.split(x, '.')[-1] in ['jpg', 'jpeg', 'png', 'tiff']
+            else 
+                (csvreader.parse_image(
+                    x,                                                  # filename
+                    config['hyperparameters']['mean'],                  # mean
+                    config['hyperparameters']['use_mean'],              # use_mean
+                    config['class_names'],                              # class_names
+                    label_position,                                     # label_position
+                    config['hyperparameters']['channels'],              # channels
+                    config['hyperparameters']['do_cropping'],           # do_cropping
+                    config['hyperparameters']['cropping_position'][0],  # offset_height
+                    config['hyperparameters']['cropping_position'][1],  # offset_width
+                    config['target_height'],                            # target_height
+                    config['target_width']                              # target_width     
+                )
+                if tf.strings.split(x, '.')[-1] == 'csv'
+                else 
+                    # If new file types need to be added, can add a check here
+                    print(colored(f"Error: Invalid file type for {x}.", "yellow"))))
             datasets[dataset]['ds'] = ds_map.batch(config['hyperparameters']['batch_size'], drop_remainder=False)
             
         # Create the model to train
