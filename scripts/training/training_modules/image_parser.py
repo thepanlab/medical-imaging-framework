@@ -78,17 +78,42 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
 
 """ Abstract ImageReader class
 """
-class ImageReader(metaclass=ABCMeta):
+class ImageReader(ABC):
     def __init__(self):
         return
     
     @abstractmethod
     def io_read(self, filename):
-        #return io.imread(filename.numpy().decode())
+        """ Reads an image from a file and loads it into memory
+        """
         pass
 
     @abstractmethod
     def parse_image(self, filename, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width):
+        """ Parses an image from some given filename and various parameters.
+        
+        -- Input Parameters ------------------------
+        filename (Tensor str): A tensor of some file name.
+        mean (double): A mean value.
+        
+        use_mean (bool): Wather to use the mean to normalize.
+        class_names (list of str): A list of label class names.
+        label_position (int): The position of the label in the image name.
+        
+        channels (int): Channels in which to decode image. 
+        do_cropping (bool): Whether to crop the image.
+        offset_height (int): Image height offset.
+        
+        offset_width (int): Image width offset.
+        target_height (int): Image height target.
+        target_width (v): Image width target.
+        --------------------------------------------
+        
+        -- Return ----------------------------------
+        (Tensor image): An image.
+        (Tensor str): The true label of the image.
+        --------------------------------------------
+        """
         pass
 
 
@@ -100,10 +125,41 @@ class ImageReaderGlobal(ImageReader):
         return
 
     def io_read(self, filename):
-        return
+        # TODO: Check file extension -> Move to self.parse_image()
+        if tf.strings.split(filename, ".")[-1] == "csv":
+            csvreader = ImageReaderCSV()
+            return csvreader.parse_image()
+
+        # If .csv -> ImageReaderCSV, otherwise invalid and pass error
+
+        return tf.py_function(io_read, filename, tf.float32)
 
     def parse_image(self, filename, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width):
-        return
+        # Split to get only the image name
+        image_path = tf.strings.split(filename, "/")[-1]
+        
+        # Remove the file extention
+        path_substring = tf.strings.regex_replace(
+            image_path,
+            ".png|.jpg|.jpeg|.tiff|.csv", 
+            ""
+        )
+        
+        # Find the label
+        label = tf.strings.split(path_substring, "_")[label_position]
+        label_bool = (label == class_names)
+
+        image = self.io_read(filename)
+
+        # Crop the image
+        if do_cropping == 'true':
+            image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)
+        
+        # Normalize the image
+        if use_mean == 'true':
+            image = image - mean / 255
+
+        return image, tf.argmax(label_bool)
 
 
 """
@@ -115,8 +171,32 @@ class ImageReaderCSV(ImageReader):
 
     def io_read(self, filename):
         image = np.genfromtxt(filename)
-        image.reshape()
-        return
+        image.reshape()                     # TODO: Find the dimensions to reshape
+        return image
 
     def parse_image(self, filename, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width):
-        return
+        # Split to get only the image name
+        image_path = tf.strings.split(filename, "/")[-1]
+        
+        # Remove the file extention
+        path_substring = tf.strings.regex_replace(
+            image_path,
+            ".png|.jpg|.jpeg|.tiff|.csv", 
+            ""
+        )
+        
+        # Find the label
+        label = tf.strings.split(path_substring, "_")[label_position]
+        label_bool = (label == class_names)
+
+        image = self.io_read(filename)
+
+        # Crop the image
+        if do_cropping == 'true':
+            image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)
+        
+        # Normalize the image
+        if use_mean == 'true':
+            image = image - mean / 255
+        
+        return image, tf.argmax(label_bool)
