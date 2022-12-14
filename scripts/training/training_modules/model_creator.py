@@ -11,6 +11,9 @@ model_list = {
     "Xception": keras.applications.Xception
 }
 
+custom_models = {
+    "3dcnn": ""
+}
 
 class TrainingModel:
     def __init__(self, hyperparameters, model_type, target_height, target_width, class_names):
@@ -33,7 +36,10 @@ class TrainingModel:
         # Catch if the model is not in the model list
         if model_type not in model_list:
             print(colored(f"Warning: Model '{model_type}' not found in the list of possible models: {list(model_list.keys())}"))
-            model_type = 'resnet_50'
+            
+            # TODO: Create a custom model
+            # sys.path
+
         self.model_type = model_type
             
         # Get the model base
