@@ -1,0 +1,41 @@
+{
+    "hyperparameters": {
+        "batch_size": 24,
+        "channels": 1,
+        "cropping_position": [40, 10],
+        "decay": 0.01,
+        "do_cropping": false,
+        "epochs": 1,
+        "learning_rate": 0.01,
+        "mean": 0,
+        "momentum": 0.9,
+        "patience": 10,
+        "use_mean": false
+    },
+
+    "data_input_directory":"../data/CW_treated",
+    "output_path": "../results/training",
+    
+    "checkpointing_path": "../checkpoints",
+    "checkpointing_title": "checkpointing_test",
+
+    "shuffle_the_folds": true,
+    "rotations": "all",
+    "seed": 9,
+
+    "class_names": ["cortex", "medulla", "pelvis"],
+    "selected_model_name": "3dcnn",
+    "model_code_path": "data/custom_models/3dcnn.py",
+    "coming_from_json": false,
+    "subject_list": ["k1", "k2", "k3"],
+    "test_subjects": ["k1"],
+
+    "csv_shape": [185, 210, 185, 1],
+    "image_size": [800, 400],
+	"target_height": 241,
+    "target_width": 181
+}
+
+
+
+
