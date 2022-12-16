@@ -1,17 +1,15 @@
+from tensorflow import keras as K
 import tensorflow as tf
 
-from tensorflow import keras as K
-
-def parse_image(filename, mean, use_mean, class_names, label_position, channels, do_cropping, offset_height, offset_width, target_height, target_width): 
+def parse_image(filename, mean, use_mean, class_names, channels, do_cropping, offset_height, offset_width, target_height, target_width, label_position=None, use_labels=True): 
     """ Parses an image from some given filename and various parameters.
         
         -- Input Parameters ------------------------
         filename (Tensor str): A tensor of some file name.
         mean (double): A mean value.
         
-        use_mean (bool): Wather to use the mean to normalize.
+        use_mean (bool): Whether to use the mean to normalize.
         class_names (list of str): A list of label class names.
-        label_position (int): The position of the label in the image name.
         
         channels (int): Channels in which to decode image. 
         do_cropping (bool): Whether to crop the image.
@@ -19,7 +17,10 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
         
         offset_width (int): Image width offset.
         target_height (int): Image height target.
-        target_width (v): Image width target.
+        target_width (int): Image width target.
+        
+        label_position (int): Optional. The position of the label in the image name. Default is None.
+        use_labels(bool): Optional. Whether to consider/output the true image label. Default is True.
         --------------------------------------------
         
         -- Return ----------------------------------
@@ -37,10 +38,6 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
         ""
     )
     
-    # Find the label
-    label = tf.strings.split(path_substring, "_")[label_position]
-    label_bool = (label == class_names)
-    
     # Read the image --> TODO modify this for 3D images
     image = tf.io.read_file(filename)
     image = tf.io.decode_image(image, channels=channels, dtype=tf.float32, name=None, expand_animations=False)
@@ -52,4 +49,11 @@ def parse_image(filename, mean, use_mean, class_names, label_position, channels,
     # Normalize the image
     if use_mean == 'true':
         image = image - mean / 255
-    return image, tf.argmax(label_bool)
+    
+    # Find the label if needed
+    if use_labels:
+        label = tf.strings.split(path_substring, "_")[label_position]
+        label_bool = (label == class_names)
+        return image, tf.argmax(label_bool)
+    else:
+        return image
