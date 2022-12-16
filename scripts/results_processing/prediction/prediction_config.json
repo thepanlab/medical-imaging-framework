@@ -1,20 +1,20 @@
 {
     "prediction_output": "../results/predictions",
     "test_subject_data_input": {
-        "e1": "/data/jshaw/medical-imaging-framework/data/ep_intensity_ORIG/Test_subject_e1",
-        "e2": "/data/jshaw/medical-imaging-framework/data/ep_intensity_ORIG/Test_subject_e1"
+        "e1": "/home/jshaw/medical-imaging-framework/data/ep_intensity/Test_subject_e1"
     },
     "model_input": {
-        "Inception": "../data/_loop_outer/Test_subject_k2/config_1_resnet_50/resnet_50_test_k2/model/resnet_50_test_k2_resnet50.h5"
+        "Inception": "/home/jshaw/medical-imaging-framework/data/_loop_outer/Test_subject_k2/config_1_resnet_50/resnet_50_test_k2/model/resnet_50_test_k2_resnet50.h5"
     },
 
     "batch_size": 8,
     "output_tabled_info": true,
+    "use_true_labels": true,
 
     "image_settings": {
         "mean": 0,
         "use_mean": "false",
-        "class_names": "fat,ligament,flavum,epidural space,spinal cord",
+        "class_names": ["fat", "ligament", "flavum", "epidural space", "spinal cord"],
         "channels": 1,
         "do_cropping" : "false",
         "offset_height": 0,

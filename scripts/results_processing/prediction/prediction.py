@@ -1,5 +1,5 @@
 from results_processing.tabled_prediction_info import tabled_prediction_info
-from training.training_modules.image_parser import parse_image
+from training.training_modules.image_parser import *
 from util.get_config import parse_json
 from termcolor import colored
 from tensorflow import keras
@@ -66,39 +66,42 @@ def read_models(model_input):
     return model_output
 
 
-def predict_images(image_paths, models, batch_size, class_names, image_config):
+def predict_images(image_paths, models, config, class_names):
     """ Predicts values of images for each given model.
 
     Args:
         image_paths (dict): A dictionary of key-array form, containing images.
         models (dict): A dictionary of key-model form.
         batch_size (int): The size of the prediction subsets.
+        config (dict): The program configuration.
         class_names (str): Names of the prediction classes.
-        image_config (dict): Image configuration.
 
     Returns:
         tuple: The prediction results and timing results
     """
     
     # Image args
-    class_names = image_config['class_names'].split(',')
-    target_height = int(image_config['target_height'])
-    offset_height = int(image_config['offset_width'])
-    offset_width = int(image_config['offset_width'])
-    target_width = int(image_config['target_width'])
-    do_cropping = image_config['do_cropping']
-    channels = int(image_config['channels']) 
-    use_mean = image_config['use_mean']
-    mean = float(image_config['mean'])
+    class_names = config['image_settings']['class_names']
+    target_height = config['image_settings']['target_height']
+    offset_height = config['image_settings']['offset_width']
+    offset_width = config['image_settings']['offset_width']
+    target_width = config['image_settings']['target_width']
+    do_cropping = config['image_settings']['do_cropping']
+    channels = config['image_settings']['channels']
+    use_mean = config['image_settings']['use_mean']
+    mean = config['image_settings']['mean']
     
     # Get label position
-    for subject in image_paths:
-        for file_name in image_paths[subject]:
-            labels = [class_name for class_name in class_names if class_name in file_name]
-            temp = os.path.abspath(file_name).split('.')
-            label_position = temp[0].split('_').index(labels[0])
+    if config['use_true_labels']:
+        for subject in image_paths:
+            for file_name in image_paths[subject]:
+                labels = [class_name for class_name in class_names if class_name in file_name]
+                temp = os.path.abspath(file_name).split('.')
+                label_position = temp[0].split('_').index(labels[0])
+                break
             break
-        break
+    else:
+        label_position = None
     
     # Predict all items using every model
     prediction_results = {}
@@ -114,16 +117,28 @@ def predict_images(image_paths, models, batch_size, class_names, image_config):
                 
             # Separate the images into batches
             img_slices = tf.data.Dataset.from_tensor_slices(image_paths[subject])
-            img_map = img_slices.map(lambda x:image_parser.parse_image(
-                x,  mean, use_mean, class_names, label_position, channels, 
-                do_cropping,offset_height, offset_width, target_height, target_width
+            img_map = img_slices.map(lambda x:parse_image(
+                x,  
+                mean, 
+                use_mean, 
+                class_names, 
+                channels, 
+                do_cropping,
+                offset_height, 
+                offset_width, 
+                target_height, 
+                target_width,
+                label_position,
+                config['use_true_labels']
             ))
-            img_batch = img_map.batch(batch_size, drop_remainder=False)
+            img_batch = img_map.batch(config['batch_size'], drop_remainder=False)
 
             # Get the computation time
+            print(colored(f"Beginning prediction for {len(image_paths[subject])} images.", 'yellow'))
             srt = time.time()
             pred = models[model].predict(img_batch)
             timing_results[model][subject] = time.time() - srt
+            print(colored("Finished prediction.", 'cyan'))
             
             # Add predictions to the array
             prediction_results[model][subject] = pred
@@ -132,20 +147,20 @@ def predict_images(image_paths, models, batch_size, class_names, image_config):
     return prediction_results, timing_results
 
 
-def output_results(prediction_results, timing_results, input_filepaths, class_names, out_vals):
+def output_results(config, prediction_results, timing_results, input_filepaths, class_names, out_vals):
     """ Output the prediction results to CSV file.
 
     Args:
+        config (dict): The program configuration.
         prediction_results (dict): A key-model-array dictionary of prediction results.
         timing_results (dict): The times of predictions.
-        input_filepaths (dict): The true values (images.)
+        input_filepaths (dict): The true values, (images paths.)
         class_names (str): Names of the prediction classes.
         out_vals (str): Directory output path of the values.
         out_mets (str): Directory output path of the metrics.
     """
     
     # Output results to file
-    columns_predicted_labels = ['test_subject', 'true_label', 'true_label_index', 'pred_label', 'pred_label_index', 'match', 'filename', 'filepath']
     for model in prediction_results:
         for subject in prediction_results[model]:
                 
@@ -159,9 +174,13 @@ def output_results(prediction_results, timing_results, input_filepaths, class_na
             print(colored(f"For model '{model}' and input '{subject}':", 'magenta'))
             
             # Make output directories
-            if not os.path.exists(os.path.join(dirpath, 'prediction')): os.makedirs(os.path.join(dirpath, 'prediction'))
-            if not os.path.exists(os.path.join(dirpath, 'true_label')): os.makedirs(os.path.join(dirpath, 'true_label'))
-            if not os.path.exists(os.path.join(dirpath, 'file_name')): os.makedirs(os.path.join(dirpath, 'file_name'))
+            if config['use_true_labels']:
+                if not os.path.exists(os.path.join(dirpath, 'true_label')): 
+                    os.makedirs(os.path.join(dirpath, 'true_label'))
+            if not os.path.exists(os.path.join(dirpath, 'prediction')): 
+                os.makedirs(os.path.join(dirpath, 'prediction'))
+            if not os.path.exists(os.path.join(dirpath, 'file_name')): 
+                os.makedirs(os.path.join(dirpath, 'file_name'))
             prefix = f"{model}_{model_i}_test_{subject}_test"
                 
             # Print the prediction probability values
@@ -176,25 +195,27 @@ def output_results(prediction_results, timing_results, input_filepaths, class_na
             preds.to_csv(filename, index=False, header=False)
             print(colored(f"\t Wrote the indexed predictions.", 'cyan'))
             
-            # Print the true labels
-            trues = pd.DataFrame(i for file in input_filepaths[subject] for i in file.split('/')[-1].split('.')[0].split('_') if i in class_names)
-            filename = os.path.join(dirpath, f"true_label/{prefix}_true_label.csv")
-            trues.to_csv(filename, index=False, header=False)
-            print(colored(f"\t Wrote the true values.", 'cyan'))
+            if config['use_true_labels']:
+                print(config['use_true_labels'])
+                # Print the true labels
+                trues = pd.DataFrame(i for file in input_filepaths[subject] for i in file.split('/')[-1].split('.')[0].split('_') if i in class_names)
+                filename = os.path.join(dirpath, f"true_label/{prefix}_true_label.csv")
+                trues.to_csv(filename, index=False, header=False)
+                print(colored(f"\t Wrote the true values.", 'cyan'))
             
-            # Print the true label index values
-            trues = pd.DataFrame(class_names.index(label[0]) for label in trues.values)
-            filename = os.path.join(dirpath, f"true_label/{prefix}_true_label_index.csv")
-            trues.to_csv(filename, index=False, header=False)
-            print(colored(f"\t Wrote the indexed true values.", 'cyan'))
+                # Print the true label index values
+                trues = pd.DataFrame(class_names.index(label[0]) for label in trues.values)
+                filename = os.path.join(dirpath, f"true_label/{prefix}_true_label_index.csv")
+                trues.to_csv(filename, index=False, header=False)
+                print(colored(f"\t Wrote the indexed true values.", 'cyan'))
             
-            # Print the true label index values
+            # Print the file paths
             files = pd.DataFrame(input_filepaths[subject])
             filename = os.path.join(dirpath, f"file_name/{prefix}_file.csv")
             files.to_csv(filename, index=False, header=False)
             print(colored(f"\t Wrote the image file paths.", 'cyan'))
             
-            # Print the true label index values
+            # Print the timing
             time = pd.DataFrame([timing_results[model][subject]])
             filename = os.path.join(dirpath, f"{prefix}_time_total.csv")
             time.to_csv(filename, index=False, header=False)
@@ -219,7 +240,7 @@ def main(config=None):
     if not os.path.exists(out_mets): os.makedirs(out_mets)
 
     # Read in the input data
-    class_names = config['image_settings']['class_names'].split(',')
+    class_names = config['image_settings']['class_names']
     data = get_images(config["test_subject_data_input"], class_names)
     print(colored('Input images sucessfully read.', 'green'))
     
@@ -228,16 +249,17 @@ def main(config=None):
     print(colored('Input models sucessfully read.\n', 'green'))
 
     # Predict the images
-    prediction_results, timing_results = predict_images(data, models, config['batch_size'], class_names, config["image_settings"])
+    prediction_results, timing_results = predict_images(data, models, config, class_names)
 
     # Output the results
-    output_results(prediction_results, timing_results, data, class_names, out_vals)
+    output_results(config, prediction_results, timing_results, data, class_names, out_vals)
     
     # Output tabled info
     if config['output_tabled_info']:
         table_config = {
             "data_path": out_vals,
             "output_path": out_mets,
+            "use_true_labels": config['use_true_labels'],
             "label_types": {str(class_names.index(label)): label for label in class_names}
         }
         tabled_prediction_info.main(table_config)
