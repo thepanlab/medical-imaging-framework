@@ -1,7 +1,11 @@
 from .predicted_formatter.predicted_formatter import main as reformat
 from termcolor import colored
 import regex as re
+import sys
 import os
+
+
+sys.setrecursionlimit(10**6)
 
 
 def is_outer_loop(data_path):
