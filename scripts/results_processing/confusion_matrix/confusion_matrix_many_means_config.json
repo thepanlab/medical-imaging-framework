@@ -1,0 +1,17 @@
+{
+  "data_path": "../results/_loop_inner",
+  "matrices_path": "../results/processed_output/confusion_matrix",
+  "means_output_path": "../results/processed_output/confusion_matrix_means",
+
+  "round_to": 2,
+
+  "label_types": {
+    "fat": 0,
+    "ligament": 1,
+    "flavum": 2,
+    "epidural space": 3,
+    "spinal cord": 4
+  }
+
+
+}

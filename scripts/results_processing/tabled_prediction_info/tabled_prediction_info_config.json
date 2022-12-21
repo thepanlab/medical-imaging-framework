@@ -1,0 +1,14 @@
+{
+  "data_path": "../data/_loop_outer",
+  "output_path": "../results/processed_output/tabled_prediction_info",
+  
+  "use_true_labels": true,
+
+  "label_types": {
+    "0": "fat",
+    "1": "ligament",
+    "2": "flavum",
+    "3": "epidural-space",
+    "4": "spinalcord"
+  }
+}

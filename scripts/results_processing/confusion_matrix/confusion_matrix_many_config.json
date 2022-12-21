@@ -1,0 +1,13 @@
+{
+  "data_path": "../data/_loop_inner",
+  "output_path": "../results/processed_output/confusion_matrix",
+
+  "label_types": {
+    "fat": 0,
+    "ligament": 1,
+    "flavum": 2,
+    "epidural space": 3,
+    "spinal cord": 4
+  }
+
+}

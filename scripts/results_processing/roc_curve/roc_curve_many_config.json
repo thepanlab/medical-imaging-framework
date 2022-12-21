@@ -1,0 +1,27 @@
+{
+  "data_path": "../data/_loop_outer",
+  "output_path": "../results/processed_output/roc_output",
+
+  "line_width": "2",
+  "label_types": [
+    "fat",
+    "ligament",
+    "flavum",
+    "epidural-space",
+    "spinalcord"
+  ],
+  "line_colors": [
+    "aqua",
+    "darkorange",
+    "cornflowerblue",
+    "brown",
+    "seagreen"
+  ],
+
+  "font_family": "DejaVu Sans",
+  "label_font_size": 12,
+  "title_font_size": 12,
+
+  "save_resolution": "figure",
+  "save_format": "png"
+}
