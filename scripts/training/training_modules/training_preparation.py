@@ -17,7 +17,7 @@ class TrainingVars:
             files (list of str): A list of file paths.
             folds (list of dict): A list of fold partitions.
             
-            rotations (int): The number of rotations to train with.
+            n_folds (int): The number of folds to train with.
             indexes (dict of lists): A dictionary of lists containing various indexes.
             label_position (int): Position in the file name where the label exists.
             --------------------------------------------
@@ -33,5 +33,5 @@ class TrainingVars:
         self.indexes, self.label_position = get_indexes(self.files, config['class_names'], config['subject_list'])
         
         # Generate training folds
-        self.folds, self.rotations = generate_folds(config['subject_list'], test_subject, config['rotations'], config['shuffle_the_folds'])
+        self.folds, self.n_folds = generate_folds(config['subject_list'], test_subject, config['n_folds'], config['shuffle_the_folds'])
         

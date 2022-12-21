@@ -4,7 +4,7 @@
         "channels": 1,
         "cropping_position": [40, 10],
         "decay": 0.01,
-        "do_cropping": false,
+        "do_cropping": true,
         "epochs": 1,
         "learning_rate": 0.01,
         "mean": 0,
@@ -15,12 +15,13 @@
 
     "data_input_directory":"../data/ep_intensity",
     "output_path": "../results/training",
+    "job_name": "InceptionV3_test_1",
     
-    "checkpointing_path": "../checkpoints",
     "checkpointing_title": "checkpointing_test",
+    "k_epoch_checkpoint_frequency": 4,
 
     "shuffle_the_folds": true,
-    "rotations": "all",
+    "n_folds": "all",
     "seed": 9,
 
     "class_names": ["fat", "ligament", "flavum", "epidural space", "spinal cord"],
@@ -32,7 +33,3 @@
 	"target_height": 241,
     "target_width": 181
 }
-
-
-
-
