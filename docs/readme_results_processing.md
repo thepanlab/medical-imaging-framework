@@ -42,7 +42,6 @@
 
     
     2) ### ***confusion_matrix_many.py:***
-        ***Example:*** 
         >python3 confusion_matrix_many.py -j my_config.json
 
         <details>
@@ -349,7 +348,8 @@
         * ***Input:*** The configuration file. *(Optional)*
         * ***Output:*** A CSV file.
         *  ***prediction_config.json:***
-           ```json {
+           ```json 
+            {
                 "prediction_output": "[path]/predictions",
                 "test_subject_data_input": {
                     "subject_name": "[path]/Test_subject_[subject_name]"
@@ -531,7 +531,6 @@
         * ***Input:*** The configuration file. *(Optional)*
         * ***Output:*** A CSV file.
         * ***tabled_prediction_info.json:***
-        ***Example:*** 
             ```json
                 {
                     "data_path": "[path]/data/",
