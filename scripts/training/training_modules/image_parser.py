@@ -1,18 +1,14 @@
-from abc import ABC, abstractclassmethod, abstractmethod
-from tensorflow import keras as K
+from abc import ABC, abstractmethod
 import tensorflow as tf
 from skimage import io
 import numpy as np
 
 
-def parse_image(filename, mean, use_mean, class_names, channels, do_cropping, offset_height, offset_width, target_height, target_width, label_position=None, use_labels=True): 
+def parse_image(filename, class_names, channels, do_cropping, offset_height, offset_width, target_height, target_width, label_position=None, use_labels=True): 
     """ Parses an image from some given filename and various parameters.
         
-        -- Input Parameters ------------------------
+    Args:
         filename (Tensor str): A tensor of some file name.
-        mean (double): A mean value.
-        
-        use_mean (bool): Whether to use the mean to normalize.
         class_names (list of str): A list of label class names.
         
         channels (int): Channels in which to decode image. 
@@ -25,12 +21,13 @@ def parse_image(filename, mean, use_mean, class_names, channels, do_cropping, of
         
         label_position (int): Optional. The position of the label in the image name. Default is None.
         use_labels (bool): Optional. Whether to consider/output the true image label. Default is True.
-        --------------------------------------------
         
-        -- Return ----------------------------------
+    Returns:
         (Tensor image): An image.
         (Tensor str): The true label of the image.
-        --------------------------------------------
+        
+    Exception:
+        If eager execution is disabled.
     """
     # Assert eager execution, else trouble will be had...
     if not tf.executing_eagerly():
@@ -63,10 +60,6 @@ def parse_image(filename, mean, use_mean, class_names, channels, do_cropping, of
     # Crop the image
     if do_cropping:
         image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)
-       
-    # Normalize the image
-    if use_mean:
-        image = image - mean / 255
     
     # Find the label if needed
     if use_labels:
@@ -76,6 +69,11 @@ def parse_image(filename, mean, use_mean, class_names, channels, do_cropping, of
     else:
         return image
     
+
+
+
+""" --- WIP --------------------------------------------------------------------- """
+
 
 class ImageReader(ABC):
     """ Abstract ImageReader Class """
@@ -109,7 +107,7 @@ class ImageReaderGlobal(ImageReader):
         im=im.reshape(185,210,185,1)
         return im
 
-    def parse_image(self, filename, mean, use_mean, class_names, channels, do_cropping, offset_height, offset_width, target_height, target_width, label_position=None, use_labels=True): 
+    def parse_image(self, filename,class_names, channels, do_cropping, offset_height, offset_width, target_height, target_width, label_position=None, use_labels=True): 
         # Split to get only the image name
         image_path = tf.strings.split(filename, "/")[-1]
         
@@ -130,10 +128,6 @@ class ImageReaderGlobal(ImageReader):
         # Crop the image
         if do_cropping == 'true':
             image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)
-        
-        # Normalize the image
-        if use_mean == 'true':
-            image = image - mean / 255
 
         return image, tf.argmax(label_bool)
     
@@ -158,7 +152,7 @@ class ImageReaderCSV(ImageReader):
 
         return image
 
-    def parse_image(self, filename, mean, use_mean, class_names, channels, do_cropping, offset_height, offset_width, target_height, target_width, label_position=None, use_labels=True): 
+    def parse_image(self, filename, class_names, channels, do_cropping, offset_height, offset_width, target_height, target_width, label_position=None, use_labels=True): 
         # Split to get only the image name
         image_path = tf.strings.split(filename, "/")[-1]
         
@@ -178,10 +172,6 @@ class ImageReaderCSV(ImageReader):
         # Crop the image
         if do_cropping == 'true':
             image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)
-        
-        # Normalize the image
-        if use_mean == 'true':
-            image = image - mean / 255
         
         return image, tf.argmax(label_bool)
     

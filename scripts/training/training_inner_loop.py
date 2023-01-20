@@ -5,17 +5,18 @@ from util.get_config import parse_training_configs
 from training.checkpoint_modules.logger import *
 from termcolor import colored
 import tensorflow as tf
-import shutil
-
-
-# When debugging the logs/ckpts, enable to delete old logs/ckpts
-DEBUG_LOGS = True
 
 # Location of the configurations
 CONFIG_LOC = './training/training_config_files'
             
             
 def subject_loop(config, test_subject):
+    """ Executes the training loop for the given test subject.
+
+    Args:
+        config (dict): The training configuration.
+        test_subject (str): The test subject name.
+    """
     print(colored(
         f"\n\n===========================================================\n" + 
         f"Starting training for {test_subject} in {config['selected_model_name']}\n"
@@ -42,12 +43,6 @@ def main():
     # Parse the command line arguments
     configs = parse_training_configs('./training/training_config_files')
     for config in configs:
-    
-        # For debugging logging
-        if DEBUG_LOGS:
-            log_path = os.path.join(config['output_path'], 'logging')
-            if os.path.exists(log_path):
-                shutil.rmtree(log_path)
         
         # Make sure the subject list is of the same case
         subject_list = [s.lower() for s in config['subject_list']]

@@ -19,18 +19,16 @@ class TrainingModel:
     def __init__(self, hyperparameters, model_type, target_height, target_width, class_names):
         """ Creates and prepares a model for training.
             
-            -- Input Parameters ------------------------
+        Args:
             hyperparameters (dict): The configuration's hyperparameters.
             model_type (str): Type of model to create.
             target_height (int): Height of input.
             target_width (int): Width of input.
             class_names (list of str): A list of classes.
-            --------------------------------------------
             
-            -- Variables ---------------------------------
+        Returns:
             model (keras Model): The prepared keras model.
             model_type (str): The name of the model type.
-            --------------------------------------------
         """
 
         # Catch if the model is not in the model list

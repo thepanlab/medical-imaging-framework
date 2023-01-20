@@ -5,20 +5,17 @@
         "cropping_position": [40, 10],
         "decay": 0.01,
         "do_cropping": true,
-        "epochs": 1,
+        "epochs": 6,
         "learning_rate": 0.01,
-        "mean": 0,
         "momentum": 0.9,
-        "patience": 10,
-        "use_mean": false
+        "patience": 10
     },
 
     "data_input_directory":"../data/ep_intensity",
     "output_path": "../results/training",
     "job_name": "InceptionV3_test_1",
     
-    "checkpointing_title": "checkpointing_test",
-    "k_epoch_checkpoint_frequency": 4,
+    "k_epoch_checkpoint_frequency": 2,
 
     "shuffle_the_folds": true,
     "n_folds": "all",

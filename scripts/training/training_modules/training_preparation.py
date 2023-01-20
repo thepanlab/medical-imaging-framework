@@ -8,19 +8,9 @@ class TrainingVars:
     def __init__(self, config, test_subject):
         """ Gets some parameters needing for training
             
-            -- Input Parameters ------------------------
+        Args:
             config (dict): List of input image paths.
             test_subject (str): List of class names.
-            --------------------------------------------
-            
-            -- Variables -------------------------------
-            files (list of str): A list of file paths.
-            folds (list of dict): A list of fold partitions.
-            
-            n_folds (int): The number of folds to train with.
-            indexes (dict of lists): A dictionary of lists containing various indexes.
-            label_position (int): Position in the file name where the label exists.
-            --------------------------------------------
         """
         # Set the seed
         seed(config['seed'])

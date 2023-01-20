@@ -7,7 +7,7 @@ import os
 def output_results(output_path, testing_subject, validation_subject, rotation, model_obj, history, time_elapsed, datasets, class_names):
     """ Output results from the trained model.
         
-        -- Input Parameters ------------------------
+    Args:
         output_path (str): Where to output the results.
         testing_subject (str): The testing subject name.
         validation_subject (str): The validation subject name.
@@ -19,7 +19,6 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
         time_elapsed (double): The elapsed time from the fitting phase.
         datasets (dict): A dictionary of various values for the data-splits.
         class_names (list of str): The class names of the data.
-        --------------------------------------------
     """
     # Check if the output paths exist
     file_prefix = f"{model_obj.model_type}_{rotation}_test_{testing_subject}_val_{validation_subject}"

@@ -4,16 +4,17 @@ from termcolor import colored
 def get_indexes(files, class_names, subject_list):
     """ Gets the indexes of classes, and the subjects within the image file names.
         
-        -- Input Parameters ------------------------
+    Args:
         files (list of str): List of input image paths.
         class_names (list of str): List of class names.
         subject_list (list of str): List of subject names
-        --------------------------------------------
         
-        -- Returns ---------------------------------
+    Returns:
         (dict of lists): A dictionary containing all labels, indexes, and subjects.
         (int): The label position.
-        --------------------------------------------
+        
+    Exception:
+        When more than one label or subject is given.
     """
     indexes = {'labels': [], 'idx': [], 'subjects': []}
     label_position = None

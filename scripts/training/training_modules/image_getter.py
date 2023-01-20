@@ -5,14 +5,15 @@ import os
 
 def get_files(input_path):
     """ Gets all of the input paths of the image data.
-        
-        -- Input Parameters ------------------------
+
+    Args:
         input_path (str): A path to some directory.
-        --------------------------------------------
-        
-        -- Returns ---------------------------------
+
+    Raises:
+        Exception: If an input path cannot be reached.
+
+    Returns:
         (list of str): A list of image paths.
-        --------------------------------------------
     """
     # See if it exists
     if not os.path.isdir(input_path):
@@ -32,10 +33,9 @@ def get_files(input_path):
 def _flatten_dir(path, files):
     """ Recursively gets the paths of ALL images within a directory and its subdirectories.
 
-        -- Input Parameters ------------------------
+    Args:
         path (str): A path to some directory.
         files (list of str): A list of paths to images.
-        --------------------------------------------
     """
     for item in os.listdir(os.path.abspath(path)):
         full_path = os.path.join(path, item)

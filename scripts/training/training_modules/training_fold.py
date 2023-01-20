@@ -11,7 +11,7 @@ import tensorflow as tf
 
 class _FoldTrainingInfo():
     def __init__(self, fold_index, config, testing_subject, files, folds, indexes, label_position):
-        """ Initializes a training fold object.
+        """ Initializes a training fold info object.
 
         Args:
             fold_index (int): The fold index within the loop.
@@ -39,6 +39,7 @@ class _FoldTrainingInfo():
         
         self.model = None
         self.callbacks = None
+        self.checkpoint_name = None
         
         
     def run_all_steps(self):
@@ -86,11 +87,14 @@ class _FoldTrainingInfo():
             patience=self.config['hyperparameters']['patience'], 
             restore_best_weights=True
         )
-        checkpoints = create_checkpoint(
-            self.config['output_path'], 
-            self.config['checkpointing_title'], 
-            f"{self.config['job_name']}_{self.config['selected_model_name']}", 
-            self.config['k_epoch_checkpoint_frequency']
+        
+        self.checkpoint_prefix = f"{self.config['job_name']}_config_{self.config['selected_model_name']}_test_{self.testing_subject}_val_{self.validation_subject}"     
+        
+        checkpoints = Checkpointer(
+            self.config['hyperparameters']['epochs'],
+            self.config['k_epoch_checkpoint_frequency'], 
+            self.checkpoint_prefix, 
+            self.config['output_path']
         )
         self.callbacks = (early_stopping, checkpoints)
         
@@ -120,15 +124,29 @@ class Fold():
         )
         self.history = None
         self.time_elapsed = None
+        self.checkpoint_epoch = 0
         
         
     def run_all_steps(self):
         """ This will run all of the steps for the training process 
             Training itself depends on the state of the training fold.
-            It checks for insufficient dataset. TODO Implement completeness from log.
+            It checks for insufficient dataset.
         """
-        self.fold_info.run_all_steps()
-        self.save_state()
+        # Load in the previously saved fold info. Check if valid. If so, use it.
+        prev_info = self.load_state()
+        if prev_info is not None and \
+        self.fold_info.testing_subject == prev_info.testing_subject and \
+        self.fold_info.validation_subject == prev_info.validation_subject:
+            self.fold_info = prev_info
+            self.load_checkpoint()
+            print(colored("Loaded previous existing state for test. " + 
+                          f"{prev_info.testing_subject} and val. {prev_info.validation_subject}.", 'cyan'))
+
+        else:
+            self.fold_info.run_all_steps()
+            self.save_state()
+            
+        # Create the datasets and train. (Datasets cannot be logged.)
         if self.create_dataset():
             self.train_model()
             self.output_results()
@@ -141,9 +159,9 @@ class Fold():
             self.fold_info.config['job_name'], 
             ['fold_info']
         )
-        if 'fold_info' in log:
-            return log['fold_info']
-        return None
+        if log is None or 'fold_info' not in log:
+            return None
+        return log['fold_info']
             
     
     def save_state(self):
@@ -153,7 +171,18 @@ class Fold():
             self.fold_info.config['job_name'], 
             {'fold_info': self.fold_info}
         )
-        
+    
+    
+    def load_checkpoint(self):
+        """ Loads the latest checkpoint to start from. """
+        results = get_most_recent_checkpoint(
+            self.fold_info.config['output_path'], 
+            self.fold_info.checkpoint_prefix
+        )
+        if results is not None:
+            print(colored(f"Loaded most recent checkpoint of epoch: {results[1]}.", 'cyan'))
+            self.fold_info.model.model = results[0]
+            self.checkpoint_epoch = results[1]
         
     def create_dataset(self):
         """ Create the dataset needed for training the model.
@@ -175,8 +204,6 @@ class Fold():
                 func=parse_image,
                 inp=[
                     x,                                                                 # Filename
-                    self.fold_info.config['hyperparameters']['mean'],                  # Mean
-                    self.fold_info.config['hyperparameters']['use_mean'],              # Use Mean
                     self.fold_info.config['class_names'],                              # Class Names
                     self.fold_info.config['hyperparameters']['channels'],              # Channels
                     self.fold_info.config['hyperparameters']['do_cropping'],           # Do Cropping
@@ -203,14 +230,19 @@ class Fold():
         
     def train_model(self):
         """ Train the model, assuming the given dataset is valid. """  
+        if self.checkpoint_epoch+1 == self.fold_info.config['hyperparameters']['epochs']:
+            print(colored("Maximum number of epochs reached from checkpoint.", 'yellow'))
+            return
         time_start = perf_counter()
         self.history = self.fold_info.model.model.fit(
             self.fold_info.datasets['training']['ds'],
             validation_data=self.fold_info.datasets['validation']['ds'],
             epochs=self.fold_info.config['hyperparameters']['epochs'],
+            initial_epoch=self.checkpoint_epoch,
             callbacks=[self.fold_info.callbacks]
         )
         self.time_elapsed = perf_counter() - time_start
+        
         
         
     def output_results(self):

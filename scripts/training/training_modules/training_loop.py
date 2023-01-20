@@ -1,18 +1,12 @@
-from training.training_modules.result_outputter import output_results
-from training.training_modules.model_creator import TrainingModel
-from training.training_modules.image_parser import parse_image
 from training.training_modules.training_fold import Fold
 from training.checkpoint_modules.logger import *
 from termcolor import colored
-from time import perf_counter
-from tensorflow import keras
-import tensorflow as tf
 
 
 def training_loop(config, testing_subject, files, folds, rotations, indexes, label_position):
     """ Creates a model, trains it, and writes its outputs.
         
-        -- Input Parameters ------------------------
+    Args:
         config (dict): The input configuration.
         
         testing_subject (str): The name of the testing subject.
@@ -22,7 +16,6 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
         rotations (int): the number of rotations to perform.
         indexes (dict of lists): A list of true indexes.
         label_position (int): Location in the filename of the label.
-        --------------------------------------------
     """
     print(colored(f'Beginning the training loop for {testing_subject}.', 'green'))
        
@@ -33,8 +26,10 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
         config['job_name'], 
         ['current_rotation']
     )
-    if log_rotations and 'current_rotation' in log_rotations:
-        rotation = log_rotations['current_rotation']
+    
+    if log_rotations and 'current_rotation' in log_rotations and testing_subject in log_rotations['current_rotation']:
+        rotation = log_rotations['current_rotation'][testing_subject]
+        print(colored(f'Starting off from rotation {rotation+1} for testing subject {testing_subject}.', 'cyan'))
     
     # Train for every rotation specified
     for rot in range(rotation, rotations):
@@ -43,17 +38,16 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
         training_fold.run_all_steps()
         
         # Write the index to log
+        if not log_rotations:
+            rotation_dict = {testing_subject: rot + 1}
+        else:
+            rotation_dict = log_rotations['current_rotation']
+            rotation_dict[testing_subject] = rot + 1
         write_log(
             config['output_path'], 
             config['job_name'], 
-            {'current_rotation': rot + 1}
+            {'current_rotation': rotation_dict}
         )
-        
-    # Reset the rotations
-    write_log(
-        config['output_path'], 
-        config['job_name'], 
-        {'current_rotation': 0}
-    )       
+             
 
     
