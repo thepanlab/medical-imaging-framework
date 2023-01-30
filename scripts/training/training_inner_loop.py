@@ -41,7 +41,7 @@ def main():
     tf.config.run_functions_eagerly(True)
     
     # Parse the command line arguments
-    configs = parse_training_configs('./training/training_config_files')
+    configs = parse_training_configs(CONFIG_LOC)
     for config in configs:
         
         # Read in the log's subject list, if it exists

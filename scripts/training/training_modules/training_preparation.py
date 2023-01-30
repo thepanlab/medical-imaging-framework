@@ -17,7 +17,7 @@ class TrainingVars:
         
         # The files to train with and info about its contents
         self.files = get_files(config['data_input_directory'])
-        self.indexes, self.label_position = get_indexes(self.files, config['class_names'], config['validation_subjects'])
+        self.indexes, self.label_position = get_indexes(self.files, config['class_names'], config['subject_list'])
         
         # Generate training folds
         self.folds, self.n_folds = generate_folds(config['test_subjects'], config['validation_subjects'], test_subject, config['shuffle_the_folds'])

@@ -54,14 +54,16 @@ class _FoldTrainingInfo():
             This includes the testing and validation subjects, file paths,
             label indexes, and labels.
         """
-        for index, file in enumerate(self.files):
+        for index, file in enumerate(self.files):            
             dataset = ''
             if self.indexes['subjects'][index] == self.validation_subject:
                 dataset = 'validation'
             elif self.indexes['subjects'][index] == self.testing_subject:
                 dataset = 'testing'
-            else:
+            elif self.indexes['subjects'][index] in self.config['validation_subjects']:
                 dataset = 'training'
+            else:
+                continue
             self.datasets[dataset]['files'].append(file)
             self.datasets[dataset]['indexes'].append(index)
             self.datasets[dataset]['labels'].append(self.indexes['labels'][index])
