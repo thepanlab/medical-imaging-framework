@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from termcolor import colored
 import tensorflow as tf
 from skimage import io
 import numpy as np
@@ -19,7 +20,7 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
         target_height (int): Image height target.
         target_width (int): Image width target.
         
-        label_position (int): Optional. The position of the label in the image name. Default is None.
+        label_position (int): Optional. The position of the label in the image name. Must provide if using labels. Default is None.
         use_labels (bool): Optional. Whether to consider/output the true image label. Default is True.
         
     Returns:
@@ -59,13 +60,26 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
     
     # Crop the image
     if do_cropping:
-        image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)
+        try:
+            image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)
+        except:
+            raise ValueError(colored('Cropping bounds are invalid. Please review target size and cropping position values.', 'red'))
     
     # Find the label if needed
     if use_labels:
+        if not label_position:
+            raise ValueError(colored("Error: A label position is needed to parse the image class.", 'red'))
+        
+        # Check for label matches
         path_label = tf.strings.split(path_substring, "_")[label_position]
-        class_name = tf.argmax(path_label == class_names)
-        return image, class_name
+        class_matches = np.where(path_label == class_names)[0]
+        if len(class_matches) > 1:
+            raise ValueError(colored(f'Error: more than one class name found in the image: "{image_path}"', 'red'))
+        elif len(class_matches) < 1:
+            raise ValueError(colored(f'Error: no class name found was in the image: "{image_path}"\n\tIs the case correct?', 'red'))
+        
+        # Return the tensor
+        return image, class_matches[0]
     else:
         return image
     

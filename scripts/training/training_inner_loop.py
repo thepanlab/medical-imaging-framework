@@ -44,26 +44,25 @@ def main():
     configs = parse_training_configs('./training/training_config_files')
     for config in configs:
         
-        # Make sure the subject list is of the same case
-        subject_list = [s.lower() for s in config['subject_list']]
-        
         # Read in the log's subject list, if it exists
         log_list = read_log_items(
             config['output_path'], 
             config['job_name'], 
-            ['subject_list']
+            ['test_subjects']
         )
         if log_list and 'subject_list' in log_list:
-            subject_list = log_list['subject_list']
+            test_subjects = log_list['test_subjects']
+        else:
+            test_subjects = config['test_subjects']
             
         # Train for each test subject
-        for test_subject in subject_list:
+        for test_subject in test_subjects:
             subject_loop(config, test_subject)
-            subject_list.remove(test_subject)
+            test_subjects.remove(test_subject)
             write_log(
                 config['output_path'], 
                 config['job_name'], 
-                {'subject_list': subject_list}
+                {'test_subjects': test_subjects}
             )
 
 if __name__ == "__main__":

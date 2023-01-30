@@ -1,13 +1,13 @@
 from random import shuffle
 
 
-def generate_folds(subject_list, test_subject, in_rotations, do_shuffle):
+def generate_folds(test_subject_list, validation_subject_list, test_subject, do_shuffle):
     """ Generates folds for the subject.
         
         -- Input Parameters ------------------------
-        subject_list (list of str): A list of subject names.
+        test_subject_list (list of str): A list of test subject names.
+        validation_subject_list (list of str): A list of validation subject names.
         test_subject (str): The current test subject name.
-        in_rotations (int or 'all'): How many rotations were specified in the configuration.
         do_shuffle (bool): If the fold list should be shuffled or not.
         --------------------------------------------
         
@@ -19,18 +19,16 @@ def generate_folds(subject_list, test_subject, in_rotations, do_shuffle):
     folds = []
     
     # For this test subject, find all combinations for the testing data
-    i = subject_list.index(test_subject)
-    for j, validation_subject in enumerate(subject_list):
+    i = test_subject_list.index(test_subject)
+    for j, validation_subject in enumerate(validation_subject_list):
         if i != j:
-            subject_fold = {'training': _fill_training_fold(subject_list, i, j), 'validation': [validation_subject], 'testing': [test_subject]}
+            subject_fold = {'training': _fill_training_fold(validation_subject_list, i, j), 'validation': [validation_subject], 'testing': [test_subject]}
             folds.append(subject_fold)
     
     # Shuffle the data and get the number of training rotations
     if do_shuffle:
         shuffle(folds)
-    if (in_rotations == 'all') or (in_rotations > len(folds)):
-        return folds, len(folds)
-    return folds, in_rotations
+    return folds, len(folds)
 
 
 def _fill_training_fold(subject_list, i, j):

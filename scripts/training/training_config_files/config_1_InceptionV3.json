@@ -5,26 +5,27 @@
         "cropping_position": [40, 10],
         "decay": 0.01,
         "do_cropping": true,
-        "epochs": 6,
+        "epochs": 1,
         "learning_rate": 0.01,
         "momentum": 0.9,
         "patience": 10
     },
 
-    "data_input_directory":"../data/ep_intensity",
+    "data_input_directory":"../data/ps_kidney_intensity",
     "output_path": "../results/training",
-    "job_name": "InceptionV3_test_1",
+    "job_name": "lowercase_print",
     
-    "k_epoch_checkpoint_frequency": 2,
+    "k_epoch_checkpoint_frequency": 1,
 
     "shuffle_the_folds": true,
-    "n_folds": "all",
     "seed": 9,
 
-    "class_names": ["fat", "ligament", "flavum", "epidural space", "spinal cord"],
+    "class_names": ["Cortex", "Medulla", "Calyx", "Fat"],
     "selected_model_name": "InceptionV3",
-    "subject_list": ["e1", "e2", "e3", "e4", "e5", "e6"],
-    "test_subjects": ["e1", "e2"],
+    
+    "subject_list": ["1-AJCQ267-left", "2-AJCQ267-right", "3-AJCT106-left", "4-AJCT106-right", "5-AJDG239-left", "6-AJDG239-right"],
+    "test_subjects": ["1-AJCQ267-left", "2-AJCQ267-right"],
+    "validation_subjects": ["1-AJCQ267-left", "2-AJCQ267-right", "3-AJCT106-left", "4-AJCT106-right", "5-AJDG239-left", "6-AJDG239-right"],
 
     "image_size": [800, 400],
 	"target_height": 241,

@@ -29,8 +29,11 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
     model_obj.model.save(f"{path_prefix}/model/{file_prefix}_{model_obj.model_type}.h5")
     
     # Save the history
-    history = pd.DataFrame.from_dict(history.history)
-    history.to_csv(f"{path_prefix}/{file_prefix}_history.csv")
+    if history is not None:
+        history = pd.DataFrame.from_dict(history.history)
+        history.to_csv(f"{path_prefix}/{file_prefix}_history.csv")
+    else:
+        print(colored(f'Warning: The model history is empty for: {file_prefix}', 'yellow'))
     
     # Write the class names
     _metric_writer(
