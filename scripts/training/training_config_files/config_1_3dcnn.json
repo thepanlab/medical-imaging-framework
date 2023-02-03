@@ -17,6 +17,8 @@
     "output_path": "../results/training",
     "job_name": "3dcnn_test_1",
     
+    "k_epoch_checkpoint_frequency": 2,
+
     "checkpointing_path": "../checkpoints",
     "checkpointing_title": "checkpointing_test",
 
