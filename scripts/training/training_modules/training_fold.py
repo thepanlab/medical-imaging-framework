@@ -74,7 +74,8 @@ class _FoldTrainingInfo():
             self.config['selected_model_name'], 
             self.config['target_height'], 
             self.config['target_width'], 
-            self.config['class_names']
+            self.config['class_names'],
+            self.config['model_code_path']
         )
         
     
