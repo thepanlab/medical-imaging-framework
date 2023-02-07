@@ -1,0 +1,15 @@
+{
+  "data_path": "../data/_loop_inner",
+  "output_path": "../results/processed_output/class_accuracy",
+  "output_filename": "class_accuracy",
+
+  "round_to": 2,
+
+  "classes": {
+    "fat": 0,
+    "ligament": 1,
+    "flavum": 2,
+    "epidural space": 3,
+    "spinal cord": 4
+  }
+}

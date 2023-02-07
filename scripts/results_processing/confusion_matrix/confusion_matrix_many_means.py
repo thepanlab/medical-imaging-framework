@@ -1,6 +1,7 @@
 from util.get_config import parse_json
 from termcolor import colored
 from statistics import mode
+import numpy as np
 import pandas as pd
 import regex as re
 import os
@@ -227,20 +228,38 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
             # Divide the error-sums by n_items - 1
             for row in labels:
                 for col in labels:
-                    matrix_err["Predicted"][col]["Truth"][row] /= n_items - 1
-                    matrix_weighted_err["Predicted"][col]["Truth"][row] /= n_items - 1
-
-            # Output ALL matrices
+                    if n_items > 1:
+                        matrix_err["Predicted"][col]["Truth"][row] /= n_items - 1
+                        matrix_weighted_err["Predicted"][col]["Truth"][row] /= n_items - 1
+                        
+            # Create a combination of the mean and std error
+            matrix_combo = pd.DataFrame('', columns=labels, index=labels)
+            matrix_weighted_combo = pd.DataFrame(0, columns=labels, index=labels)
+            matrix_combo.index = matrix_weighted_combo.index = index_labels
+            matrix_combo.columns = matrix_weighted_combo.columns = columns_labels
+            for row in labels:
+                for col in labels:
+                    matrix_combo.loc[("Truth", row), ("Predicted", col)] = \
+                        f'{round(matrix_avg["Predicted"][col]["Truth"][row], round_to)} ± {round(matrix_err["Predicted"][col]["Truth"][row], round_to)}'
+                    if not matrix_weighted_avg.empty:
+                        matrix_weighted_combo.loc[("Truth", row), ("Predicted", col)] = \
+                            f'{round(matrix_weighted_avg["Predicted"][col]["Truth"][row], round_to)} ± {round(matrix_weighted_err["Predicted"][col]["Truth"][row], round_to)}'
+            
+            # Output all of the mean and error dataframes
             output_folder = os.path.join(output_path, f'{config}_{test_fold}/')
             if not os.path.exists(output_folder): os.makedirs(output_folder)
             matrix_avg.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean.csv'))
             matrix_err.round(round_to).to_csv(os.path.join(
+                output_folder, f'{config}_{test_fold}_conf_matrix_stderr.csv'))
+            matrix_combo.to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean_stderr.csv'))
             if not matrix_weighted_avg.empty:
                 matrix_weighted_avg.round(round_to).to_csv(os.path.join(
                     output_folder, f'{config}_{test_fold}_conf_matrix_mean_weighted.csv'))
                 matrix_weighted_err.round(round_to).to_csv(os.path.join(
+                    output_folder, f'{config}_{test_fold}_conf_matrix_stderr_weighted.csv'))
+                matrix_weighted_combo.to_csv(os.path.join(
                     output_folder, f'{config}_{test_fold}_conf_matrix_mean_stderr_weighted.csv'))
             print(colored(f"Mean confusion matrix results created for {test_fold} in {config}", 'green'))
 

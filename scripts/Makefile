@@ -18,6 +18,11 @@ help:
 	@echo ''
 
 
+class_accuracy: ## Creates a list of class accuracies for every test-val fold.
+class_accuracy: 
+	python3 -W ignore -m results_processing.class_accuracy.class_accuracy -j ${j}
+
+
 confusion_matrix: ## Creates a single confusion matrix for the specified inputs.
 confusion_matrix: 
 	python3 -W ignore -m results_processing.confusion_matrix.confusion_matrix -j ${j}
@@ -94,3 +99,8 @@ tabled_prediction_info:
 training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
 training_inner_loop: 
 	python3 -W ignore -m training.training_inner_loop $(args)
+
+
+threaded_training_inner_loop: ## Runs the inner loop training program in a multithreaded manner. Specify arguments with "args='--file X'" or "args='--folder X'"
+threaded_training_inner_loop: 
+	mpiexec -n 4 python -W ignore -m training.multiprocessing_modules.test $(args)

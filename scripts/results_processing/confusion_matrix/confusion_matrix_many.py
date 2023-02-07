@@ -16,8 +16,8 @@ def find_directories(data_path):
         dict: Two dictionaries of prediction and truth paths.
     """
     # Get the paths of every prediction and true CSV, as well as the fold-names
-    pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=True, getValidation=True)
-    true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True)
+    pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=True, getValidation=True, getTesting=False)
+    true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True, getTesting=False)
     return pred_paths, true_paths
 
 

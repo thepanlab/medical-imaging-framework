@@ -4,10 +4,9 @@
 
   "label_types": {
     "fat": 0,
-    "ligament": 1,
-    "flavum": 2,
-    "epidural space": 3,
-    "spinal cord": 4
+    "spinal cord": 1,
+    "ligament": 2,
+    "flavum": 3,
+    "epidural space": 4
   }
-
 }
