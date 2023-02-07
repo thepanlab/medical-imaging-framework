@@ -43,7 +43,7 @@ def _flatten_dir(path, files):
             if full_path.endswith((".png", ".jpg", ".jpeg", ".tiff", ".csv")):
                 files.append(full_path)
             else:
-                print(colored(f"Warning: Non-image file detected: '{full_path}'"))
+                print(colored(f"Warning: Non-image file detected:"))
         else:
             _flatten_dir(full_path, files)
  

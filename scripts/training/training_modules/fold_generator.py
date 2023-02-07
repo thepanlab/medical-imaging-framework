@@ -17,7 +17,6 @@ def generate_folds(subject_list, test_subject, in_rotations, do_shuffle):
         --------------------------------------------
     """
     folds = []
-    print("generating folds")
     # For this test subject, find all combinations for the testing data
     i = subject_list.index(test_subject)
     for j, validation_subject in enumerate(subject_list):
