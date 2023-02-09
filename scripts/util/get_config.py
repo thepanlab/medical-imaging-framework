@@ -5,6 +5,7 @@ import json
 import io
 import os
 
+os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 def parse_json(default_config_file_name):
     """ Parses the config file from the command line. """
