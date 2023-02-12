@@ -37,6 +37,8 @@ def get_indexes(files, class_names, subject_list):
         # Get the image subject
         subjects = [s for s in subject_list if s in formatted_name]
         if len(subjects) != 1:
+            #print("subjects : ", subjects)
+            #print("formatted_name : ", formatted_name)
             raise Exception(colored(f"Error: {len(subjects)} subjects found for '{file}'. There should be only one.", 'red'))
         
         # Get the position of the label in the string

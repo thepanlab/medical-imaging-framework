@@ -5,7 +5,7 @@
         "cropping_position": [40, 10],
         "decay": 0.01,
         "do_cropping": false,
-        "epochs": 70,
+        "epochs": 3,
         "learning_rate": 0.01,
         "mean": 0,
         "momentum": 0.9,
@@ -13,7 +13,7 @@
         "use_mean": false
     },
 
-    "data_input_directory":"../data/CW_treated",
+    "data_input_directory":"/data/adbadre/data/CW_treated_tiff/",
     "output_path": "../results/training",
     "job_name": "3dcnn_test_1",
     
@@ -31,7 +31,7 @@
     "selected_model_name": "3dcnn",
     "model_code_path": "../data/custom_models/3dcnn.py",
     "coming_from_json": false,
-    "subject_list": ["k1", "k2", "k3"],
+    "subject_list": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
     "test_subjects": ["k1"],
 
     "csv_shape": [185, 210, 185, 1],
