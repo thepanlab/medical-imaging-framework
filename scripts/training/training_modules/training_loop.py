@@ -3,7 +3,7 @@ from training.checkpoint_modules.logger import *
 from termcolor import colored
 
 
-def training_loop(config, testing_subject, files, folds, rotations, indexes, label_position):
+def training_loop(config, testing_subject, files, folds, rotations, indexes, label_position, rank=None):
     """ Creates a model, trains it, and writes its outputs.
         
     Args:
@@ -16,6 +16,8 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
         rotations (int): the number of rotations to perform.
         indexes (dict of lists): A list of true indexes.
         label_position (int): Location in the filename of the label.
+        
+        rank (int): The process rank. Default is none. (Optional)
     """
     print(colored(f'Beginning the training loop for {testing_subject}.', 'green'))
        
@@ -24,7 +26,8 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
     log_rotations = read_log_items(
         config['output_path'], 
         config['job_name'], 
-        ['current_rotation']
+        ['current_rotation'],
+        rank
     )
     
     if log_rotations and 'current_rotation' in log_rotations and testing_subject in log_rotations['current_rotation']:
@@ -33,8 +36,9 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
     
     # Train for every rotation specified
     for rot in range(rotation, rotations):
-        print(colored(f'-- Rotation {rot+1}/{rotations} for {testing_subject} ---------------------------------------', 'magenta'))
-        training_fold = Fold(rot, config, testing_subject, files, folds, indexes, label_position)
+        val_subject = folds[rot]['validation'][0]
+        print(colored(f'--- Rotation {rot+1}/{rotations} for test subject {testing_subject} and val subject {val_subject} ---', 'magenta'))
+        training_fold = Fold(rot, config, testing_subject, val_subject, files, folds, indexes, label_position, rank)
         training_fold.run_all_steps()
         
         # Write the index to log
@@ -46,7 +50,8 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
         write_log(
             config['output_path'], 
             config['job_name'], 
-            {'current_rotation': rotation_dict}
+            {'current_rotation': rotation_dict},
+            rank
         )
              
 

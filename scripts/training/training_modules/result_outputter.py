@@ -12,7 +12,7 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
         testing_subject (str): The testing subject name.
         validation_subject (str): The validation subject name.
         
-        rotation (int): The rotatiion index.
+        rotation (int): The rotation index.
         model_obj (TrainingModel): The trained model.
         history (keras History): The history outputted by the fitting function.
         
@@ -23,6 +23,7 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
     # Check if the output paths exist
     file_prefix = f"{model_obj.model_type}_{rotation}_test_{testing_subject}_val_{validation_subject}"
     path_prefix = os.path.join(output_path, f'Test_subject_{testing_subject}', file_prefix)
+    
     _create_folders(path_prefix, ['prediction', 'true_label', 'file_name', 'model'])
     
     # Save the model

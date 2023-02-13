@@ -4,6 +4,7 @@ from statistics import mode
 import numpy as np
 import pandas as pd
 import regex as re
+import math
 import os
 
 
@@ -225,12 +226,24 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
                         mean_weighted = matrix_weighted_avg["Predicted"][col]["Truth"][row]
                         matrix_weighted_err["Predicted"][col]["Truth"][row] += (true_weighted - mean_weighted) ** 2
 
-            # Divide the error-sums by n_items - 1
+            # Get the standard error
             for row in labels:
                 for col in labels:
                     if n_items > 1:
+                        
+                        # Divide by N-1
                         matrix_err["Predicted"][col]["Truth"][row] /= n_items - 1
                         matrix_weighted_err["Predicted"][col]["Truth"][row] /= n_items - 1
+                        
+                        # Sqrt the entire calculation
+                        matrix_err["Predicted"][col]["Truth"][row] = math.sqrt(matrix_err["Predicted"][col]["Truth"][row])
+                        matrix_weighted_err["Predicted"][col]["Truth"][row] = math.sqrt(matrix_weighted_err["Predicted"][col]["Truth"][row])
+                        
+                        # Divide by sqrt N
+                        matrix_err["Predicted"][col]["Truth"][row] /= math.sqrt(n_items)
+                        matrix_weighted_err["Predicted"][col]["Truth"][row] /= math.sqrt(n_items)
+                    
+                        
                         
             # Create a combination of the mean and std error
             matrix_combo = pd.DataFrame('', columns=labels, index=labels)

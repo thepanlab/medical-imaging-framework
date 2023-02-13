@@ -7,20 +7,23 @@ from termcolor import colored
 from time import perf_counter
 from tensorflow import keras
 import tensorflow as tf
+import fasteners
 
 
 class _FoldTrainingInfo():
-    def __init__(self, fold_index, config, testing_subject, files, folds, indexes, label_position):
+    def __init__(self, fold_index, config, testing_subject, validation_subject, files, folds, indexes, label_position, rank=0):
         """ Initializes a training fold info object.
 
         Args:
             fold_index (int): The fold index within the loop.
             config (dict): The training configuration.
             test_subject (str): The test subject name.
+            validation_subject (str): The validation subject name.
             files (list of str): A list of filepaths to images.
             folds (list of dict): A list of fold partitions
             indexes (dict of lists): A list of true indexes.
             label_position (int): Location in the filename of the label.
+            rank (int): An optional value of some MPI rank.
         """ 
         self.datasets = {
             'testing':    {'files': [], 'indexes': [], 'labels': [], 'ds': None},
@@ -28,7 +31,7 @@ class _FoldTrainingInfo():
             'validation': {'files': [], 'indexes': [], 'labels': [], 'ds': None}
         }
         self.testing_subject = testing_subject
-        self.validation_subject = folds[fold_index]['validation'][0]
+        self.validation_subject = validation_subject
         
         self.files = files
         self.folds = folds
@@ -36,6 +39,7 @@ class _FoldTrainingInfo():
         self.indexes = indexes
         self.fold_index = fold_index
         self.label_position = label_position
+        self.rank = rank
         
         self.model = None
         self.callbacks = None
@@ -103,22 +107,25 @@ class _FoldTrainingInfo():
 
 
 class Fold():
-    def __init__(self, fold_index, config, testing_subject, files, folds, indexes, label_position):
+    def __init__(self, fold_index, config, testing_subject, validation_subject, files, folds, indexes, label_position, rank=None):
         """ Initializes a training fold object.
 
         Args:
             fold_index (int): The fold index within the loop.
             config (dict): The training configuration.
             test_subject (str): The test subject name.
+            validation_subject (str): The validation subject name.
             files (list of str): A list of filepaths to images.
             folds (list of dict): A list of fold partitions
             indexes (dict of lists): A list of true indexes.
             label_position (int): Location in the filename of the label.
+            rank (int): An optional value of some MPI rank.
         """ 
         self.fold_info = _FoldTrainingInfo(
             fold_index, 
             config, 
             testing_subject, 
+            validation_subject,
             files, 
             folds, 
             indexes, 
@@ -159,7 +166,8 @@ class Fold():
         log = read_log_items(
             self.fold_info.config['output_path'], 
             self.fold_info.config['job_name'], 
-            ['fold_info']
+            ['fold_info'],
+            self.fold_info.rank
         )
         if log is None or 'fold_info' not in log:
             return None
@@ -171,7 +179,8 @@ class Fold():
         write_log(
             self.fold_info.config['output_path'], 
             self.fold_info.config['job_name'], 
-            {'fold_info': self.fold_info}
+            {'fold_info': self.fold_info},
+            self.fold_info.rank
         )
     
     
@@ -250,15 +259,16 @@ class Fold():
     def output_results(self):
         """ Output the training results to file. """
         print(colored(f"Finished training for testing subject {self.fold_info.testing_subject} and validation subject {self.fold_info.validation_subject}.", 'green'))
-        output_results(
-            self.fold_info.config['output_path'], 
-            self.fold_info.testing_subject, 
-            self.fold_info.validation_subject, 
-            self.fold_info.fold_index, 
-            self.fold_info.model, 
-            self.history, 
-            self.time_elapsed, 
-            self.fold_info.datasets, 
-            self.fold_info.config['class_names']
-        )
+        with fasteners.InterProcessLock(os.path.join(self.fold_info.config['output_path'], 'lock.tmp')):
+            output_results(
+                self.fold_info.config['output_path'], 
+                self.fold_info.testing_subject, 
+                self.fold_info.validation_subject, 
+                self.fold_info.fold_index, 
+                self.fold_info.model, 
+                self.history, 
+                self.time_elapsed, 
+                self.fold_info.datasets, 
+                self.fold_info.config['class_names']
+            )
         

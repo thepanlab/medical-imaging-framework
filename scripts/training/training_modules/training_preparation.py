@@ -19,6 +19,10 @@ class TrainingVars:
         self.files = get_files(config['data_input_directory'])
         self.indexes, self.label_position = get_indexes(self.files, config['class_names'], config['subject_list'])
         
+        # Make sure test subjects and validation subjects are unique
+        validation_subjects = list(set(config['validation_subjects']))
+        test_subjects = list(set(config['test_subjects']))
+        
         # Generate training folds
-        self.folds, self.n_folds = generate_folds(config['test_subjects'], config['validation_subjects'], test_subject, config['shuffle_the_folds'])
+        self.folds, self.n_folds = generate_folds(test_subjects, validation_subjects, test_subject, config['shuffle_the_folds'])
         

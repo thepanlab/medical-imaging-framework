@@ -13,7 +13,7 @@
 
     "data_input_directory":"../data/ps_kidney_intensity",
     "output_path": "../results/training",
-    "job_name": "lowercase_print",
+    "job_name": "single",
     
     "k_epoch_checkpoint_frequency": 1,
 
@@ -24,8 +24,8 @@
     "selected_model_name": "InceptionV3",
     
     "subject_list": ["1-AJCQ267-left", "2-AJCQ267-right", "3-AJCT106-left", "4-AJCT106-right", "5-AJDG239-left", "6-AJDG239-right"],
-    "test_subjects": ["1-AJCQ267-left", "2-AJCQ267-right"],
-    "validation_subjects": ["1-AJCQ267-left", "2-AJCQ267-right", "3-AJCT106-left", "4-AJCT106-right", "5-AJDG239-left", "6-AJDG239-right"],
+    "test_subjects": ["1-AJCQ267-left", "2-AJCQ267-right", "3-AJCT106-left"],
+    "validation_subjects": ["4-AJCT106-right", "5-AJDG239-left", "6-AJDG239-right"],
 
     "image_size": [800, 400],
 	"target_height": 241,

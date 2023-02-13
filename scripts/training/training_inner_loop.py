@@ -55,14 +55,16 @@ def main():
         else:
             test_subjects = config['test_subjects']
             
+        # Double-check that the test subjects are unique
+        test_subjects = list(set(test_subjects))
+            
         # Train for each test subject
         for test_subject in test_subjects:
             subject_loop(config, test_subject)
-            test_subjects.remove(test_subject)
             write_log(
                 config['output_path'], 
                 config['job_name'], 
-                {'test_subjects': test_subjects}
+                {'test_subjects': [t for t in test_subjects if t != test_subject]}
             )
 
 if __name__ == "__main__":
