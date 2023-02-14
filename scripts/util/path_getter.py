@@ -95,6 +95,14 @@ def get_subfolds(data_path):
 
             # Check if the model has contents
             subfold_paths = get_subfiles(config)
+            
+            # Add check for if this contains info for 1 fold.
+            info = {'file_name': False, 'model': False, 'prediction': False, 'true_label': False}
+            for path in subfold_paths:
+                subpath = path.split('/')[-1]
+                if subpath in info:
+                    info[subpath] = True
+                    
             if subfold_paths:
 
                 # Check that the dictionary contains the model/subject
@@ -105,7 +113,10 @@ def get_subfolds(data_path):
                     subfolds[model_name][subject_id] = []
 
                 # Add to results
-                subfolds[model_name][subject_id].extend(subfold_paths)
+                if False in list(info.values()):
+                    subfolds[model_name][subject_id].extend(subfold_paths)
+                else:
+                    subfolds[model_name][subject_id].append(config)
 
     # Return the directory-paths
     return subfolds
