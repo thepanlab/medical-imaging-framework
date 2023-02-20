@@ -11,7 +11,7 @@ import fasteners
 
 
 class _FoldTrainingInfo():
-    def __init__(self, fold_index, config, testing_subject, validation_subject, files, folds, indexes, label_position, rank=0):
+    def __init__(self, fold_index, config, testing_subject, validation_subject, files, folds, indexes, label_position, rank=None):
         """ Initializes a training fold info object.
 
         Args:
