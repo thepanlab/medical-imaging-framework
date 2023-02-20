@@ -26,6 +26,7 @@
     "n_folds": "all",
     "rotations": "all",
     "seed": 9,
+    "use_true_labels":true,
 
     "class_names": ["cortex", "medulla", "pelvis"],
     "selected_model_name": "3dcnn",

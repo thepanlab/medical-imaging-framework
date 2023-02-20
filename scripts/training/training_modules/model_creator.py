@@ -36,11 +36,11 @@ class TrainingModel:
             model (keras Model): The prepared keras model.
             model_type (str): The name of the model type.
         """
-        print("model_type : ", model_type)
+        print("ici model_type : ", model_type)
         # Catch if the model is not in the model list
             
         if model_type not in model_list:
-            print("using custom value")
+            print("essai 2 using custom value")
             
             # TODO: Create a custom model
             #self.model = get_model()
@@ -52,7 +52,7 @@ class TrainingModel:
             width=185
             height=210
             depth=185
-
+            self.model_type = model_type
             inputs = tf.keras.Input((width, height, depth, 1))
 
             x = tf.keras.layers.Conv3D(filters=20, kernel_size=10, activation="relu")(inputs)

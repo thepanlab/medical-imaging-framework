@@ -94,3 +94,61 @@ tabled_prediction_info:
 training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
 training_inner_loop: 
 	python3 -W ignore -m training.training_inner_loop $(args)
+
+clean: clean-build clean-pyc clean-test
+
+clean-build:
+	rm -fr build/
+	rm -fr dist/
+	rm -fr .eggs/
+	find . -name '*.egg-info' -exec rm -fr {} +
+	find . -name '*.egg' -exec rm -f {} +
+
+clean-pyc:
+	find . -name '*.pyc' -exec rm -f {} +
+	find . -name '*.pyo' -exec rm -f {} +
+	find . -name '*~' -exec rm -f {} +
+	find . -name '__pycache__' -exec rm -fr {} +
+
+clean-test:
+	rm -fr .tox/
+	rm -f .coverage
+	rm -fr htmlcov/
+
+lint:
+	flake8 leviathan_serving tests
+
+test:
+	python setup.py test
+
+test-all:
+	tox
+
+coverage:
+	coverage run --source leviathan_serving setup.py test
+	coverage report -m
+	coverage html
+	$(BROWSER) htmlcov/index.html
+
+docs:
+	rm -f docs/leviathan_serving.rst
+	rm -f docs/modules.rst
+	sphinx-apidoc -o docs/ leviathan_serving
+	$(MAKE) -C docs clean
+	$(MAKE) -C docs html
+	$(BROWSER) docs/_build/html/index.html
+
+servedocs: docs
+	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
+
+release: clean
+	python setup.py sdist upload
+	python setup.py bdist_wheel upload
+
+dist: clean
+	python setup.py sdist
+	python setup.py bdist_wheel
+	ls -l dist
+
+install: clean
+	python setup.py install

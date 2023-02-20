@@ -52,8 +52,8 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
         res_to_return=res.reshape(185, 210, 185)
         return res_to_return
 
-    image = np.array(tf.py_function(io_read, [filename], [tf.float32]))[0]
     #print("shape print : ", image.shape)
+    image = np.array(tf.py_function(io_read, [filename], [tf.float32]))[0]
     #image = tf.io.decode_image(image, channels=channels, dtype=tf.float32, name=None, expand_animations=False)
     
     # TODO: Perhaps make image parser one function, so it can be changed in one area?
