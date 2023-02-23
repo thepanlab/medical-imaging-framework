@@ -1,6 +1,6 @@
 {
     "hyperparameters": {
-        "batch_size": 15,
+        "batch_size": 10,
         "channels": 1,
         "cropping_position": [40, 10],
         "decay": 0.01,
