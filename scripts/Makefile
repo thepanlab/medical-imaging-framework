@@ -18,6 +18,16 @@ help:
 	@echo ''
 
 
+predicted_formatter: ## Formats prediction values of some data
+predicted_formatter: 
+	python3 -W ignore -m util.predicted_formatter.predicted_formatter
+
+
+truth_formatter: ## Formats truth values of some data
+truth_formatter: 
+	python3 -W ignore -m util.truth_formatter.truth_formatter
+
+
 class_accuracy: ## Creates a list of class accuracies for every test-val fold.
 class_accuracy: 
 	python3 -W ignore -m results_processing.class_accuracy.class_accuracy -j ${j}
@@ -101,6 +111,4 @@ training_inner_loop:
 	python3 -W ignore -m training.training_inner_loop $(args)
 
 
-threaded_training_inner_loop: ## Runs the inner loop training program in a multithreaded manner. Specify arguments with "args='--file X'" or "args='--folder X'"
-threaded_training_inner_loop: 
-	mpiexec -n 4 python -W ignore -m training.multiprocessing_modules.test $(args)
+
