@@ -16,8 +16,11 @@ def get_data(pred_path, true_path):
         pandas.Dataframe: Two pandas dataframes of prediction and true values.
     """
     # Read CSV file
-    pred = pd.read_csv(pred_path, header=None).to_numpy()
-    true = pd.read_csv(true_path, header=None).to_numpy()
+    try:
+        pred = pd.read_csv(pred_path, header=None).to_numpy()
+        true = pd.read_csv(true_path, header=None).to_numpy()
+    except:
+        raise Exception(f'\nError: Could not read in \n\t{true_path}  \n\tand/or \n\t{pred_path}\n\tProbably empty.')
 
     # Get shapes
     pred_rows = pred.shape[0]
