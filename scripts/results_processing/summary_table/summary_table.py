@@ -41,7 +41,10 @@ def read_data(paths):
             # For each file, read and store it
             for validation_fold_path in paths[config][test_fold]:
                 val_fold = validation_fold_path.split("/")[-3].split("_")[-1]
-                results[config][test_fold][val_fold] = pd.read_csv(validation_fold_path, header=None).to_numpy()
+                try:
+                    results[config][test_fold][val_fold] = pd.read_csv(validation_fold_path, header=None).to_numpy()
+                except:
+                    print(colored(f"Warning: {validation_fold_path} is empty.", 'yellow'))
 
     # Return the dictionary
     return results

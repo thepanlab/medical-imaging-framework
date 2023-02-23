@@ -1,5 +1,5 @@
 {
-  "data_path": "../data/result_ep_intensity_test",
+  "data_path": "../data/hao",
   "output_path": "../results/processed_output/summary_output",
   "output_filename": "summary_table",
 
