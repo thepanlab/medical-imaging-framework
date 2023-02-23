@@ -5,27 +5,7 @@ import argparse
 import json
 
 """
-    Predicted Formatter
-
-    This file will take the model predictions, as a matrix of probabilities,
-    and translate them to a vector of integer values.
-    It will do this for every prediction-file, so it expects a specific structure and naming scheme.
-
-    > data_path/
-        > Test_subject_e1/                              # Level 1
-            > config_1/                                 # Level 2
-                > [some fold name]                      # Level 3
-                    > prediction
-                        > [some fold name]_val_predicted.csv        <-- Target input
-                        > [some fold name]_val_predicted_index.csv  <-- Target output
-                        > ...
-                > ...
-            > config_2/
-            > config_3/
-            > winner_model/
-        > Test_subject_e2/
-        ...
-
+    This formats the truth indexes from the labels in case they are wrong.
 """
 
 
@@ -36,25 +16,29 @@ def read_json():
         '-j', '--json', '--load_json',
         help='Load settings from a JSON file.',
         required=False,
-        default='./util/predicted_formatter/predicted_formatter_config.json'
+        default='./util/truth_formatter/truth_formatter_config.json'
     )
     args = parser.parse_args()
     with open(args.json) as config_file:
         return json.load(config_file)
 
 
-def translate_file(file_path):
+def translate_file(file_path, label_types):
     """ Reads and translates a data-file """
 
     # Get the data in the CSV file
-    data = pd.read_csv(file_path, header=None)
+    try:
+        data = pd.read_csv(file_path, header=None)
+    except:
+        return []
 
     # Loop through all the rows, note the largest probability-value's index
     formatted_data = []
     for i, values in data.iterrows():
-        values = [v for v in values]
-        index = values.index(max(values))
-        formatted_data.append(index)
+        label = values[0]
+        if label not in label_types:
+            raise Exception(colored(f'Error: {label} not found in the label types given!'))
+        formatted_data.append(label_types[label])
 
     # Return a list of max-indexes
     return formatted_data
@@ -80,14 +64,14 @@ def main(data_path=None):
         data_path = config["data_path"]
 
     # Get a list of all files to translate
-    file_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False)
+    file_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=False)
     
     # Translate each file
     for model in file_paths:
         for test_subject in file_paths[model]:
             for file_path in file_paths[model][test_subject]:
                 # The translation
-                translated_data = translate_file(file_path)
+                translated_data = translate_file(file_path, config['label_types'])
 
                 # Write it to file
                 write_file(file_path, translated_data)

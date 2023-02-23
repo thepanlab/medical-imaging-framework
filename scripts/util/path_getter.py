@@ -55,9 +55,13 @@ def get_subfiles(path, return_full_path=True):
     # Make this path have all forward-slashes, to make usable with Windows machines
     path = path.replace("\\", "/")
 
-    # Check if the path exists and is a directory
-    if not (os.path.exists(path) and os.path.isdir(path)):
-        raise Exception(colored("Error: The directory does not exist! - " + path, "red"))
+    # Check if the path exists
+    if not os.path.exists(path):
+        raise Exception(colored(f"Error: The directory does not exist! - {path}", "red"))
+    
+    # If a file
+    if not os.path.isdir(path):
+        raise Exception(colored(f"Error: Not a directory, but it should be - {path}\n\t Check your data's directory structure.", "red"))
 
     # Get and return items
     subfiles = os.listdir(path)
@@ -163,8 +167,16 @@ def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=Fa
 
             # Each subfold should contain the target subfolder. Try to find it.
             for subfold in subfolds[model_name][subject_id]:
+                
+                # Make sure the directory is there...
+                if target_folder in [f.split('/')[-1] for f in subfolds[model_name]] or \
+                 target_folder in [f.split('/')[-1] for f in subfolds[model_name][subject_id]]:
+                    raise Exception(colored("Error: Please make sure your data is in the correct format!\n\t" +
+                            "The levels should be model->subject->fold. You have less than this.", 'red'))
+                    
+                # Get subfiles
                 subfiles = get_subfiles(subfold, return_full_path=False)
-
+                    
                 # Check if the target folder is in the list
                 if target_folder not in subfiles:
                     print(colored("Warning: " + target_folder + " not detected in " + subfold, "yellow"))
