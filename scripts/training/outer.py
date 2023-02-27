@@ -120,7 +120,7 @@ def get_configFile_list(path):
 # Get labels, subject, class index
 def get_label_subject(path,label_position ,class_names, subject_list):
     #"/home/xx_fat_xxx/img_ps/ep_optic_axis/train/E4_1_fat_3_Optic%20axis/807_E4_1_fat_3_Optic%20axis.png"
-    formatted_path=path.lower().replace("%20", " ")
+    formatted_path=path.replace("%20", " ")
     # Remove the file extension
     temp = formatted_path.split('.')
     fileName_remove_extension = temp[0]
@@ -132,11 +132,12 @@ def get_label_subject(path,label_position ,class_names, subject_list):
 
     # Get all match the labels
     labels = [class_name for class_name in class_names if class_name in fileName_parts]
+
     # Assuming only 1 label will be obtained, otherwise throw exception
+    if len(labels) < 1:
+        raise Exception("Error when getting label from: " + path)
     if len(set(labels)) > 1:
         raise Exception("Duplicate labels extracted from: " + path)
-    elif len(labels) < 1:
-        raise Exception("Error when getting label from: " + path)
 
     # Update label index within the filename, this line only perform once
     if label_position==-1:
@@ -151,6 +152,8 @@ def get_label_subject(path,label_position ,class_names, subject_list):
     idx=class_names.index(labels[0])
     # Get all match the subjects
     subjects = [subject for subject in subject_list if subject in fileName_parts]
+
+
     # Assuming only 1 subject will be obtained, otherwise throw exception
     if len(set(subjects)) > 1:
         raise Exception("Duplicate subjects extracted from: " + path)
@@ -240,7 +243,7 @@ f = open(configFile_list[0])
 test_config =json.load(f)
 f.close()
 testing_subjects = test_config['testing_subject'].split(',')  # (string list)
-testing_subjects = [x.lower() for x in testing_subjects]  # (string list lower case)
+testing_subjects = [x for x in testing_subjects]  # (string list lower case)
 
 
 
@@ -252,7 +255,7 @@ def training(data, testing_subject, config_name):
     n_epochs = int(data['epochs'])  # (int)
     # Get subject list from config
     subject_list = data['subject_list'].split(',')  # (string list)
-    subject_list = [x.lower() for x in subject_list]  # (string list lower case)
+    # subject_list = [x for x in subject_list]  # (string list lower case)
     # Get the main directory path from config
     file_path = data['files_directory']  # (string)
     # Get the saving directory path from config
@@ -440,22 +443,13 @@ def training(data, testing_subject, config_name):
 
     base_model_empty, model_type = get_model(selected_model,target_height, target_width, channels)
     print("\033[91mCurrent model: %s\033[0m" % model_type)
-    #
-    # base_model_empty = keras.applications.resnet50.ResNet50(include_top=False,
-    #                                                         weights=None,
-    #                                                         input_tensor=None,
-    #                                                         input_shape=(target_height, target_width, channels),
-    #                                                         pooling=None)
-
 
     avg = keras.layers.GlobalAveragePooling2D()(base_model_empty.output)
     out_put = keras.layers.Dense(len(class_names), activation="softmax")(avg)
     model_ready = keras.models.Model(inputs=base_model_empty.input, outputs=out_put)
 
     optimizer = keras.optimizers.SGD(lr=learning_rate, momentum=the_momentum, nesterov=True, decay=the_decay)
-    # for old epidural data 3c
-    # optimizer = keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False,
-    #                                   name="Adam")
+
     # early_stopping_cb = keras.callbacks.EarlyStopping(monitor='val_loss',
     #                                                   patience=the_patience,
     #                                                   restore_best_weights=True)
@@ -506,7 +500,7 @@ def training(data, testing_subject, config_name):
     with open('%s/%s_test_%s/%s_test_%s_classes-names.csv' % (results_path, model_type, test_subject, model_type, test_subject), 'w') as f:
         writer = csv.writer(f)
         for idx, item in enumerate(class_names):
-            writer.writerow(item, idx)
+            writer.writerow(item)
     # val_pred = model_ready.predict(images_val_batch_ds)
     # print("Saving prediction of validation for fold 0")
     # with open('%s/%s_test_%s/prediction/%s_test_%s_val-predicted.csv' % (results_path, model_type, test_subject, model_type, test_subject), 'w') as f:
