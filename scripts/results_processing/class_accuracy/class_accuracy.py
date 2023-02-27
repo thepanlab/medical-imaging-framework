@@ -40,7 +40,10 @@ def read_data(paths):
             # For each file, read and store it
             for validation_fold_path in paths[config][test_fold]:
                 val_fold = validation_fold_path.split("/")[-3].split("_")[-1]
-                results[config][test_fold][val_fold] = pd.read_csv(validation_fold_path, header=None).to_numpy()
+                try:
+                    results[config][test_fold][val_fold] = pd.read_csv(validation_fold_path, header=None).to_numpy()
+                except:
+                    print(colored(f"Warning: {validation_fold_path} is empty.", 'yellow'))
 
     # Return the dictionary
     return results
@@ -193,8 +196,8 @@ def main(config=None):
         config = parse_json('./results_processing/class_accuracy/class_accuracy_config.json')
 
     # Get the necessary input files
-    true_paths = path_getter.get_subfolder_files(config['data_path'], "true_label", isIndex=True, getValidation=True)
-    pred_paths = path_getter.get_subfolder_files(config['data_path'], "prediction", isIndex=True, getValidation=True)
+    true_paths = path_getter.get_subfolder_files(config['data_path'], "true_label", isIndex=True, getValidation=True, isOuter=config['is_outer'])
+    pred_paths = path_getter.get_subfolder_files(config['data_path'], "prediction", isIndex=True, getValidation=True, isOuter=config['is_outer'])
 
     # Read in each file into a dictionary
     true = read_data(true_paths)

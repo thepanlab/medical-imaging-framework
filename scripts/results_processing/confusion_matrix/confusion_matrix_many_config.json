@@ -1,12 +1,15 @@
 {
-  "data_path": "../data/_loop_inner",
+  "data_path": "../data/hao",
   "output_path": "../results/processed_output/confusion_matrix",
 
   "label_types": {
-    "fat": 0,
-    "spinal cord": 1,
-    "ligament": 2,
-    "flavum": 3,
-    "epidural space": 4
-  }
+    "cortex": 0,
+    "medulla": 1,
+    "calyx": 2,
+    "fat": 3,
+    "pelvis": 4,
+    "tumor": 5
+  },
+
+  "is_outer": false
 }

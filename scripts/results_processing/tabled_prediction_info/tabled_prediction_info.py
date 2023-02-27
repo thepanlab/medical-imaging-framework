@@ -16,13 +16,12 @@ def find_directories(config):
         dict: Two dictionaries of prediction and truth paths.
     """
     # Get the paths of every prediction and true CSV, as well as the fold-names
-    is_outer = path_getter.is_outer_loop(config['data_path'])
-    pred_paths = path_getter.get_subfolder_files(config['data_path'], "prediction", isIndex=True, getValidation=True)
+    pred_paths = path_getter.get_subfolder_files(config['data_path'], "prediction", isIndex=True, getValidation=True, isOuter=config['is_outer'])
     if config['use_true_labels']:
-        true_paths = path_getter.get_subfolder_files(config['data_path'], "true_label", isIndex=True, getValidation=True)
-        return pred_paths, true_paths, is_outer
+        true_paths = path_getter.get_subfolder_files(config['data_path'], "true_label", isIndex=True, getValidation=True, isOuter=config['is_outer'])
+        return pred_paths, true_paths
     else:
-        return pred_paths, None, is_outer
+        return pred_paths, None
 
 
 def find_images(data_path):
@@ -135,13 +134,13 @@ def main(config=None):
     # Get program configuration and run using its contents
     if config is None:
         config = parse_json('./results_processing/tabled_prediction_info/tabled_prediction_info_config.json')
-    pred_paths, true_paths, is_outer = find_directories(config)
+    pred_paths, true_paths = find_directories(config)
     print(colored(f"Successfully read in the prediction and truth paths.", 'green'))
     image_paths = find_images(config["data_path"])
     print(colored(f"Successfully read in the image paths.", 'green'))
     if not os.path.exists(config["output_path"]):
         os.makedirs(config["output_path"])
-    compare_values(config["output_path"], pred_paths, true_paths, image_paths, config["label_types"], is_outer)
+    compare_values(config["output_path"], pred_paths, true_paths, image_paths, config["label_types"], config['is_outer'])
 
 
 if __name__ == "__main__":

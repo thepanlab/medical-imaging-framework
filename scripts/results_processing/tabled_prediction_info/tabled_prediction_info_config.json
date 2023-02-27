@@ -11,5 +11,7 @@
     "3": "fat",
     "4": "pelvis",
     "5": "tumor"
-  }
+  },
+
+  "is_outer": false
 }

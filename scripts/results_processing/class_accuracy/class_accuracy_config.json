@@ -1,15 +1,18 @@
 {
-  "data_path": "../data/_loop_inner",
+  "data_path": "../data/hao",
   "output_path": "../results/processed_output/class_accuracy",
   "output_filename": "class_accuracy",
 
   "round_to": 2,
 
   "classes": {
-    "fat": 0,
-    "ligament": 1,
-    "flavum": 2,
-    "epidural space": 3,
-    "spinal cord": 4
-  }
+    "cortex": 0,
+    "medulla": 1,
+    "calyx": 2,
+    "fat": 3,
+    "pelvis": 4,
+    "tumor" : 5
+  },
+
+  "is_outer": false
 }

@@ -34,7 +34,9 @@ def is_outer_loop(data_path):
     config_count = [p for p in subject_paths if 'config' in p.split('/')[-1]]
     config_count = [p for p in config_count if os.path.isdir(p)]
     if len(config_count) > 1:
+        print(colored("Data detected as inner loop.", 'yellow'))
         return False
+    print(colored("Data detected as outer loop.", 'yellow'))
     return True
         
 
@@ -126,7 +128,7 @@ def get_subfolds(data_path):
     return subfolds
 
 
-def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=False, getTesting=False, isCSV=True, returnIsOuter=False):
+def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=False, getTesting=False, isCSV=True, returnIsOuter=False, isOuter=None):
     """ This function will get a set of files from each "subfold" contained within a particular target directory.
 
     Args:
@@ -137,6 +139,7 @@ def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=Fa
         getTesting (bool, optional): Gets test files only. Defaults to False.
         isCSV (bool, optional): Check if the file should be a CSV file. Defaults to True.
         returnIsOuter (bool, optional): To return whether the data is determined to be in outer loop format.
+        isOuter (bool, optional): A specification to whether this data path is the outer loop.
 
     Raises:
         Exception: If no files are found.
@@ -149,7 +152,10 @@ def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=Fa
     target_subfolder_files = {}
     
     # Check if outer loop
-    is_outer = is_outer_loop(data_path)
+    if isOuter is None:
+        is_outer = is_outer_loop(data_path)
+    else:
+        is_outer = isOuter
 
     # Change both 'gets' to true if false
     if not getValidation and not getTesting:
@@ -203,7 +209,7 @@ def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=Fa
                         for file in target_paths:
                             if re.search('_test_.*_val_.*_test_', file.split('/')[-1]) is not None:
                                 temp_paths.append(file)
-                else:
+                else: # TODO
                     for file in target_paths:
                         if re.search('.*_test_.*', file.split('/')[-1]) is not None:
                             temp_paths.append(file)

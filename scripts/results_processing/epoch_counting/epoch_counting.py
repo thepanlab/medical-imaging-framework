@@ -153,7 +153,7 @@ def main(config=None):
 
     # Get the necessary input files
     history_paths = path_getter.get_history_paths(config['data_path'])
-    is_outer = path_getter.is_outer_loop(config['data_path'])
+    is_outer = config['is_outer']
 
     # Count the number of epochs within every file
     epochs = count_epochs(history_paths, is_outer)

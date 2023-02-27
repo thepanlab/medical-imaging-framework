@@ -3,5 +3,7 @@
   "output_path": "../results/processed_output/summary_output",
   "output_filename": "summary_table",
 
-  "round_to": 8
+  "round_to": 8,
+
+  "is_outer": false
 }

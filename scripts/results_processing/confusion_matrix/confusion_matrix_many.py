@@ -6,18 +6,19 @@ import traceback
 import os
 
 
-def find_directories(data_path):
+def find_directories(data_path, is_outer):
     """ Finds the directories for every input needed to make graphs.
 
     Args:
         data_path (string): The path of the data directory.
+        is_outer (bool): Whether the path is of the outer loop.
 
     Returns:
         dict: Two dictionaries of prediction and truth paths.
     """
     # Get the paths of every prediction and true CSV, as well as the fold-names
-    pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=True, getValidation=True, getTesting=False)
-    true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True, getTesting=False)
+    pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=True, getValidation=True, getTesting=False, isOuter=is_outer)
+    true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True, getTesting=False, isOuter=is_outer)
     return pred_paths, true_paths
 
 
@@ -79,7 +80,7 @@ def main():
     """ The Main Program. """
     # Get program configuration and run using its contents
     config = parse_json(os.path.abspath('./results_processing/confusion_matrix/confusion_matrix_many_config.json'))
-    pred_paths, true_paths = find_directories(config["data_path"])
+    pred_paths, true_paths = find_directories(config["data_path"], config['is_outer'])
     run_program(config, pred_paths, true_paths)
 
 
