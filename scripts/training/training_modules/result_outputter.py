@@ -1,10 +1,11 @@
 from termcolor import colored
 import pandas as pd
+import json
 import csv
 import os
 
 
-def output_results(output_path, testing_subject, validation_subject, rotation, model_obj, history, time_elapsed, datasets, class_names):
+def output_results(output_path, testing_subject, validation_subject, rotation, model_obj, history, time_elapsed, datasets, class_names, job_name, config_name):
     """ Output results from the trained model.
         
     Args:
@@ -19,10 +20,18 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
         time_elapsed (double): The elapsed time from the fitting phase.
         datasets (dict): A dictionary of various values for the data-splits.
         class_names (list of str): The class names of the data.
+        
+        job_name (str): The name of this config's job name.
+        config_name(str): The name of this config's config (model) name.
     """
     # Check if the output paths exist
     file_prefix = f"{model_obj.model_type}_{rotation}_test_{testing_subject}_val_{validation_subject}"
-    path_prefix = os.path.join(output_path, f'Test_subject_{testing_subject}', file_prefix)
+    path_prefix = os.path.join(
+        output_path, 
+        f'Test_subject_{testing_subject}', 
+        f'config_{job_name}_{config_name}',
+        file_prefix
+    )
     
     _create_folders(path_prefix, ['prediction', 'true_label', 'file_name', 'model'])
     
@@ -37,9 +46,10 @@ def output_results(output_path, testing_subject, validation_subject, rotation, m
         print(colored(f'Warning: The model history is empty for: {file_prefix}', 'yellow'))
     
     # Write the class names
+    class_output = {class_names[idx]: idx for idx in range(len(class_names))}
     _metric_writer(
-         f"{file_prefix}_class_names.csv", 
-         [f"{class_names[idx]}, {idx}" for idx in range(len(class_names))], 
+         f"{file_prefix}_class_names.json", 
+         class_output, 
          path_prefix
     )
     
@@ -105,10 +115,19 @@ def _metric_writer(path, values, path_prefix):
         path_prefix (str): The prefix of the file name and directory.
     """
     with open(f"{path_prefix}/{path}", 'w', encoding='utf-8') as fp:
-        writer = csv.writer(fp)
+        # Predicted values
         if path.endswith('predicted.csv'):
+            writer = csv.writer(fp)
             for item in values:
                 writer.writerow(item)
+                
+        # Class names
+        elif path.endswith('_class_names.json'): 
+            json.dump(values, fp)
+            
+            
+        # Everything else
         else:
+            writer = csv.writer(fp)
             for item in values:
                 writer.writerow([item])
