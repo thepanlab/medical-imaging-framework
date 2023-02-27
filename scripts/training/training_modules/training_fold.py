@@ -158,7 +158,11 @@ class Fold():
         # Create the datasets and train. (Datasets cannot be logged.)
         if self.create_dataset():
             self.train_model()
-            self.output_results()
+            if self.fold_info.rank is not None:
+                with fasteners.InterProcessLock(os.path.join(self.fold_info.config['output_path'], 'lock.tmp')):
+                    self.output_results()
+            else:
+                self.output_results()
     
     
     def load_state(self):
@@ -259,16 +263,18 @@ class Fold():
     def output_results(self):
         """ Output the training results to file. """
         print(colored(f"Finished training for testing subject {self.fold_info.testing_subject} and validation subject {self.fold_info.validation_subject}.", 'green'))
-        with fasteners.InterProcessLock(os.path.join(self.fold_info.config['output_path'], 'lock.tmp')):
-            output_results(
-                self.fold_info.config['output_path'], 
-                self.fold_info.testing_subject, 
-                self.fold_info.validation_subject, 
-                self.fold_info.fold_index, 
-                self.fold_info.model, 
-                self.history, 
-                self.time_elapsed, 
-                self.fold_info.datasets, 
-                self.fold_info.config['class_names']
-            )
+        output_results(
+            os.path.join(self.fold_info.config['output_path'], 'training_results'), 
+            self.fold_info.testing_subject, 
+            self.fold_info.validation_subject, 
+            self.fold_info.fold_index, 
+            self.fold_info.model, 
+            self.history, 
+            self.time_elapsed, 
+            self.fold_info.datasets, 
+            self.fold_info.config['class_names'],
+            self.fold_info.config['job_name'],
+            self.fold_info.config['selected_model_name']
+        )
+        
         
