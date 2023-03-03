@@ -29,13 +29,6 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
     Exception:
         If eager execution is disabled.
     """
-    # Assert eager execution, else trouble will be had...
-    if not tf.executing_eagerly():
-        raise Exception(
-            "Fatal Error: TensorFlow must have eager execution enabled when parsing images.\n\t" +
-            "Try including this function call within 'tf.py_function' and/or calling\n\t" +
-            "'tf.config.run_functions_eagerly(True)' before running this."
-        )
     
     # Split to get only the image name
     image_path = tf.strings.split(filename, "/")[-1]
