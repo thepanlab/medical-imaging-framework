@@ -10,7 +10,7 @@ def run_program(args):
         args (dict): Program configuration.
     """
     # Get the needed input paths, as well as the proper file names for output
-    pred_paths, true_paths = find_directories(args["data_path"])
+    pred_paths, true_paths = find_directories(args["data_path"], args['is_outer'])
     json = {
         label: args[label] for label in (
             'line_width', 'label_types', 'line_colors',
@@ -28,7 +28,7 @@ def run_program(args):
                 roc_curve.main(json)
 
 
-def find_directories(data_path):
+def find_directories(data_path, is_outer):
     """ Finds the directories for every input needed to make graphs.
 
     Args:
@@ -38,8 +38,8 @@ def find_directories(data_path):
         dict: Of the true paths and the prediction paths.
     """
     # Get the paths of every prediction and true CSV, as well as the fold-names
-    true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True)
-    pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False, getValidation=True)
+    true_paths = path_getter.get_subfolder_files(data_path, "true_label", isIndex=True, getValidation=True, isOuter=is_outer)
+    pred_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False, getValidation=True, isOuter=is_outer)
     return pred_paths, true_paths
 
 

@@ -1,21 +1,23 @@
 {
-  "data_path": "../data/_loop_outer",
+  "data_path": "../data/hao",
   "output_path": "../results/processed_output/roc_output",
 
   "line_width": "2",
   "label_types": [
+    "cortex",
+    "medulla",
+    "calyx",
     "fat",
-    "ligament",
-    "flavum",
-    "epidural-space",
-    "spinalcord"
+    "pelvis",
+    "tumor"
   ],
   "line_colors": [
     "aqua",
     "darkorange",
     "cornflowerblue",
     "brown",
-    "seagreen"
+    "seagreen",
+    "red"
   ],
 
   "font_family": "DejaVu Sans",
@@ -23,5 +25,7 @@
   "title_font_size": 12,
 
   "save_resolution": "figure",
-  "save_format": "png"
+  "save_format": "png",
+
+  "is_outer": false
 }

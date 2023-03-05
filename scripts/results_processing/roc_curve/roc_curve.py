@@ -104,8 +104,17 @@ def get_data(pred_path, true_path):
         list: Two lists of true and predicted values.
     """
     # Read CSV file
-    pred = pd.read_csv(pred_path, header=None).to_numpy()
-    true = pd.read_csv(true_path, header=None).to_numpy()
+    try:
+        pred = pd.read_csv(pred_path, header=None).to_numpy()
+    except:
+        print(colored(f"\nError: the predictions file was empty.  \n\t{pred_path}", 'red'))
+        return None, None
+    
+    try:
+        true = pd.read_csv(true_path, header=None).to_numpy()
+    except:
+        print(colored(f"\nError: the truth file was empty.  \n\t{true_path}", 'red'))
+        return None, None
 
     # Get shapes
     pred_rows, _ = pred.shape
@@ -145,6 +154,8 @@ def main(config=None):
     if not os.path.exists(true_path):
         raise Exception(colored("Error: The true-value path is not valid!: " + true_path, 'red'))
     true_val, pred_val = get_data(pred_path, true_path)
+    if true_val is None:
+        exit(-1)
 
     # Create the curve
     create_roc_curve(true_val, pred_val, config, config['output_file_prefix'], output_path)
