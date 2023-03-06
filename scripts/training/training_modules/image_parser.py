@@ -67,7 +67,7 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
     
     # Find the label if needed
     if use_labels:
-        if not label_position:
+        if not label_position or label_position < 0:
             raise ValueError(colored("Error: A label position is needed to parse the image class.", 'red'))
         
         # Check for label matches
