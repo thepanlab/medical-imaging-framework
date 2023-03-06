@@ -101,7 +101,7 @@ def predict_images(image_paths, models, config, class_names):
                 break
             break
     else:
-        label_position = None
+        label_position = -1
     
     # Predict all items using every model
     prediction_results = {}
@@ -116,20 +116,26 @@ def predict_images(image_paths, models, config, class_names):
             timing_results[model][subject] = {}
                 
             # Separate the images into batches
-            img_slices = tf.data.Dataset.from_tensor_slices(image_paths[subject])
-            img_map = img_slices.map(lambda x:parse_image(
-                x,  
-                mean, 
-                use_mean, 
-                class_names, 
-                channels, 
-                do_cropping,
-                offset_height, 
-                offset_width, 
-                target_height, 
-                target_width,
-                label_position,
-                config['use_true_labels']
+            img_slices = tf.data.Dataset.from_tensor_slices(image_paths[subject]) 
+            if config['use_true_labels']:
+                tout = [tf.float32, tf.int64]
+            else:
+                tout = [tf.float32]
+            img_map = img_slices.map(lambda x: tf.py_function(
+                func=parse_image,
+                inp=[
+                    x,                                                                 # Filename
+                    class_names, 
+                    channels, 
+                    do_cropping,  
+                    offset_height, 
+                    offset_width, 
+                    target_height,
+                    target_width, 
+                    label_position,
+                    config['use_true_labels'],                                     # Label Position
+                ],
+                Tout=tout
             ))
             img_batch = img_map.batch(config['batch_size'], drop_remainder=False)
 
