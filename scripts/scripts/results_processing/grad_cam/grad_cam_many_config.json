@@ -1,0 +1,26 @@
+{
+  "input_model_address": "../data/grad_cam/model/InceptionV3_0_test_e1_val_e2_resnet50.h5",
+  "input_directory_or_tabled_info": "../results/processed_output/tabled_prediction_info/resnet_prediction_info.csv",
+  "output_directory": "../results/processed_output/grad_cam",
+
+  "alpha": 0.7,
+  "last_conv_layer_name": "mixed8",
+
+  "query":{
+    "cutoff_number_of_results": -1,
+    "sort_images": true,
+
+    "test_subject": ["k2", "k4"],
+
+    "match": [true, false],
+
+    "true_label": ["ligament"],
+    "true_label_index": [],
+
+    "pred_label": [],
+    "pred_label_index": [],
+
+    "true_predicted_label_pairs": [],
+    "true_predicted_index_pairs": [[1, 2], [3, 3]] 
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "data_path": "../data/hao",
+  "output_path": "../results/processed_output/metrics_output",
+  "output_filename": "metrics_table",
+
+  "round_to": 6,
+
+  "is_outer": false
+}

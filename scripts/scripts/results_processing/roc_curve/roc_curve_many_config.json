@@ -1,0 +1,31 @@
+{
+  "data_path": "../data/hao",
+  "output_path": "../results/processed_output/roc_output",
+
+  "line_width": "2",
+  "label_types": [
+    "cortex",
+    "medulla",
+    "calyx",
+    "fat",
+    "pelvis",
+    "tumor"
+  ],
+  "line_colors": [
+    "aqua",
+    "darkorange",
+    "cornflowerblue",
+    "brown",
+    "seagreen",
+    "red"
+  ],
+
+  "font_family": "DejaVu Sans",
+  "label_font_size": 12,
+  "title_font_size": 12,
+
+  "save_resolution": "figure",
+  "save_format": "png",
+
+  "is_outer": false
+}
