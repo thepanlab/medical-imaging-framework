@@ -18,6 +18,9 @@ help:
 	@echo ''
 
 
+## --- Result Processing ----------------------------------------------------------------------- ##
+
+
 predicted_formatter: ## Formats prediction values of some data
 predicted_formatter: 
 	python3 -W ignore -m util.predicted_formatter.predicted_formatter
@@ -103,12 +106,41 @@ tabled_prediction_info:
 	python3 -W ignore -m results_processing.tabled_prediction_info.tabled_prediction_info -j ${j}
 
 
-## -------------------------------------------------------------------------- ##
+## --- Sequential Training ----------------------------------------------------------------------- ##
 
 
 training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
 training_inner_loop: 
-	python3 -W ignore -m training.training_inner_loop $(args)
+	python3 -W ignore -m training.training_sequential.loop_inner.training_inner_loop $(args)
 
 
+training_outer_loop: ## Runs the outer loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
+training_outer_loop: 
+	python3 -W ignore -m training.training_sequential.loop_outer.training_outer_loop $(args)
+
+
+## --- Distributed Training ----------------------------------------------------------------------- ##
+
+
+mpi_init: ## Prints a console command for running MPI based on your config parameters.
+mpi_init: 
+	python3 -W ignore -m training.training_multiprocessing.mpi_init $(args)
+
+
+distributed_training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
+distributed_training_inner_loop: 
+	CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 python3 -m training.training_multiprocessing.loop_inner.multiprocessed_training_inner_loop
+
+
+distributed_training_outer_loop: ## Runs the outer loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
+distributed_training_outer_loop: 
+	CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 python3 -m training.training_multiprocessing.loop_outer.multiprocessed_training_outer_loop
+
+
+## --- Temp ----------------------------------------------------------------------- ##
+
+
+mpi_test: ## test fx
+mpi_test: 
+	CUDA_VISIBLE_DEVICES=0,1 mpirun -n 1 python3 -W ignore -m training.training_multiprocessing.test_orig $(args)
 
