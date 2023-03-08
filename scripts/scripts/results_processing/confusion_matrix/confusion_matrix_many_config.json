@@ -1,8 +1,0 @@
-{
-  "data_path": "/home/jshaw/medical-imaging-framework/results/training_TEST_OUTER/training_results",
-  "output_path": "../results/processed_output/confusion_matrix",
-
-  "label_types": {"Cortex": 0, "Medulla": 1, "Calyx": 2, "Fat": 3},
-
-  "is_outer": true
-}

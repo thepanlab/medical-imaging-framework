@@ -1,6 +1,0 @@
-{
-  "data_path": "../data/hao",
-  "output_path": "../results/processed_output/epoch_output/",
-
-  "is_outer": false
-}
