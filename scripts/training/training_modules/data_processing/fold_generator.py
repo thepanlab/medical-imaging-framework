@@ -76,10 +76,13 @@ def _inner_loop_generation(test_subject_list, validation_subject_list, test_subj
     folds = []
     
     # For this test subject, find all combinations for the testing data
-    i = test_subject_list.index(test_subject)
-    for j, validation_subject in enumerate(validation_subject_list):
-        if i != j:
-            subject_fold = {'training': _fill_training_fold(validation_subject_list, i, j), 'validation': [validation_subject], 'testing': [test_subject]}
+    for validation_subject in validation_subject_list:
+        if validation_subject != test_subject:
+            subject_fold = {
+                'training': _fill_training_fold(test_subject_list, test_subject, validation_subject), 
+                'validation': [validation_subject], 
+                'testing': [test_subject]
+            }
             folds.append(subject_fold)
     
     # Shuffle the data and get the number of training rotations
@@ -89,11 +92,11 @@ def _inner_loop_generation(test_subject_list, validation_subject_list, test_subj
 
 
 
-def _fill_training_fold(subject_list, i, j):
+def _fill_training_fold(test_subject_list, test_subject, validation_subject):
     """ Fills the training fold for some subject.
 
         -- Input Parameters ------------------------
-        subject_list (list of str): A list of possible subjects.
+        test_subject_list (list of str): A list of possible subjects.
         i (int): The index of the testing subject.
         j (int): The index of the validation subject.
         --------------------------------------------
@@ -103,8 +106,8 @@ def _fill_training_fold(subject_list, i, j):
         --------------------------------------------
     """
     training_fold = []
-    for k, training_subject in enumerate(subject_list):
-        if (i != k) and (j != k):
-            training_fold.append(training_subject)
+    for subject in test_subject_list:
+        if subject not in [test_subject, validation_subject]:
+            training_fold.append(subject)
     return training_fold
     
