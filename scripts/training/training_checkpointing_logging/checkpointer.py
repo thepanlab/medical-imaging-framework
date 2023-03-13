@@ -1,6 +1,7 @@
 from tensorflow.keras.callbacks import ModelCheckpoint
 from termcolor import colored
 from keras import models
+import fasteners
 import keras
 import os
 
@@ -25,9 +26,11 @@ class Checkpointer(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
         # If the epoch is within k steps, save it
         if epoch % self.k_epochs == 0 or (epoch+1) == self.n_epochs:
-            new_save_path = os.path.join(self.save_path, f"{self.file_name}_{epoch+1}.h5")
-            self.model.save(new_save_path)
-            print(colored(f"\nSaved a checkpoint for epoch {epoch+1}/{self.n_epochs}.", 'cyan'))
+            
+            with fasteners.InterProcessLock(os.path.join(self.save_path, 'ckpt_lock.tmp')):
+                new_save_path = os.path.join(self.save_path, f"{self.file_name}_{epoch+1}.h5")
+                self.model.save(new_save_path)
+                print(colored(f"\nSaved a checkpoint for epoch {epoch+1}/{self.n_epochs}.", 'cyan'))
             
             # Keep only the previous checkpoint for the most recent training fold, to save memory.
             self.clear_prev_save(new_save_path)
