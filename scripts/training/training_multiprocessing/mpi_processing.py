@@ -24,8 +24,6 @@ def config_loop(rank, config, test_subjects, is_outer):
     )
     if log_list and 'subject_list' in log_list:
         test_subjects = log_list['test_subjects']
-    else:
-        test_subjects = config['test_subjects']
     
     # Check if no test subjects
     if not test_subjects:
