@@ -1,11 +1,12 @@
 from termcolor import colored
+import fasteners
 import pandas as pd
 import json
 import csv
 import os
 
 
-def output_results(output_path, testing_subject, rotation_subject, rotation, model_obj, history, time_elapsed, datasets, class_names, job_name, config_name, is_outer):
+def output_results(output_path, testing_subject, rotation_subject, rotation, model_obj, history, time_elapsed, datasets, class_names, job_name, config_name, is_outer, rank):
     """ Output results from the trained model.
         
     Args:
@@ -37,7 +38,11 @@ def output_results(output_path, testing_subject, rotation_subject, rotation, mod
         file_prefix
     )
     
-    _create_folders(path_prefix, ['prediction', 'true_label', 'file_name', 'model'])
+    if rank is not None:
+        with fasteners.InterProcessLock(os.path.join(output_path, 'output_lock.tmp')):
+            _create_folders(path_prefix, ['prediction', 'true_label', 'file_name', 'model'])
+    else:
+        _create_folders(path_prefix, ['prediction', 'true_label', 'file_name', 'model'])
     
     # Save the model
     model_obj.model.save(f"{path_prefix}/model/{file_prefix}_{model_obj.model_type}.h5")

@@ -7,8 +7,10 @@ from termcolor import colored
 from datetime import date
 import tensorflow as tf
 from mpi4py import MPI
+import datetime
 import time
 import math
+import os
 
 # Location of the configurations
 CONFIG_LOC = './training/training_config_files'
@@ -70,22 +72,36 @@ def subject_loop(rank, config, test_subject, is_outer):
 
 def main(config_loc, is_outer):
     """ Runs the training process for each configuration and test subject. Process 0 DOES NOT train. """
+    
     # Initialize MPI
-    tf.config.run_functions_eagerly(True)
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     n_proc = comm.Get_size()
     
-    # Rank 0 initializes the program and runs the configuration loops
+    # Initalize TF
+    tf_config = tf.compat.v1.ConfigProto()
     if rank == 0:
-        
+        os.environ["CUDA_VISIBLE_DEVICES"]=""
+        tf_config.gpu_options.visible_device_list = ""
+    else:
+        os.environ["CUDA_VISIBLE_DEVICES"]=str(rank%2)
+        tf_config.gpu_options.allow_growth = True
+    session = tf.compat.v1.Session(config=tf_config)
+    
+    # Equally spread GPU allocation
+    #tf.debugging.set_log_device_placement(True)
+    #strategy = tf.distribute.MirroredStrategy(tf.config.list_logical_devices('GPU'))
+    
+    # Rank 0 initializes the program and runs the configuration loops
+    if rank == 0:   
         # Get start time
+        start_time_name = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         start_time = time.time()
         
-        # Print the environment info
-        console_printing.show_gpu_list()
-        console_printing.show_cpu_count()
-        console_printing.show_process_count(comm)
+        # Print the environment info TODO move to rank 1?
+        # console_printing.show_gpu_list()
+        # console_printing.show_cpu_count()
+        # console_printing.show_process_count(comm)
         
         # Get the configurations
         configs = parse_training_configs(config_loc)
@@ -101,13 +117,18 @@ def main(config_loc, is_outer):
         
         # Loop through them all and get the splits
         config_splits = {}
-        for index, config in enumerate(configs):
-            config_splits[index] = {}
+        for config_index, config in enumerate(configs):
+            config_splits[config_index] = {}
             
             # Separate and store test subjects
-            n_split = math.ceil(len(config['test_subjects'])/(n_proc-1))
+            """n_split = math.ceil(len(config['test_subjects'])/(n_proc-1))
             for subrank in range(1, n_proc):
-                config_splits[index][subrank] = config['test_subjects'][(subrank-1)*n_split:subrank*n_split]
+                config_splits[index][subrank] = config['test_subjects'][(subrank-1)*n_split:subrank*n_split]"""
+            for subject_index, subject in enumerate(config['test_subjects']):
+                subrank = (subject_index%(n_proc-1)) + 1
+                if subrank not in config_splits[config_index]:
+                    config_splits[config_index][subrank] = []
+                config_splits[config_index][subrank] += [subject]
             
         # Communicate to each process for the first time
         for subrank in range(1, n_proc):
@@ -138,7 +159,7 @@ def main(config_loc, is_outer):
                     # Get end time and print
                     print(colored(f"Rank 0 is printing the processing time.", 'red'))
                     elapsed_time = time.time() - start_time
-                    with open(f'_TIME_MPI_{date.today()}.txt', 'w') as fp:
+                    with open(f'_TIME_MPI_{start_time_name}.txt', 'w') as fp:
                         fp.write(f"{elapsed_time}")
                     print(colored(f'Rank {rank} terminated. All other processes are finished.', 'yellow'))
                     break
@@ -163,7 +184,8 @@ def main(config_loc, is_outer):
                 
             
     # The other ranks will listen for rank 0's messages and run the training loop
-    else:
+    else:        
+        tf.config.run_functions_eagerly(True)
         
         # Listen for the config and test subject list
         print(colored(f'Rank {rank} is listening for process 0.', 'cyan'))

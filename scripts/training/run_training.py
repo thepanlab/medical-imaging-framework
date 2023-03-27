@@ -40,7 +40,12 @@ def main(config_loc, is_outer):
         is_outer (bool): If this is of the outer loop.
     """
     # Print a list of the available GPUs
-    console_printing.show_gpu_list()
+    gpus = console_printing.show_gpu_list()
+    
+    # Set eager execution and memory limits
+    tf_config = tf.compat.v1.ConfigProto()
+    tf_config.gpu_options.allow_growth = True
+    session = tf.compat.v1.Session(config=tf_config)
     tf.config.run_functions_eagerly(True)
     
     # Parse the command line arguments

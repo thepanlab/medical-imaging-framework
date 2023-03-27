@@ -61,6 +61,7 @@ class _FoldTrainingInfo():
             This includes the testing and rotation_subjects, file paths,
             label indexes, and labels.
         """
+        
         for index, file_path in enumerate(self.files):            
             dataset = ''
             subject_name = self.indexes['subjects'][index]
@@ -189,11 +190,7 @@ class Fold():
         # Create the datasets and train. (Datasets cannot be logged.)
         if self.create_dataset():
             self.train_model()
-            if self.fold_info.rank is not None:
-                with fasteners.InterProcessLock(os.path.join(self.fold_info.config['output_path'], 'lock.tmp')):
-                    self.output_results()
-            else:
-                self.output_results()
+            self.output_results()
         
     
     def load_state(self):
@@ -277,7 +274,8 @@ class Fold():
         
     def train_model(self):
         """ Train the model, assuming the given dataset is valid. """  
-        if self.checkpoint_epoch+1 == self.fold_info.config['hyperparameters']['epochs']:
+        if self.checkpoint_epoch != 0 and \
+         self.checkpoint_epoch+1 == self.fold_info.config['hyperparameters']['epochs']:
             print(colored("Maximum number of epochs reached from checkpoint.", 'yellow'))
             return
         
@@ -302,7 +300,7 @@ class Fold():
         
     def output_results(self):
         """ Output the training results to file. """
-        print(colored(f"Finished training for testing subject {self.fold_info.testing_subject} and validation subject {self.fold_info.rotation_subject}.", 'green'))
+        print(colored(f"Finished training for testing subject {self.fold_info.testing_subject} and subject {self.fold_info.rotation_subject}.", 'green'))
         output_results(
             os.path.join(self.fold_info.config['output_path'], 'training_results'), 
             self.fold_info.testing_subject, 
@@ -315,6 +313,7 @@ class Fold():
             self.fold_info.config['class_names'],
             self.fold_info.config['job_name'],
             self.fold_info.config['selected_model_name'],
-            self.is_outer
+            self.is_outer,
+            self.fold_info.rank
         )
         

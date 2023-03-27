@@ -14,6 +14,7 @@ def show_gpu_list():
     else:
         for gpu in gpus:
             print(colored(f"Name: {gpu.name}  | Type: {gpu.device_type}", 'cyan'))
+    return gpus
 
 
 def show_cpu_count():

@@ -1,4 +1,5 @@
 import termcolor
+import fasteners
 import dill
 import os
 
@@ -19,6 +20,8 @@ def read_log_items(training_output_path, job_name, item_list, rank=None):
     if not log:
         return None
     specified_items = {}
+    #print(log)
+    #quit()
     for key in item_list:
         if key in log:
             specified_items[key] = log[key]
@@ -40,8 +43,6 @@ def read_log(training_output_path, job_name, rank=None):
     if not os.path.exists(log_path) or os.path.getsize(log_path) == 0:
         return None
     else:
-        with open(log_path, 'rb') as fp:
-            return dill.load(fp, encoding='latin1')
         try:
             with open(log_path, 'rb') as fp:
                 return dill.load(fp, encoding='latin1')
@@ -60,8 +61,9 @@ def _writing_prep(training_output_path, job_name, rank=None):
     """
     # Check if the output directory exists
     logging_path = os.path.join(training_output_path, 'logging')
-    if not os.path.exists(logging_path):
-        os.makedirs(logging_path)
+    with fasteners.InterProcessLock(os.path.join(training_output_path, 'logging_lock.tmp')):
+        if not os.path.exists(logging_path):
+            os.makedirs(logging_path)
         
     # Check if the log already exists
     current_log = read_log(training_output_path, job_name, rank)
