@@ -17,7 +17,7 @@ class TrainingVars:
         seed(config['seed'])
         
         # The files to train with and info about its contents
-        self.files = get_files(config['data_input_directory'])
+        self.files = get_files(config['data_input_directory'], config['shuffle_the_images'], config['seed'])
         self.indexes, self.label_position = get_indexes(self.files, config['class_names'], config['subject_list'])
         
         # Make sure test subjects and validation subjects are unique
