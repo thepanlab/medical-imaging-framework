@@ -1,9 +1,9 @@
 from termcolor import colored
-from random import shuffle
+import random
 import os
 
 
-def get_files(input_path):
+def get_files(input_path, shuffle_images, seed):
     """ Gets all of the input paths of the image data.
 
     Args:
@@ -25,7 +25,10 @@ def get_files(input_path):
                     
     # Shuffle the list
     files.sort()
-    shuffle(files)
+    if shuffle_images:
+        if seed: 
+            random.seed(seed)
+        random.shuffle(files)
     print(colored('Finished getting the image paths.', 'green'))
     return files
 
