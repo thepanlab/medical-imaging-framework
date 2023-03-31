@@ -16,22 +16,23 @@ def generate_folds(test_subject_list, validation_subject_list, test_subject, do_
         (int): The number of rotations for the training loop.
         --------------------------------------------
     """
-    # If outer loop, compare the test subjects. Else validation subjects.
-    if validation_subject_list is None:    
-        subject_list = test_subject_list
-    else:
-        subject_list = validation_subject_list
+    # If outer loop, compare the test subjects.
+    if validation_subject_list is None:        
+        folds = [{
+            'testing': [test_subject],
+            'training': _fill_training_fold(test_subject_list, test_subject, test_subject)
+        }]
         
-    # For each subject not equal to the test subject, get the fold combination.
-    folds = []
-    for subject in subject_list:
-        if subject != test_subject:
-            subject_fold = {
-                'training': _fill_training_fold(subject_list, test_subject, subject), 
-                'validation': [subject], 
-                'testing': [test_subject]
-            }
-            folds.append(subject_fold)
+    # If inner loop, get the test-val combinations.
+    else:        
+        folds = []
+        for subject in validation_subject_list:
+            if subject != test_subject:     
+                folds.append({
+                    'testing': [test_subject],
+                    'training': _fill_training_fold(validation_subject_list, test_subject, subject), 
+                    'validation': [subject]
+                })
         
     # Shuffle the data and get the number of training rotations
     if do_shuffle:
