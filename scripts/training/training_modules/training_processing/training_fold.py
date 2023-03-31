@@ -68,19 +68,19 @@ class _FoldTrainingInfo():
             
             # Outer loop
             if self.is_outer:
-                if subject_name == self.rotation_subject:
+                if subject_name == self.testing_subject:
                     dataset = 'testing'
-                elif subject_name == self.testing_subject:
+                elif subject_name in self.config['test_subjects']:
                     dataset = 'training'
                 else:
                     continue
                 
             # Inner loop
             else:
-                if subject_name == self.rotation_subject:
-                    dataset = 'validation'
-                elif subject_name == self.testing_subject:
+                if subject_name == self.testing_subject:
                     dataset = 'testing'
+                elif subject_name == self.rotation_subject:
+                    dataset = 'validation'
                 elif subject_name in self.config['validation_subjects']:
                     dataset = 'training'
                 else:
