@@ -1,6 +1,3 @@
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
-
 from training import run_training
 import datetime
 import time
