@@ -146,10 +146,10 @@ def main(config_loc, is_outer):
             )
             
             # Send task if the process is ready
-            if next_task_index < len(tasks):
+            if tasks:
                 print(colored(f"Rank 0 is sending rank {subrank} their first task.", 'green'))
                 comm.send(
-                    tasks[next_task_index], 
+                    tasks.pop(), 
                     dest=subrank
                 )
                 next_task_index += 1
@@ -175,7 +175,7 @@ def main(config_loc, is_outer):
                     break
             
     # The other ranks will listen for rank 0's messages and run the training loop
-    else:    
+    else: 
         tf.config.run_functions_eagerly(True)
         
         # Listen for the first task
