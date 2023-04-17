@@ -20,8 +20,6 @@ def read_log_items(training_output_path, job_name, item_list, rank=None):
     if not log:
         return None
     specified_items = {}
-    #print(log)
-    #quit()
     for key in item_list:
         if key in log:
             specified_items[key] = log[key]

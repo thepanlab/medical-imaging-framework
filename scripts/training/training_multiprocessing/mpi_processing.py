@@ -1,4 +1,4 @@
-from training.training_modules.data_processing import training_preparation
+from training.training_modules.data_processing import training_preparation, fold_generator
 from training.training_modules.output_processing import console_printing
 from training.training_modules.training_processing import training_loop
 from training.training_checkpointing_logging.logger import *
@@ -14,37 +14,65 @@ import os
 
 # Location of the configurations
 CONFIG_LOC = './training/training_config_files'
+
+def split_tasks(configs, n_proc, is_outer):
+    """ Generates config-fold tuples for training.
+
+        -- Input Parameters ------------------------
+        configs (list of dict): List of configurations.
+        n_proc (int): Number of training processes.
+        is_outer (bool): If this is of the outer loop or not.
+        --------------------------------------------
+        
+        -- Returns ---------------------------------
+        (list tuples): A list of config-fold tuples.
+        --------------------------------------------
+    """
+    # Create a list of (config, test subject, validation subject) tuples
+    tasks = []
+    for config in configs:
+        
+        # Generate all fold-pairs
+        test_subjects = config['test_subjects']
+        validation_subjects = None if is_outer else config['validation_subjects']
+        folds = fold_generator.generate_pairs(test_subjects, validation_subjects, config['shuffle_the_folds'])
+        
+        # Add folds to task list
+        tasks.extend([(config, test_subject, training_subject) for test_subject, training_subject in folds])
+        
+    return tasks
+        
             
-def config_loop(rank, config, test_subjects, is_outer):
+def run_training(rank, config, test_subject, training_subject, is_outer):
     
-    # Read in the log's subject list, if it exists
-    log_list = read_log_items(
+    # Read in the log, if it exists
+    job_name = f"{config['job_name']}_test_{test_subject}_sub_{training_subject}" 
+    log = read_log_items(
         config['output_path'], 
-        config['job_name'], 
-        ['test_subjects'],
+        job_name, 
+        ['is_finished'],
         rank
     )
-    if log_list and 'subject_list' in log_list:
-        test_subjects = log_list['test_subjects']
     
-    # Check if no test subjects
-    if not test_subjects:
-        print(colored(f"Rank {rank} has no test subjects to loop through.", 'cyan'))
+    # If this fold has finished training, return
+    if log and log['is_finished']:
         return
     
-    # Loop through all test subjects0
-    print(colored(f"Rank {rank} is starting the configuration loop.", 'cyan'))
-    for test_subject in test_subjects:
-        subject_loop(rank, config, test_subject, is_outer)
-        write_log(
-            config['output_path'], 
-            config['job_name'], 
-            {'test_subjects': [t for t in test_subjects if t != test_subject]},
-            rank
-        )
+    # Run the subject pair
+    if is_outer:
+        print(colored(f"Rank {rank} is starting training for {test_subject}.", 'green'))
+    else:
+        print(colored(f"Rank {rank} is starting training for {test_subject} and validation subject {training_subject}.", 'green'))
+    subject_loop(rank, config, test_subject, is_outer, training_subject=training_subject)
+    write_log(
+        config['output_path'], 
+        job_name, 
+        {'is_finished': True},
+        rank
+    )
         
         
-def subject_loop(rank, config, test_subject, is_outer):
+def subject_loop(rank, config, test_subject, is_outer, training_subject=None):
     """ Executes the training loop for the given test subject.
 
     Args:
@@ -56,7 +84,7 @@ def subject_loop(rank, config, test_subject, is_outer):
         f"Rank {rank} is starting training for {test_subject} in {config['selected_model_name']}\n"
         , 'magenta'
     ))
-    training_vars = training_preparation.TrainingVars(config, test_subject, is_outer)
+    training_vars = training_preparation.TrainingVars(config, test_subject, is_outer, training_subject=training_subject)
     training_loop.training_loop(
         config, 
         test_subject, 
@@ -81,77 +109,59 @@ def main(config_loc, is_outer):
     # Initalize TF
     tf_config = tf.compat.v1.ConfigProto()
     if rank == 0:
-        os.environ["CUDA_VISIBLE_DEVICES"]=""
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
         tf_config.gpu_options.visible_device_list = ""
     else:
-        os.environ["CUDA_VISIBLE_DEVICES"]=str(rank%2)
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(rank%2)
         tf_config.gpu_options.allow_growth = True
     session = tf.compat.v1.Session(config=tf_config)
     
-    # Equally spread GPU allocation
-    #tf.debugging.set_log_device_placement(True)
-    #strategy = tf.distribute.MirroredStrategy(tf.config.list_logical_devices('GPU'))
-    
     # Rank 0 initializes the program and runs the configuration loops
-    if rank == 0:   
+    if rank == 0:  
+         
         # Get start time
         start_time_name = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         start_time = time.time()
         
-        # Print the environment info TODO move to rank 1?
-        # console_printing.show_gpu_list()
-        # console_printing.show_cpu_count()
-        # console_printing.show_process_count(comm)
-        
         # Get the configurations
         configs = parse_training_configs(config_loc)
         n_configs = len(configs)
-        current_configs = {}
+        next_task_index = 0
         
         # No configs, no run
         if n_configs == 0:
             print(colored("No configurations given.", 'yellow'))
             for subrank in range(1, n_proc):
-                comm.send((None, None), dest=subrank, tag=1)
+                comm.send(False, dest=subrank)
             exit()
         
-        # Loop through them all and get the splits
-        config_splits = {}
-        for config_index, config in enumerate(configs):
-            config_splits[config_index] = {}
+        # Get the tasks for each process
+        tasks = split_tasks(configs, n_proc, is_outer)
             
-            # Separate and store test subjects
-            """n_split = math.ceil(len(config['test_subjects'])/(n_proc-1))
-            for subrank in range(1, n_proc):
-                config_splits[index][subrank] = config['test_subjects'][(subrank-1)*n_split:subrank*n_split]"""
-            for subject_index, subject in enumerate(config['test_subjects']):
-                subrank = (subject_index%(n_proc-1)) + 1
-                if subrank not in config_splits[config_index]:
-                    config_splits[config_index][subrank] = []
-                config_splits[config_index][subrank] += [subject]
-            
-        # Communicate to each process for the first time
-        for subrank in range(1, n_proc):
-            print(colored(f"Rank 0 is sending rank {subrank} their first task.", 'green'))
-            current_configs[subrank] = 0
-            comm.send(
-                (configs[0], config_splits[0][subrank]), 
-                dest=subrank, 
-                tag=1
-            )
-            
-        # Loop while the subprocesses are running.
+        # Listen for process messages while running
         exited = []
         while True:
-            subrank, subrank_msg = comm.recv(
+            subrank = comm.recv(
                 source=MPI.ANY_SOURCE
             )
             
-            # Check if a process sent a termination signal
-            if subrank_msg is None:
-                
-                # Add to list of terminated processes
-                exited.append(subrank)
+            # Send task if the process is ready
+            if next_task_index < len(tasks):
+                print(colored(f"Rank 0 is sending rank {subrank} their first task.", 'green'))
+                comm.send(
+                    tasks[next_task_index], 
+                    dest=subrank
+                )
+                next_task_index += 1
+                    
+            # If no task remains, terminate process
+            else:
+                print(colored(f"Rank 0 is terminating rank {subrank}, no tasks to give.", 'red'))
+                comm.send(
+                    False, 
+                    dest=subrank
+                )
+                exited += [subrank]
                 
                 # Check if any processes are left, end this process if so
                 if all(subrank in exited for subrank in range(1, n_proc)):
@@ -164,45 +174,23 @@ def main(config_loc, is_outer):
                     print(colored(f'Rank {rank} terminated. All other processes are finished.', 'yellow'))
                     break
             
-            # Send next job if one is available
-            current_configs[subrank] += 1
-            if current_configs[subrank] < n_configs:
-                print(colored(f"Rank 0 is sending rank {subrank} their next task.", 'green'))
-                current_config = configs[current_configs[subrank]]
-                comm.send(
-                    (current_config, config_splits[current_configs[subrank]][subrank]), 
-                    dest=subrank
-                )
-                
-            # If nothing more to run, tell process to terminate
-            else:
-                print(colored(f"Rank 0 is terminating rank {subrank}.", 'red'))
-                comm.send(
-                    (None, None), 
-                    dest=subrank
-                )
-                
-            
     # The other ranks will listen for rank 0's messages and run the training loop
-    else:        
+    else:    
         tf.config.run_functions_eagerly(True)
         
-        # Listen for the config and test subject list
+        # Listen for the first task
         print(colored(f'Rank {rank} is listening for process 0.', 'cyan'))
-        comm.send((rank, rank), dest=0)
-        config, test_subjects = comm.recv(source=0)
+        comm.send(rank, dest=0)
+        task = comm.recv(source=0)
         
-        # Run the items through the training algorithm
-        while config:
-            config_loop(rank, config, test_subjects, is_outer) 
-            
-            # Listen for the next job
-            print(colored(f'Rank {rank} is listening for process 0.', 'cyan'))
-            comm.send((rank, rank), dest=0)
-            config, test_subjects = comm.recv(source=0)
-            
-        # Send termination
-        comm.send((rank, None), dest=0)
+        # While there are tasks to run, train
+        while task:
+                    
+            # Training loop
+            config, test_subject, training_subject = task
+            run_training(rank, config, test_subject, training_subject, is_outer)
+            comm.send(rank, dest=0)
+            task = comm.recv(source=0)
             
         # Nothing more to run.
         print(colored(f'Rank {rank} terminated. All jobs finished for this process.', 'yellow'))

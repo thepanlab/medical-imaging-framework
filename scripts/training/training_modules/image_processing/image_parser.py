@@ -44,7 +44,7 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
     # Remove the file extention
     path_substring = tf.strings.regex_replace(
         image_path,
-        ".png|.jpg|.jpeg|.tiff|.csv", 
+        ".png|.jpg|.jpeg|.bmp", 
         ""
     )
     
@@ -58,7 +58,7 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
     # else:
         # TODO: do that
     
-    # Crop the image
+    # Crop the image TODO add scaling/resize/reshape?
     if do_cropping:
         try:
             image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, target_height, target_width)

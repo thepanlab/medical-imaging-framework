@@ -1,7 +1,38 @@
 from random import shuffle
 
+def generate_pairs(test_subject_list, validation_subject_list, do_shuffle):
+    """ Generates subject-subject pairs
 
-def generate_folds(test_subject_list, validation_subject_list, test_subject, do_shuffle):
+        -- Input Parameters ------------------------
+        test_subject_list (list of str): List of test subjects.
+        validation_subject_list (list of str): List of validation subjects.
+        do_shuffle (bool): If the fold list should be shuffled or not.
+        --------------------------------------------
+        
+        -- Returns ---------------------------------
+        (list of str tuples): A list of subject pairs.
+        --------------------------------------------
+    """
+    # Generate subject-subject tuples
+    folds = []
+    for test_subject in test_subject_list:
+        
+        # Outer loop: use test subjects only
+        if validation_subject_list is None:   
+            folds.extend(_get_training_combos(test_subject_list, test_subject))
+            
+        # Inner loop: use validation subjects
+        else:   
+            folds.extend(_get_training_combos(validation_subject_list, test_subject))
+        
+    # Shuffle the folds
+    if do_shuffle:
+        shuffle(folds)
+    return folds
+    
+
+
+def generate_folds(test_subject_list, validation_subject_list, subject_list, test_subject, do_shuffle, training_subject=None):
     """ Generates folds for the subject.
         
         -- Input Parameters ------------------------
@@ -20,19 +51,27 @@ def generate_folds(test_subject_list, validation_subject_list, test_subject, do_
     if validation_subject_list is None:        
         folds = [{
             'testing': [test_subject],
-            'training': _fill_training_fold(test_subject_list, test_subject, test_subject)
+            'training': _fill_training_fold(subject_list, test_subject, test_subject)
         }]
         
     # If inner loop, get the test-val combinations.
     else:        
         folds = []
-        for subject in validation_subject_list:
-            if subject != test_subject:     
-                folds.append({
-                    'testing': [test_subject],
-                    'training': _fill_training_fold(validation_subject_list, test_subject, subject), 
-                    'validation': [subject]
-                })
+        if training_subject:    
+            folds.append({
+                'testing': [test_subject],
+                'training': _fill_training_fold(validation_subject_list, test_subject, training_subject), 
+                'validation': [training_subject]
+            })
+        
+        else:
+            for subject in validation_subject_list:
+                if subject != test_subject:     
+                    folds.append({
+                        'testing': [test_subject],
+                        'training': _fill_training_fold(validation_subject_list, test_subject, subject), 
+                        'validation': [subject]
+                    })
         
     # Shuffle the data and get the number of training rotations
     if do_shuffle:
@@ -45,8 +84,8 @@ def _fill_training_fold(subject_list, test_subject, subject):
 
         -- Input Parameters ------------------------
         subject_list (list of str): A list of possible subjects.
-        test_subject (int): The index of the testing subject.
-        subject (int): The index of the paired validation/testing subject.
+        test_subject (int): The testing subject.
+        subject (int): The paired validation/testing subject.
         --------------------------------------------
         
         -- Returns ---------------------------------
@@ -58,4 +97,23 @@ def _fill_training_fold(subject_list, test_subject, subject):
         if s not in [test_subject, subject]:
             training_fold.append(s)
     return training_fold
+
+
+def _get_training_combos(subject_list, test_subject):
+    """ Fills the training fold for some subject.
+
+        -- Input Parameters ------------------------
+        subject_list (list of str): A list of possible subjects.
+        test_subject (int): The the testing subject.
+        --------------------------------------------
+        
+        -- Returns ---------------------------------
+        (list of str tuples): A list of subject pairs.
+        --------------------------------------------
+    """
+    folds = []
+    for subject in subject_list:
+        if subject != test_subject:
+            folds.append((test_subject, subject))
+    return folds
     

@@ -39,7 +39,7 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
     for rot in range(rotation, rotations):
         if is_outer:
             rot_subject = folds[rot]['training'][0]
-            print(colored(f'--- Rotation {rot+1}/{rotations} for test subject {testing_subject} and test subject {rot_subject} ---', 'magenta'))
+            print(colored(f'--- Rotation {rot+1}/{rotations} for test subject {testing_subject} ---', 'magenta'))
         
         # Inner loop will use the validation subjects
         else:

@@ -5,12 +5,12 @@ from random import seed
 
 
 class TrainingVars:
-    def __init__(self, config, test_subject, is_outer):
+    def __init__(self, config, test_subject, is_outer, training_subject=None):
         """ Gets some parameters needing for training
             
         Args:
             config (dict): List of input image paths.
-            test_subject (str): List of class names.
+            test_subject (str): The test subject to train.
             is_outer (bool): A flag telling if running the outer loop.
         """
         # Set the seed
@@ -22,13 +22,11 @@ class TrainingVars:
         
         # Make sure test subjects and validation subjects are unique
         test_subjects = list(set(config['test_subjects']))
-        
-        # The outer loop does not have validation subjects
         if is_outer:
             validation_subjects = None
         else:
             validation_subjects = list(set(config['validation_subjects']))
-        
+    
         # Generate training folds
-        self.folds, self.n_folds = generate_folds(test_subjects, validation_subjects, test_subject, config['shuffle_the_folds'])
-        
+        self.folds, self.n_folds = generate_folds(test_subjects, validation_subjects, config['subject_list'], test_subject, config['shuffle_the_folds'], training_subject=training_subject)
+            
