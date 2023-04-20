@@ -46,12 +46,11 @@ def split_tasks(configs, n_proc, is_outer):
 def run_training(rank, config, test_subject, training_subject, is_outer):
     
     # Read in the log, if it exists
-    job_name = f"{config['job_name']}_test_{test_subject}_sub_{training_subject}" 
+    job_name = f"{config['job_name']}_test_{test_subject}" if is_outer else f"{config['job_name']}_test_{test_subject}_sub_{training_subject}"
     log = read_log_items(
         config['output_path'], 
         job_name, 
-        ['is_finished'],
-        rank
+        ['is_finished']
     )
     
     # If this fold has finished training, return
@@ -67,8 +66,7 @@ def run_training(rank, config, test_subject, training_subject, is_outer):
     write_log(
         config['output_path'], 
         job_name, 
-        {'is_finished': True},
-        rank
+        {'is_finished': True}
     )
         
         
