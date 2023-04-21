@@ -2,7 +2,7 @@
 
 # <b>Logging</b>: <i>logger.py</i>
 <p>
-    Logging is done both for sequential and distributed training. It's purpose is to keep track of what to train, as well as its current progress. The following items are stored at some point in the program:
+    The log file(.log) is stored as a pickle file. It is a dictionary of items ( objects, boolean, etc). Logging is done both for sequential and distributed training. It's purpose is to keep track of what to train, as well as its current progress. The following items are stored at some point in the program:
 </p>
 
 1) "test_subjects" or "is_finished"
@@ -12,7 +12,7 @@
 <hr>
 
 ## <b>1.a) Test subjects</b>: <i>run_training.py</i>
-The list of test subjects that have yet to train are stored from within the main function. 
+The list of strings that contains test subjects that have yet to train are stored from within the main function. 
 
 ## <b>1.b) Is Finished</b>: <i>mpi_processing.py</i>
 A boolean is stored for each subject or subject-pair that is finished. This is set after training is complete. If it is revisited, the worker can immedietly ignore it.
