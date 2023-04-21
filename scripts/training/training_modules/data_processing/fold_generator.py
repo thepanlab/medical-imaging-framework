@@ -1,11 +1,12 @@
 from random import shuffle
 
-def generate_pairs(test_subject_list, validation_subject_list, do_shuffle):
+def generate_pairs(test_subject_list, validation_subject_list, subject_list, do_shuffle):
     """ Generates subject-subject pairs
 
         -- Input Parameters ------------------------
         test_subject_list (list of str): List of test subjects.
         validation_subject_list (list of str): List of validation subjects.
+        validation_subject_list (list of str): List of all subjects.
         do_shuffle (bool): If the fold list should be shuffled or not.
         --------------------------------------------
         
@@ -19,7 +20,7 @@ def generate_pairs(test_subject_list, validation_subject_list, do_shuffle):
         
         # Outer loop: use test subjects only
         if validation_subject_list is None:   
-            folds.extend(_get_training_combos(test_subject_list, test_subject))
+            folds.extend(_get_training_combos(subject_list, test_subject))
             
         # Inner loop: use validation subjects
         else:   
