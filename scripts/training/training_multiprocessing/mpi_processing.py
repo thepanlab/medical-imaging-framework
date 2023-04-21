@@ -35,7 +35,7 @@ def split_tasks(configs, n_proc, is_outer):
         # Generate all fold-pairs
         test_subjects = config['test_subjects']
         validation_subjects = None if is_outer else config['validation_subjects']
-        folds = fold_generator.generate_pairs(test_subjects, validation_subjects, config['shuffle_the_folds'])
+        folds = fold_generator.generate_pairs(test_subjects, validation_subjects, config['subject_list'], config['shuffle_the_folds'])
         
         # Add folds to task list
         tasks.extend([(config, test_subject, training_subject) for test_subject, training_subject in folds])
