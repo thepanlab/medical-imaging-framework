@@ -11,7 +11,8 @@
     "flavum": 2,
     "epidural space": 3,
     "spinal cord": 4
-  }
+  },
 
+  "is_outer": false
 
 }
