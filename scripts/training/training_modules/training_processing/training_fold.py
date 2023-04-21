@@ -70,7 +70,7 @@ class _FoldTrainingInfo():
             if self.is_outer:
                 if subject_name == self.testing_subject:
                     dataset = 'testing'
-                elif subject_name in self.config['test_subjects']:
+                elif subject_name in self.config['subject_list']:
                     dataset = 'training'
                 else:
                     continue
