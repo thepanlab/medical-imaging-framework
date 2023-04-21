@@ -27,5 +27,5 @@ Within the training fold, the fold information is stored into the log. The fold 
 
 # <b>Checkpoints</b>: <i>checkpointer.py</i>
 <p> 
-Checkpoints are models that are periodically saved during the training process on some <i>n</i> epochs. They are loaded in whenever a training job is stopped and resumed. They are not stored or associated with the log. They are created as callbacks within the fold information and specified within the training function. They are identified by their training subject(s) and their greatest epoch count.
+Checkpoints are models that are periodically saved during the training process on some <i>n</i> epochs. They are loaded in whenever a training job is stopped and resumed. They are not stored or associated with the log. They are created as callbacks within the fold information and specified within the training function. They are identified by their training subject(s) and their greatest epoch count. A customized checkpoint class was created for this purpose.
 </p>
