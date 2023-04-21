@@ -96,6 +96,11 @@ roc_curve_many:
 	python3 -W ignore -m results_processing.roc_curve.roc_curve_many -j ${j}
 
 
+roc_curve_many_means: ## Creates ROC mean-curves from the specified data folder.
+roc_curve_many_means: 
+	python3 -W ignore -m results_processing.roc_curve.roc_curve_many_means -j ${j}
+
+
 summary_table: ## Creates a summary table from the specified data folder.
 summary_table: 
 	python3 -W ignore -m results_processing.summary_table.summary_table -j ${j}
@@ -111,12 +116,12 @@ tabled_prediction_info:
 
 training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
 training_inner_loop: 
-	python3 -W ignore -m training.training_sequential.loop_inner.training_inner_loop $(args)
+	CUDA_VISIBLE_DEVICES=0,1 python3 -W ignore -m training.training_sequential.loop_inner.training_inner_loop $(args)
 
 
 training_outer_loop: ## Runs the outer loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
 training_outer_loop: 
-	python3 -W ignore -m training.training_sequential.loop_outer.training_outer_loop $(args)
+	CUDA_VISIBLE_DEVICES=0,1 python3 -W ignore -m training.training_sequential.loop_outer.training_outer_loop $(args)
 
 
 ## --- Distributed Training ----------------------------------------------------------------------- ##
@@ -129,12 +134,12 @@ mpi_init:
 
 distributed_training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
 distributed_training_inner_loop: 
-	CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 python3 -m training.training_multiprocessing.loop_inner.multiprocessed_training_inner_loop
+	CUDA_VISIBLE_DEVICES=0 mpirun -n 3 python3 -W ignore -m training.training_multiprocessing.loop_inner.multiprocessed_training_inner_loop
 
 
 distributed_training_outer_loop: ## Runs the outer loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
 distributed_training_outer_loop: 
-	CUDA_VISIBLE_DEVICES=0,1 mpirun -n 2 python3 -m training.training_multiprocessing.loop_outer.multiprocessed_training_outer_loop
+	CUDA_VISIBLE_DEVICES=0,1 mpirun -n 3 python3 -W ignore -m training.training_multiprocessing.loop_outer.multiprocessed_training_outer_loop
 
 
 ## --- Temp ----------------------------------------------------------------------- ##
@@ -144,3 +149,12 @@ mpi_test: ## test fx
 mpi_test: 
 	CUDA_VISIBLE_DEVICES=0,1 mpirun -n 1 python3 -W ignore -m training.training_multiprocessing.test_orig $(args)
 
+
+
+# CUDA_VISIBLE_DEVICES=0,1 python3 -W ignore -m training.training_sequential.loop_inner.training_inner_loop --file /data/jshaw/medical-imaging-framework/scripts/training/training_config_files/loop_inner/config_1_InceptionV3_8.json
+# CUDA_VISIBLE_DEVICES=-1 mpirun -n 3 python3 -W ignore -m training.training_multiprocessing.loop_inner.multiprocessed_training_inner_loop --file /data/jshaw/medical-imaging-framework/scripts/training/training_config_files/loop_inner/config_1_InceptionV3_8.json
+
+#python3 -W ignore -m training.training_sequential.loop_inner.training_inner_loop --file /data/jshaw/medical-imaging-framework/scripts/training/training_config_files/loop_inner/config_1_InceptionV3_16.json
+#python3 -W ignore -m training.training_sequential.loop_inner.training_inner_loop --file /data/jshaw/medical-imaging-framework/scripts/training/training_config_files/loop_inner/config_1_InceptionV3_32.json
+#python3 -W ignore -m training.training_sequential.loop_inner.training_inner_loop --file /data/jshaw/medical-imaging-framework/scripts/training/training_config_files/loop_inner/config_1_InceptionV3_64.json
+#python3 -W ignore -m training.training_sequential.loop_inner.training_inner_loop --file /data/jshaw/medical-imaging-framework/scripts/training/training_config_files/loop_inner/config_1_InceptionV3_128.json
