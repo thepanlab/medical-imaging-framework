@@ -10,10 +10,16 @@
     "ligament",
     "spinalcord"
   ],
-  "mean_colors": {
-    "macro": "red",
-    "micro": "blue"
-  },
+  "line_colors": [
+    "aqua",
+    "darkorange",
+    "cornflowerblue",
+    "seagreen",
+    "red"
+  ],
+
+  "average_all_subjects": false,
+  "subjects": ["e1", "e2", "e3"],
 
   "font_family": "DejaVu Sans",
   "label_font_size": 12,

@@ -20,50 +20,118 @@ def run_program(config):
     """
     # Get the needed input paths, as well as the proper file names for output
     pred_paths, true_paths = find_directories(config["data_path"], config['is_outer'])
-
-    # Get the truth and prediction data for each model
-    data = {}
-    classes = None
-    for model in pred_paths:
-        data[model] = {'pred': [], 'true': []}
-        for subject in pred_paths[model]:
-            for item in range(len(pred_paths[model][subject])):
-                true, pred = get_data(pred_paths[model][subject][item], true_paths[model][subject][item])
-                data[model]['pred'] += [pred]
-                data[model]['true'] += [true]
-        
-        # Combine the data
-        data[model]['pred'] = np.concatenate(data[model]['pred'])
-        data[model]['true'] = np.concatenate(data[model]['true'])
+    
+    # Read in the data from the filepaths
+    data, classes = read_data(config, pred_paths, true_paths)
         
     # Create the ROC curves
-    create_roc_curves(config, data)
+    create_roc_curves(config, data, classes)
+    
+    
+def read_data(config, pred_paths, true_paths):
+    """ Reads the data from the input files """
+    # For every model...
+    data = {}
+    classes = []
+    for model in pred_paths:
+        data[model] = {}
+        
+        # Read in the data for each subject...
+        for subject in pred_paths[model]:
+            if config['average_all_subjects'] or subject in config['subjects']:
+                data[model][subject] = {'pred': [], 'true': []}
+                
+                # Process the data from each file path.
+                for item in range(len(pred_paths[model][subject])):
+                    true, pred = get_data(pred_paths[model][subject][item], true_paths[model][subject][item])
+                    data[model][subject]['pred'] += [pred]
+                    data[model][subject]['true'] += [true]
+                    cat = np.concatenate(data[model][subject]['true'])
+                    classes += [c for c in np.unique(cat) if c not in classes]
+    return data, classes
+        
+        
+def get_auc(true, pred):
+    """ Calculates the true pos, false pos, and area under the roc curve from true and predicted values. """
+    fpr, tpr, _ = roc_curve(true.ravel(), pred.ravel())
+    roc_auc = auc(fpr, tpr)
+    return fpr, tpr, roc_auc
 
 
-def create_roc_curves(config, data):
+def get_micro_average(data, classes):
+    """ For every class, calculate the rates """
+    # Combine all of the subjects into a single array
+    true_cat, pred_cat = None, None
+    for subject in data:
+        if not true_cat:
+            true_cat, pred_cat = data[subject]['true'], data[subject]['pred']
+        else:
+            true_cat += data[subject]['true']
+            pred_cat += data[subject]['pred']
+    true_cat, pred_cat = label_binarize(np.concatenate(true_cat), classes=classes), np.concatenate(pred_cat)
+    
+    # Get the items for each class
+    fpr, tpr, roc_auc = ({} for _ in range(3))
+    for i in range(len(classes)):
+        fpr[i], tpr[i], roc_auc[i] = get_auc(true_cat[:, i], pred_cat[:, i])
+    return fpr, tpr, roc_auc
+
+
+def get_macro_average(data, classes):
+    """ For every subject calculate the rates, then mean the resulting values """
+    # Think of the subjects as the 'classes' when taking the F/TPR averages.
+    #   Get the mean of each subject-label, then mean on all of the subjects per label.
+    subjects = [s for s in data]
+    n_subjects = len(subjects)
+    
+    # For each class...
+    fpr, tpr, roc_auc = ({} for _ in range(3))
+    for i in range(len(classes)):
+        fpr[i], tpr[i], roc_auc[i] = ({} for _ in range(3))
+        
+        # Find the items for each individual subject.
+        for s in range(n_subjects):
+            true = label_binarize(np.concatenate(data[subjects[s]]['true']), classes=classes)[:, i]
+            pred = np.concatenate(data[subjects[s]]['pred'])[:, i]
+            fpr[i][s], tpr[i][s], roc_auc[i][s] = get_auc(true, pred)
+            
+        # Calculate the mean of the subjects in each class
+        fpr_grid = np.linspace(0.0, 1.0, 1000)
+        mean_tpr = np.zeros_like(fpr_grid)
+        for s in range(n_subjects):
+            mean_tpr += np.interp(fpr_grid, fpr[i][s], tpr[i][s])
+        mean_tpr /= n_subjects
+            
+        # Get the items
+        fpr[i] = fpr_grid
+        tpr[i] = mean_tpr
+        roc_auc[i] = auc(fpr[i], tpr[i])
+    return fpr, tpr, roc_auc
+        
+
+def create_roc_curves(config, data, classes):
     """ Creates ROC mean curves based on the configuration and pred/truth values.
 
     Args:
         config (dict): Program configuration.
         data (dict): Truth and prediction data.
-    """
+    """    
     # Print diagrams for each model
     for model in data:
                 
-        # Class labels
-        classes = np.unique(data[model]['true'])
-        n_classes = len(classes)
+        # Calculate the averages, seperated by class
+        fpr_micro, tpr_micro, roc_auc_micro = get_micro_average(data[model], classes)
+        fpr_macro, tpr_macro, roc_auc_macro = get_macro_average(data[model], classes)
         
-        # Get the truth and preds
-        pred_vals = data[model]['pred']
-        true_vals = label_binarize(data[model]['true'], classes=classes)
-        
+        # TODO keep mean for all classes combined?
+        """
         # Store the true pos, false pos, and roc for both micro and macro averages
-        fpr, tpr, roc_auc = ({'micro': None, 'macro': {}} for _ in range(3))
+        fpr, tpr, roc_auc = ({'micro': {}, 'macro': {}} for _ in range(3))
         
         # Micro Average:
         #   The precision value of all classes, as the sum of TP divided by sum of TP and FP. 
-        fpr["micro"], tpr["micro"], roc_auc["micro"] = get_auc(true_vals, pred_vals)
+        for c in range(n_classes):
+            fpr["micro"][c], tpr["micro"][c], roc_auc["micro"][c] = get_auc(true_vals[:, c], pred_vals[:, c])
         
         # Macro Average:
         #   Mean of the precision values for every class.
@@ -75,59 +143,60 @@ def create_roc_curves(config, data):
         mean_tpr /= n_classes
         fpr["macro"], tpr["macro"] = fpr_grid, mean_tpr
         roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
-
-        # Add the micro curve to the plot
-        plt.plot(
-            fpr["micro"], 
-            tpr["micro"],
-            label='micro-average (area = {0:0.2f})' ''.format(roc_auc["micro"]),
-            color=config['mean_colors']['micro'], 
-            linewidth=config['line_width']
-        )
+        """
         
-        # Add the macro curve to the plot
-        plt.plot(
-            fpr["macro"], 
-            tpr["macro"],
-            label='macro-average (area = {0:0.2f})' ''.format(roc_auc["macro"]),
-            color=config['mean_colors']['macro'], 
-            linewidth=config['line_width']
-        )
+        # Plot a graph for each mean-type
+        for plot_i in range(2):
+            
+            # Plot the micro curve values
+            if plot_i == 0:
+                for i, type_name, color in zip(classes, config['label_types'], config['line_colors']):
+                    plt.plot(
+                        fpr_micro[i], 
+                        tpr_micro[i],
+                        label='{0} (AUC={1:0.2f})' ''.format(type_name, roc_auc_micro[i]),
+                        color=color, 
+                        linewidth=config['line_width']
+                    )
+            
+            # Plot the macro curve values
+            else:
+                for i, type_name, color in zip(classes, config['label_types'], config['line_colors']):
+                    plt.plot(
+                        fpr_macro[i], 
+                        tpr_macro[i],
+                        label='{0} (AUC={1:0.2f})' ''.format(type_name, roc_auc_macro[i]),
+                        color=color, 
+                        linewidth=config['line_width']
+                    )
         
-        # Plot the linear reference line
-        plt.plot([0, 1], [0, 1], 'k--', lw=config['line_width'])
+            # Plot the linear reference line
+            plt.plot([0, 1], [0, 1], 'k--', lw=config['line_width'])
 
-        # Set the diagram's font options
-        plt.rcParams['font.family'] = config['font_family']
-        plt.rc('axes', labelsize=config['label_font_size'])
-        plt.rc('axes', titlesize=config['title_font_size'])
+            # Set the diagram's font options
+            plt.rcParams['font.family'] = config['font_family']
+            plt.rc('axes', labelsize=config['label_font_size'])
+            plt.rc('axes', titlesize=config['title_font_size'])
 
-        # Set the diagrams's axis options
-        plt.rcParams['axes.spines.right'] = False
-        plt.rcParams['axes.spines.top'] = False
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
+            # Set the diagrams's axis options
+            plt.rcParams['axes.spines.right'] = False
+            plt.rcParams['axes.spines.top'] = False
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
 
-        # Add the diagram labels
-        plt.xlabel('1 - Specificity')
-        plt.ylabel('Sensitivity')
-        plt.title(f'ROC: {model} Micro and Macro Avg')
-        plt.legend(loc="best")
-              
-
-        # Save the figure
-        if not os.path.exists(config['output_path']):
-            os.makedirs(config['output_path'])
-        plt.savefig(os.path.join(config['output_path'], model) + '_roc_curve_micro_mean.' + config['save_format'], dpi=config['save_resolution'])
-        plt.close()
-        print(colored(f"Finished the ROC means diagram for {model}.", 'green'))
-        
-        
-def get_auc(true_vals, pred_vals):
-    """ Calculates the true pos, false pos, and area under the roc curve from true and predicted values. """
-    fpr, tpr, _ = roc_curve(true_vals.ravel(), pred_vals.ravel())
-    roc_auc = auc(fpr, tpr)
-    return fpr, tpr, roc_auc
+            # Add the diagram labels
+            t = 'micro' if plot_i == 0 else 'macro'
+            plt.xlabel('1 - Specificity')
+            plt.ylabel('Sensitivity')
+            plt.title(f'ROC: {model} {t} average')
+            plt.legend(loc="best")
+                
+            # Save the figure
+            if not os.path.exists(config['output_path']):
+                os.makedirs(config['output_path'])
+            plt.savefig(f'{os.path.join(config["output_path"], model)}_roc_curve_{t}_mean.{config["save_format"]}', dpi=config['save_resolution'])
+            plt.close()
+            print(colored(f"Finished the ROC {t} means diagram for {model}.", 'green'))
 
 
 def main():
