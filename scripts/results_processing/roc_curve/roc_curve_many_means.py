@@ -61,13 +61,10 @@ def get_auc(true, pred):
 def get_micro_average(data, classes):
     """ For every class, calculate the rates """
     # Combine all of the subjects into a single array
-    true_cat, pred_cat = None, None
+    true_cat, pred_cat = [], []
     for subject in data:
-        if not true_cat:
-            true_cat, pred_cat = data[subject]['true'], data[subject]['pred']
-        else:
-            true_cat += data[subject]['true']
-            pred_cat += data[subject]['pred']
+        true_cat += data[subject]['true']
+        pred_cat += data[subject]['pred']
     true_cat, pred_cat = label_binarize(np.concatenate(true_cat), classes=classes), np.concatenate(pred_cat)
     
     # Get the items for each class
