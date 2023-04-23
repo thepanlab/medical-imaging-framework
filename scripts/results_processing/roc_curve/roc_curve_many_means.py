@@ -1,7 +1,7 @@
 from results_processing.roc_curve.roc_curve_many import find_directories
 from results_processing.roc_curve.roc_curve import get_data
-from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_curve, auc, roc_auc_score
+from sklearn.preprocessing import label_binarize
 from util.get_config import parse_json
 from matplotlib import pyplot as plt
 from termcolor import colored
@@ -120,33 +120,11 @@ def create_roc_curves(config, data, classes):
         fpr_micro, tpr_micro, roc_auc_micro = get_micro_average(data[model], classes)
         fpr_macro, tpr_macro, roc_auc_macro = get_macro_average(data[model], classes)
         
-        # TODO keep mean for all classes combined?
-        """
-        # Store the true pos, false pos, and roc for both micro and macro averages
-        fpr, tpr, roc_auc = ({'micro': {}, 'macro': {}} for _ in range(3))
-        
-        # Micro Average:
-        #   The precision value of all classes, as the sum of TP divided by sum of TP and FP. 
-        for c in range(n_classes):
-            fpr["micro"][c], tpr["micro"][c], roc_auc["micro"][c] = get_auc(true_vals[:, c], pred_vals[:, c])
-        
-        # Macro Average:
-        #   Mean of the precision values for every class.
-        mean_tpr = 0
-        fpr_grid = np.linspace(0.0, 1.0, 1000)
-        for c in range(n_classes):
-            fpr["macro"][c], tpr["macro"][c], roc_auc["macro"][c] = get_auc(true_vals[:, c], pred_vals[:, c])
-            mean_tpr += np.interp(fpr_grid, fpr["macro"][c], tpr["macro"][c])
-        mean_tpr /= n_classes
-        fpr["macro"], tpr["macro"] = fpr_grid, mean_tpr
-        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
-        """
-        
         # Plot a graph for each mean-type
-        for plot_i in range(2):
+        for plot_i in ['micro', 'macro']:
             
             # Plot the micro curve values
-            if plot_i == 0:
+            if plot_i == 'micro':
                 for i, type_name, color in zip(classes, config['label_types'], config['line_colors']):
                     plt.plot(
                         fpr_micro[i], 
@@ -182,18 +160,17 @@ def create_roc_curves(config, data, classes):
             plt.ylim([0.0, 1.05])
 
             # Add the diagram labels
-            t = 'micro' if plot_i == 0 else 'macro'
             plt.xlabel('1 - Specificity')
             plt.ylabel('Sensitivity')
-            plt.title(f'ROC: {model} {t} average')
+            plt.title(f'ROC: {model} {plot_i} average')
             plt.legend(loc="best")
                 
             # Save the figure
             if not os.path.exists(config['output_path']):
                 os.makedirs(config['output_path'])
-            plt.savefig(f'{os.path.join(config["output_path"], model)}_roc_curve_{t}_mean.{config["save_format"]}', dpi=config['save_resolution'])
+            plt.savefig(f'{os.path.join(config["output_path"], model)}_roc_curve_{plot_i}_mean.{config["save_format"]}', dpi=config['save_resolution'])
             plt.close()
-            print(colored(f"Finished the ROC {t} means diagram for {model}.", 'green'))
+            print(colored(f"Finished the ROC {plot_i} means diagram for {model}.", 'green'))
 
 
 def main():
