@@ -1,5 +1,5 @@
 from results_processing.tabled_prediction_info import tabled_prediction_info
-from training.training_modules.image_parser import *
+from training.training_modules.image_processing.image_parser import *
 from util.get_config import parse_json
 from termcolor import colored
 from tensorflow import keras
