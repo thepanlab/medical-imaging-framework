@@ -1,4 +1,4 @@
-from training.training_modules.image_getter import get_files
+from training.training_modules.image_processing.image_getter import get_files
 from results_processing.grad_cam import grad_cam
 from termcolor import colored
 from util import get_config
