@@ -13,7 +13,7 @@ def run_program(args):
     pred_paths, true_paths = find_directories(args["data_path"], args['is_outer'])
     json = {
         label: args[label] for label in (
-            'line_width', 'label_types', 'line_colors',
+            'line_width', 'label_types', 'line_colors','alpha',
             'font_family', 'label_font_size', 'title_font_size',
             'save_resolution', 'save_format', 'output_path'
         )

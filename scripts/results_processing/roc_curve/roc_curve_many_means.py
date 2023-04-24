@@ -145,14 +145,23 @@ def create_roc_curves(config, data, classes):
         # Plot a graph for each mean-type
         for plot_i in range(2):
             
+            # Set the diagram's font options
+            plt.rcParams['font.family'] = config['font_family']
+            plt.rc('axes', labelsize=config['label_font_size'])
+            plt.rc('axes', titlesize=config['title_font_size'])
+
+            # Set the diagrams's axis options
+            plt.rcParams['axes.spines.right'] = False
+            plt.rcParams['axes.spines.top'] = False
             # Plot the micro curve values
             if plot_i == 0:
                 for i, type_name, color in zip(classes, config['label_types'], config['line_colors']):
                     plt.plot(
                         fpr_micro[i], 
                         tpr_micro[i],
-                        label='{0} (AUC={1:0.2f})' ''.format(type_name, roc_auc_micro[i]),
-                        color=color, 
+                        label=f'{type_name} (AUC={roc_auc_micro[i]:.2f})',
+                        color=color,
+                        alpha=config['alpha'],
                         linewidth=config['line_width']
                     )
             
@@ -162,8 +171,9 @@ def create_roc_curves(config, data, classes):
                     plt.plot(
                         fpr_macro[i], 
                         tpr_macro[i],
-                        label='{0} (AUC={1:0.2f})' ''.format(type_name, roc_auc_macro[i]),
-                        color=color, 
+                        label=f'{type_name} (AUC={roc_auc_macro[i]:.2f})',
+                        color=color,
+                        alpha=config['alpha'],
                         linewidth=config['line_width']
                     )
         
@@ -178,7 +188,7 @@ def create_roc_curves(config, data, classes):
             # Set the diagrams's axis options
             plt.rcParams['axes.spines.right'] = False
             plt.rcParams['axes.spines.top'] = False
-            plt.xlim([0.0, 1.0])
+            plt.xlim([-0.05, 1.0])
             plt.ylim([0.0, 1.05])
 
             # Add the diagram labels
@@ -191,7 +201,8 @@ def create_roc_curves(config, data, classes):
             # Save the figure
             if not os.path.exists(config['output_path']):
                 os.makedirs(config['output_path'])
-            plt.savefig(f'{os.path.join(config["output_path"], model)}_roc_curve_{t}_mean.{config["save_format"]}', dpi=config['save_resolution'])
+            # plt.savefig(f'{os.path.join(config["output_path"], model)}_roc_curve_{t}_mean.{config["save_format"]}', dpi=config['save_resolution'])
+            plt.savefig(f'{os.path.join(config["output_path"], model)}_roc_curve_{t}_mean.{config["save_format"]}', dpi=config["save_resolution"])
             plt.close()
             print(colored(f"Finished the ROC {t} means diagram for {model}.", 'green'))
 

@@ -19,6 +19,7 @@
     "brown",
     "seagreen"
   ],
+  "alpha":1.0,
 
   "font_family": "DejaVu Sans",
   "label_font_size": 12,
