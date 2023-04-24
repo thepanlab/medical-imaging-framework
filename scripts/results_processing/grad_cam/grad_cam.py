@@ -87,8 +87,10 @@ def get_layer_name(model, last_conv_layer_name):
     """
     layer_names = [layer["config"]["name"] for layer in model.get_config()["layers"]]
     layer_names.sort()
+    
     last_conv_layer_name = check_layer_name(layer_names, last_conv_layer_name)
     if not last_conv_layer_name:
+        print(model.summary())
         for name in layer_names:
             print(colored(f"\t{name}", 'cyan'))
         print(colored("Please choose a layer name from the above list:", 'magenta'))
