@@ -99,7 +99,7 @@ def filter_images(input_path, query):
     # If directory, read in and filter the image paths.
     if os.path.isdir(input_path):
         print(colored("Note: An input directory of images was given. Only subjects and true labels can be filtered.", 'yellow'))
-        image_paths = get_files(input_path)
+        image_paths = get_files(input_path, False, 1)
         return filter_file_list(image_paths, query)
     
     # Read in the tabled prediction info CSV, filter it, and return the image paths
@@ -122,7 +122,7 @@ def generate_json_and_run(json_init, input_path, output_path):
     grad_cam.main(this_json)
 
 
-def run_program(image_addrs, config, limit):
+def run_program(image_addrs, config, run_program):
     """ Runs the main program for each image
 
     Args:
@@ -131,7 +131,6 @@ def run_program(image_addrs, config, limit):
     """
     # Get the layer to use for all items.
     last_conv_layer_name = grad_cam.get_layer_name(grad_cam.load_data(config['input_model_address']), config["last_conv_layer_name"])
-    run_count = 1
     
     # All outputs will use the base items given in the configuration
     json_init = {
@@ -156,7 +155,7 @@ def run_program(image_addrs, config, limit):
                         config['output_directory'],
                         f"subject_{subject}/{true_label}_correct"
                     )
-                    generate_json_and_run(json_init, path, output_path, limit, run_count)
+                    generate_json_and_run(json_init, path, output_path)
                     
                 # Else, separate incorrect images by the predicted label
                 for pred_label in image_addrs[subject][true_label]['incorrect']:
