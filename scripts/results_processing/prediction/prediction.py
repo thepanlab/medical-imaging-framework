@@ -79,25 +79,24 @@ def predict_images(image_paths, models, config, class_names):
     Returns:
         tuple: The prediction results and timing results
     """
+    tf.config.run_functions_eagerly(True)
     
     # Image args
     class_names = config['image_settings']['class_names']
-    target_height = config['image_settings']['target_height']
     offset_height = config['image_settings']['offset_width']
     offset_width = config['image_settings']['offset_width']
+    target_height = config['image_settings']['target_height']
     target_width = config['image_settings']['target_width']
     do_cropping = config['image_settings']['do_cropping']
     channels = config['image_settings']['channels']
-    use_mean = config['image_settings']['use_mean']
-    mean = config['image_settings']['mean']
     
     # Get label position
     if config['use_true_labels']:
         for subject in image_paths:
             for file_name in image_paths[subject]:
                 labels = [class_name for class_name in class_names if class_name in file_name]
-                temp = os.path.abspath(file_name).split('.')
-                label_position = temp[0].split('_').index(labels[0])
+                temp = os.path.abspath(file_name).split('/')[-1].split('.')[0]
+                label_position = temp.split('_').index(labels[0])
                 break
             break
     else:
@@ -137,12 +136,28 @@ def predict_images(image_paths, models, config, class_names):
                 ],
                 Tout=tout
             ))
+            """
+            img_map = img_slices.map(lambda x: parse_image(
+                x,                                                                 # Filename
+                class_names, 
+                channels, 
+                do_cropping,  
+                offset_height, 
+                offset_width, 
+                target_height,
+                target_width, 
+                label_position,
+                config['use_true_labels']
+            ))
+            """
             img_batch = img_map.batch(config['batch_size'], drop_remainder=False)
-
+            
             # Get the computation time
             print(colored(f"Beginning prediction for {len(image_paths[subject])} images.", 'yellow'))
             srt = time.time()
             pred = models[model].predict(img_batch)
+            
+            
             timing_results[model][subject] = time.time() - srt
             print(colored("Finished prediction.", 'cyan'))
             
@@ -192,7 +207,7 @@ def output_results(config, prediction_results, timing_results, input_filepaths, 
             # Print the prediction probability values
             preds = pd.DataFrame(prediction_results[model][subject])
             filename = os.path.join(dirpath, f"prediction/{prefix}_predicted.csv")
-            preds.to_csv(filename, index=False, header=False)
+            preds.to_csv(filename, index=False, header=True)
             print(colored(f"\t Wrote the predictions.", 'cyan'))
             
             # Print the prediction index values
@@ -266,7 +281,8 @@ def main(config=None):
             "data_path": out_vals,
             "output_path": out_mets,
             "use_true_labels": config['use_true_labels'],
-            "label_types": {str(class_names.index(label)): label for label in class_names}
+            "label_types": {str(class_names.index(label)): label for label in class_names},
+            "is_outer": config['is_outer']
         }
         tabled_prediction_info.main(table_config)
         print(colored('Successfully printed the tabeled info.', 'green'))
