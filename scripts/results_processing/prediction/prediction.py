@@ -217,7 +217,6 @@ def output_results(config, prediction_results, timing_results, input_filepaths, 
             print(colored(f"\t Wrote the indexed predictions.", 'cyan'))
             
             if config['use_true_labels']:
-                print(config['use_true_labels'])
                 # Print the true labels
                 trues = pd.DataFrame(i for file in input_filepaths[subject] for i in file.split('/')[-1].split('.')[0].split('_') if i in class_names)
                 filename = os.path.join(dirpath, f"true_label/{prefix}_true_label.csv")
