@@ -47,9 +47,7 @@ def compare_values(output_path, pred_paths, true_paths, image_paths, label_types
         is_outer (bool): If the data is from the outer loop.
     """
     # Explicitly declare a true label flag
-    do_true = True
-    if true_paths is None:
-        do_true = False
+    do_true = False if true_paths is None else True
     
     # Dataframe column order
     if is_outer:
@@ -78,7 +76,10 @@ def compare_values(output_path, pred_paths, true_paths, image_paths, label_types
                 
                 # If inner loop, verify the validation folds match
                 else:
-                    val_fold = re.search('_test_.*_val_.*_val', pred_file.split('/')[-1]).captures()[0].split("_")[4]
+                    file_name = pred_file.split('/')[-1]
+                    if "_val_" not in file_name:
+                        raise ValueError(colored(f"Error: No validation subject detected in the prediction file name. Are you sure it is not of the outer loop?\n\t{file_name}", 'red'))
+                    val_fold = re.search('_test_.*_val_.*_val', file_name).captures()[0].split("_")[4]
                     if do_true:
                         true_file = [t for t in true_paths[config][test_fold] if (f"_test_{test_fold}_val_{val_fold}_val" in t.split('/')[-1])][0]
                     img_file = [t for t in image_paths[config][test_fold] if (f"_test_{test_fold}_val_{val_fold}_val" in t.split('/')[-1])][0]
