@@ -163,9 +163,8 @@
             * ***data_path:*** The file path to the overall data. This folder should contain the testing folds' directories.
             * ***output_path:*** The directory path to where the confusion matrix CSV files should be written.
             * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
-        
-        </details> <hr> <br> <br> 
-    </details>
+
+        </details> <hr> <br> <br>
 <hr>
 
 
@@ -625,43 +624,6 @@
             * ***output_filename:*** This will result in a file named "*[name].csv*" 
             * ***round_to:*** This will allow the rounding of output values.
             * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
-
-       </details> <hr>  <br> <br>
-    </details>
-<hr>
-
-
-
-+ ## ***Tabled Prediction Info***
-    <ul> This will create a more detailed table of prediction information.
-    </ul> <br>
-    <details>
-    <summary>Show/Hide files</summary>
-
-    1) ### ***tabled_prediction_info.py:***
-        ***Example:*** 
-        > python3 tabled_prediction_info.py -j my_config.json
-
-        <details>
-
-        * ***Input:*** The configuration file. *(Optional)*
-        * ***Output:*** A CSV file.
-        * ***tabled_prediction_info_config.json:***
-            ```json
-                {
-                    "data_path": "[path]/data/",
-                    "output_path": "[path]/tabled_info_output",
-  
-                    "use_true_labels": true,
-
-                    "label_types": {"0":"A", "1":"B", "2":"C"},
-                    "is_outer": true
-                }
-            ```
-            * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
-            * ***output_path:*** The directory path to where the CSV file should be written.
-            * ***use_true_labels:*** Specifies whether to look for an image's true label or not.
-            * ***label_types:*** The labels and their index.
 
        </details> <hr>  <br> <br>
     </details>
