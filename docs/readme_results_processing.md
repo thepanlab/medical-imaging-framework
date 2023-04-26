@@ -147,7 +147,8 @@
                     "input_img_address": "[path]/img.png",
                     "output_image_address": "[path]/grad_cam",
                     "alpha": 0.7,
-                    "last_conv_layer_name": ""
+                    "last_conv_layer_name": "",
+                    "index_class_gradcam":-1
                 }
             ```
             * ***input_model_address:*** The filepath to the trained model.
@@ -155,6 +156,7 @@
             * ***output_image_address:*** The address to output an image to.
             * ***alpha:*** The new image's alpha value.
             * ***last_conv_layer_name:*** The particular layer name within the model. If not provided, is automatically detected. *(Optional)*
+            * ***index_class_gradcam***: determine which category to use for GradCAM. If -1 is provided, the category used is the predicted category. 
 
         <details> <hr> <br>
 
@@ -174,6 +176,7 @@
                     "output_image_address": "[path]/grad_cam",
                     "alpha": 0.7,
                     "last_conv_layer_name": "",
+                    "index_class_gradcam":-1,
 
                     "query":{
                         "cutoff_number_of_results": -1,
@@ -198,6 +201,7 @@
             * ***output_image_address:*** The address to output an image to.
             * ***alpha:*** The new image's alpha value.
             * ***last_conv_layer_name:*** The particular layer name within the model. If not provided, is automatically detected. *(Optional)*
+            * ***index_class_gradcam***: determine which category to use for GradCAM. If -1 is provided, the category used is the predicted category. 
             * ***query:*** All of the arguements within the query are entirely optional. This chooses specific images given the input path. For example, setting *match* to true will only output images with correct predictions. *(Optional)*
 
         </details> <br> <br>
