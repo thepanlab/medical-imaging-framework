@@ -107,7 +107,7 @@ def gradcam_heatmap(img, model, last_conv_layer_name, pred_index=None):
         img (image): An image to create a gradcam from.
         model (keras.models): A trained model.
         last_conv_layer_name(str): The convolutional layer name.
-        pred_index (int, optional): Gets an index from the predictions. Defaults to None.
+        pred_index (int, optional): Selects the class/category to create the visualization . Default None mean predicted class.
 
     Returns:
         image: A heatmap image.
@@ -218,7 +218,7 @@ def main(config=None):
         img_processed = preprocessing(img_addr_i)
 
         # Generate a heatmap from the model
-        heatmap = gradcam_heatmap(img_processed, model, config['last_conv_layer_name'])
+        heatmap = gradcam_heatmap(img_processed, model, config['last_conv_layer_name'], None if config["index_class_gradcam"] == -1 else config["index_class_gradcam"])
 
         # Output the image result
         save_gradcam_output(img_addr_i, heatmap, cam_path=config["output_image_address"], alpha=config["alpha"])

@@ -5,6 +5,7 @@
 
   "alpha": 0.7,
   "last_conv_layer_name": "mixed8",
+  "index_class_gradcam":-1,
 
   "query":{
     "cutoff_number_of_results": -1,

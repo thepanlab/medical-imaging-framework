@@ -136,7 +136,8 @@ def run_program(image_addrs, config, run_program):
     json_init = {
         'input_model_address': config['input_model_address'],
         'last_conv_layer_name': last_conv_layer_name,
-        'alpha': config['alpha']
+        'alpha': config['alpha'],
+        'index_class_gradcam':config['index_class_gradcam'] 
     }
     
     # If the addresses come in a list, output to the same directory
