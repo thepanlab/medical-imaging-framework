@@ -5,6 +5,46 @@
 
 </ul> <hr> <br> 
 
+
+
++ ## ***Class Accuracy***
+    <ul> This prints the accuracy scores for every class and subject, along with their averages.
+    </ul> <br>
+    <details>
+    <summary>Show/Hide files</summary>
+
+    1) ### ***class_accuracy.py:***
+        ***Example:*** 
+        > python3 class_accuracy.py -j my_config.json
+
+        <details>
+
+        * ***Input:*** The configuration file. *(Optional)*
+        * ***Output:*** A CSV file.
+        * ***class_accuracy_config.json:***
+            ```json
+                {
+                    "data_path": "[path]/data/",
+                    "output_path": "[path]/class_accuracy",
+                    "output_filename": "class_accuracy",
+  
+                    "classes": {"A": 0, "B": 1}
+
+                    "round_to": 2,
+                    "is_outer": true
+                }
+            ```
+            * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
+            * ***output_path:*** The directory path to where the CSV file should be written.
+            * ***output_filename:*** This will result in a file named "*[name].csv*" 
+            * ***classes:*** A lictionary of class-labels and their index.
+            * ***round_to:*** Allows for the rounding of output values.[name].csv*" 
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
+
+       </details> <hr>  <br> <br>
+    </details>
+<hr>
+
 + ## ***Confusion Matrix***
     <ul> 
         These scripts are responsible for creating confusion matrices for each test fold, validation fold, and configuration. If enough data is available, the <i>graphing</i> file will also produce the average and standard error matrices for each test fold and configuration pair.
@@ -54,12 +94,14 @@
                     "data_path": "[path]/data",
                     "output_path": "[path]/confusion_matrix",
 
-                    "label_types": { "A": 0, "B": 1, "C": 2 }
+                    "label_types": { "A": 0, "B": 1, "C": 2 },
+                    "is_outer": true
                 }
             ```
             * ***data_path:*** The file path to the overall data. This folder should contain the testing folds' directories.
             * ***output_path:*** The directory path to where the confusion matrix CSV files should be written.
             * ***label_types:*** These are the labels that will appear on the output matrix.
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
 
         </details> <hr> <br>
     
@@ -79,8 +121,8 @@
                     "means_output_path": "[path]/confusion_matrix_means",
         
                     "round_to": 2,
-
-                    "label_types": [ "A", "B", "C" ]
+                    "label_types": [ "A", "B", "C" ],
+                    "is_outer": true
                 }
             ```
             * ***data_path:*** The file path to the overall data. This folder should contain the testing folds' directories.
@@ -88,6 +130,7 @@
             * ***means_output_path:*** The directory path to where the confusion matrix CSV files should be written.
             * ***round_to:*** Allows for the rounding of output values.
             * ***label_types:*** These are the labels that will appear on the output matrix.
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
         
         </details> <hr> <br> <br> 
     </details>
@@ -113,14 +156,16 @@
             ```json
                 {
                     "data_path": "[path]/data/",
-                    "output_path": "[path]/epoch_output/"
+                    "output_path": "[path]/epoch_output/",
+                    "is_outer": true
                 }
             ```
             * ***data_path:*** The file path to the overall data. This folder should contain the testing folds' directories.
             * ***output_path:*** The directory path to where the confusion matrix CSV files should be written.
-
-        <details> <hr> <br> <br>
-    </details>     
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
+        
+        </details> <hr> <br> <br> 
+    </details>
 <hr>
 
 
@@ -147,16 +192,14 @@
                     "input_img_address": "[path]/img.png",
                     "output_image_address": "[path]/grad_cam",
                     "alpha": 0.7,
-                    "last_conv_layer_name": "",
-                    "index_class_gradcam":-1
+                    "last_conv_layer_name": ""
                 }
             ```
             * ***input_model_address:*** The filepath to the trained model.
             * ***input_img_address:*** The input image to alter.
             * ***output_image_address:*** The address to output an image to.
             * ***alpha:*** The new image's alpha value.
-            * ***last_conv_layer_name:*** The particular layer name within the model. If not provided, is automatically detected. *(Optional)*
-            * ***index_class_gradcam***: determine which category to use for GradCAM. If -1 is provided, the category used is the predicted category. 
+            * ***last_conv_layer_name:*** The particular layer name within the model. If not provided, is automatically detected. 
 
         <details> <hr> <br>
 
@@ -203,6 +246,21 @@
             * ***last_conv_layer_name:*** The particular layer name within the model. If not provided, is automatically detected. *(Optional)*
             * ***index_class_gradcam***: determine which category to use for GradCAM. If -1 is provided, the category used is the predicted category. 
             * ***query:*** All of the arguements within the query are entirely optional. This chooses specific images given the input path. For example, setting *match* to true will only output images with correct predictions. *(Optional)*
+
+            <br>
+
+            *Query Options*:
+            * ***cutoff_number_of_results:*** If greater than 0, the first N items will be read in..
+            * ***sort_images:*** If true, it will sort the image paths.
+            * ***test_subject:*** If the list is non-empty, the image paths will be filtered to only include the given test subject(s).
+            * ***match:*** If the list is non-empty, it will include items the predictions that match (true) and/or don't match (false).
+            * ***true_label:*** If the list is non-empty, the predictions will be filtered to only include the given true label(s).
+            * ***true_label_index:*** If the list is non-empty, the predictions will be filtered to only include the given true label index(s).
+            * ***pred_label:*** If the list is non-empty, the predictions will be filtered to only include the given predicted label(s).
+            * ***pred_label_index:*** If the list is non-empty, the predictions will be filtered to only include the given prediction label index(s).
+            * ***true_predicted_label_pairs:*** If the list is non-empty, each true-predicted label pair will be filtered from the predictions.
+            * ***true_predicted_index_pairs:*** If the list is non-empty, each true-predicted index pair will be filtered from the predictions.
+
 
         </details> <br> <br>
     </details>
@@ -323,13 +381,15 @@
                     "output_path": "[path]/metrics_output",
                     "output_filename": "metrics_table",
 
-                    "round_to": 6
+                    "round_to": 6,
+                    "is_outer": true
                 }
             ```
             * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
             * ***output_path:*** The directory path to where the CSV file should be written. 
             * ***output_filename:*** This will result in a file named "*[name].csv*" 
             * ***round_to:*** This will allow the rounding of output values.
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
 
         </details> <hr> <br> <br>
     </details>
@@ -376,7 +436,8 @@
                     "offset_width": 0,
                     "target_height": 241,
                     "target_width": 181
-               }
+               },
+                "is_outer": true
             }
            ```
            * ***prediction_output:*** Where to output predictions.
@@ -386,6 +447,7 @@
            * ***output_tabled_info:*** If true, will output tabled information of the predictions automatically.
            * ***use_true_labels:*** If false, the predictions will be made without any true labels. I.e. it will only guess what labels go to what image.
            * ***image_settings:*** How to alter the given images. Mainly should worry about 'class_names'.
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
 
         </details> <hr> <br> <br>
     </details>
@@ -465,19 +527,67 @@
                   "title_font_size": 12,
 
                   "save_resolution": "figure",
-                  "save_format": "png"
+                  "save_format": "png",
+                  "is_outer": true
               }
           ```
-          * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
-          * ***output_path:*** The directory path to where the PNG files should be written. 
-          * ***line_width:*** Width of the line. 
-          * ***label_types:*** Axis labels.
-          * ***line_colors:*** Color of the ROC curve.
-          * ***font_family:*** The font to be used with the PyPlot graphing tool.
-          * ***label_font_size:*** Size of the axis label fonts.
-          * ***title_font_size:*** Size of the title font. 
-          * ***save_resolution:*** Resolution of the image output.
-          * ***save_format:*** Image type to save.
+            * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
+            * ***output_path:*** The directory path to where the PNG files should be written. 
+            * ***line_width:*** Width of the line. 
+            * ***label_types:*** Axis labels.
+            * ***line_colors:*** Color of the ROC curve.
+            * ***font_family:*** The font to be used with the PyPlot graphing tool.
+            * ***label_font_size:*** Size of the axis label fonts.
+            * ***title_font_size:*** Size of the title font. 
+            * ***save_resolution:*** Resolution of the image output.
+            * ***save_format:*** Image type to save.
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
+        
+        </details> <hr> <br>
+    
+    3) ### ***roc_curve_many_means.py:***
+        ***Example:*** 
+        >python3 roc_curve_many_means.py -j my_config.json
+        
+        <details>
+
+        * ***Input:*** The configuration file. *(Optional)*
+        * ***Output:*** Many images, for every configuration's micro/macro mean.
+          * ***roc_curve_many_means_config.json:***
+          ```json
+              {
+                  "data_path": "[path]/data/",
+                  "output_path": "[path]/roc_means",
+
+                  "line_width": "2",
+                  "label_types": ["A", "B", "C"],
+                  "line_colors": ["red", "blue", "yellow"],
+
+                  "font_family": "DejaVu Sans",
+                  "label_font_size": 12,
+                  "title_font_size": 12,
+
+                  "save_resolution": "figure",
+                  "save_format": "png",
+                  "is_outer": true,
+
+                  "average_all_subjects": false,
+                  "subjects": ["X", "Y"],
+              }
+          ```
+            * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
+            * ***output_path:*** The directory path to where the PNG files should be written. 
+            * ***line_width:*** Width of the line. 
+            * ***label_types:*** Axis labels.
+            * ***line_colors:*** Color of the ROC curve.
+            * ***font_family:*** The font to be used with the PyPlot graphing tool.
+            * ***label_font_size:*** Size of the axis label fonts.
+            * ***title_font_size:*** Size of the title font. 
+            * ***save_resolution:*** Resolution of the image output.
+            * ***save_format:*** Image type to save.
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
+            * ***average_all_subjects:*** Whether to average all of the subjects for each configuration.
+            * ***subjects:*** If non-empty and average_all_subjects is false, will only select data that is from the given test subject(s).
 
         </details> <hr> <br> <br>
     </details>
@@ -506,13 +616,15 @@
                     "output_path": "[path]/summary_output",
                     "output_filename": "summary_table",
 
-                    "round_to": 6
+                    "round_to": 6,
+                    "is_outer": true
                 }
             ```
             * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
             * ***output_path:*** The directory path to where the CSV file should be written. 
             * ***output_filename:*** This will result in a file named "*[name].csv*" 
             * ***round_to:*** This will allow the rounding of output values.
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
 
        </details> <hr>  <br> <br>
     </details>
@@ -534,21 +646,59 @@
 
         * ***Input:*** The configuration file. *(Optional)*
         * ***Output:*** A CSV file.
-        * ***tabled_prediction_info.json:***
+        * ***tabled_prediction_info_config.json:***
             ```json
                 {
                     "data_path": "[path]/data/",
-                    "output_path": "[path]/summary_output",
+                    "output_path": "[path]/tabled_info_output",
   
                     "use_true_labels": true,
 
-                    "label_types": {"0":"A", "1":"B", "2":"C"}
+                    "label_types": {"0":"A", "1":"B", "2":"C"},
+                    "is_outer": true
                 }
             ```
             * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
             * ***output_path:*** The directory path to where the CSV file should be written.
             * ***use_true_labels:*** Specifies whether to look for an image's true label or not.
             * ***label_types:*** The labels and their index.
+
+       </details> <hr>  <br> <br>
+    </details>
+<hr>
+
+
+
++ ## ***Tabled Prediction Info***
+    <ul> This will create tables for each configuration, of the prediction information. Things such as images, matches, and labels.
+    </ul> <br>
+    <details>
+    <summary>Show/Hide files</summary>
+
+    1) ### ***tabled_prediction_info.py:***
+        ***Example:*** 
+        > python3 tabled_prediction_info.py -j my_config.json
+
+        <details>
+        
+        * ***Input:*** The configuration file. *(Optional)*
+        * ***Output:*** A CSV file.
+        * ***tabled_prediction_info_config.json:***
+            ```json
+                {
+                    "data_path": "[path]/data/",
+                    "output_path": "[path]/metrics_output",
+                    
+                    "use_true_labels": true,
+                    "label_types": {"0": "A", "1": "B"},
+                    "is_outer": true
+                }
+            ```
+            * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
+            * ***output_path:*** The directory path to where the CSV file should be written. 
+            * ***use_true_labels:*** Whether to use the true values along with the predicted values.
+            * ***label_types:*** These are the labels that will appear on the output matrix.
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
 
        </details> <hr> <br> <br>
     </details>
