@@ -42,6 +42,8 @@
     * *distributed_training_inner_loop*
     * *distributed_training_outer_loop*
     * *mpi_init*
+    * *predicted_formatter*
+    * *truth_formatter*
 
     <br>
 
@@ -60,7 +62,3 @@
 
 <hr> <br> <br>
 
-
-+ ## ***ETC***
-
-    The *predicted_formatter* and *truth_formatter* modules help to format predicted and truth data respectively if they are in an incorrect format.
