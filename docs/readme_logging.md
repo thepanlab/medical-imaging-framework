@@ -1,3 +1,6 @@
+# <b>Logging and Checkpointing</b>
+This module contains two submodules: Logging and Checkpointing. The logging module helps the training process by logging the current progress to a file. The checkpointing module helps the training process by saving a training checkpoint every certian number of epochs.
+
 <hr> <hr>
 
 # <b>Logging</b>: <i>logger.py</i>
