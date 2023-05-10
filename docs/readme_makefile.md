@@ -24,12 +24,14 @@
     * *learning_curve*
     * *learning_curve_many*
     * *metrics_table*
+    * *predicted_formatter*
     * *prediction*
     * *roc_curve*
     * *roc_curve_many*
     * *roc_curve_many_means*
     * *summary_table*
     * *tabled_prediction_info*
+    * *truth_formatter*
 
 <hr> <br> <br>
 
@@ -42,8 +44,6 @@
     * *distributed_training_inner_loop*
     * *distributed_training_outer_loop*
     * *mpi_init*
-    * *predicted_formatter*
-    * *truth_formatter*
 
     <br>
 
