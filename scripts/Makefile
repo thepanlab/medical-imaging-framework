@@ -1,3 +1,4 @@
+## --- Variables and Functions -------------------------------------------------------------------- ##
 j ?=
 args ?=
 
@@ -18,12 +19,46 @@ help:
 	@echo ''
 
 
-predicted_formatter: ## Formats prediction values of some data
+
+
+## --- Sequential Training ------------------------------------------------------------------------ ##
+training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
+training_inner_loop: 
+	CUDA_VISIBLE_DEVICES=0 python3 -W ignore -m training.training_sequential.loop_inner.training_inner_loop $(args)
+
+
+training_outer_loop: ## Runs the outer loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
+training_outer_loop: 
+	CUDA_VISIBLE_DEVICES=1 python3 -W ignore -m training.training_sequential.loop_outer.training_outer_loop $(args)
+
+
+
+
+## --- Distributed Training ----------------------------------------------------------------------- ##
+mpi_init: ## Prints a console command for running MPI based on your config parameters.
+mpi_init: 
+	python3 -W ignore -m training.training_multiprocessing.mpi_init $(args)
+
+
+distributed_training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
+distributed_training_inner_loop: 
+	CUDA_VISIBLE_DEVICES=0,1 mpirun -n 5 python3 -W ignore -m training.training_multiprocessing.loop_inner.multiprocessed_training_inner_loop
+
+
+distributed_training_outer_loop: ## Runs the outer loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
+distributed_training_outer_loop: 
+	CUDA_VISIBLE_DEVICES=0,1 mpirun -n 5 python3 -W ignore -m training.training_multiprocessing.loop_outer.multiprocessed_training_outer_loop
+
+
+
+
+## --- Results Processing ------------------------------------------------------------------------- ##
+predicted_formatter: ## Formats prediction values of some data.
 predicted_formatter: 
 	python3 -W ignore -m util.predicted_formatter.predicted_formatter
 
 
-truth_formatter: ## Formats truth values of some data
+truth_formatter: ## Formats truth values of some data.
 truth_formatter: 
 	python3 -W ignore -m util.truth_formatter.truth_formatter
 
@@ -93,6 +128,11 @@ roc_curve_many:
 	python3 -W ignore -m results_processing.roc_curve.roc_curve_many -j ${j}
 
 
+roc_curve_many_means: ## Creates ROC mean-curves from the specified data folder.
+roc_curve_many_means: 
+	python3 -W ignore -m results_processing.roc_curve.roc_curve_many_means -j ${j}
+
+
 summary_table: ## Creates a summary table from the specified data folder.
 summary_table: 
 	python3 -W ignore -m results_processing.summary_table.summary_table -j ${j}
@@ -103,12 +143,7 @@ tabled_prediction_info:
 	python3 -W ignore -m results_processing.tabled_prediction_info.tabled_prediction_info -j ${j}
 
 
-## -------------------------------------------------------------------------- ##
 
 
-training_inner_loop: ## Runs the inner loop training program. Specify arguments with "args='--file X'" or "args='--folder X'"
-training_inner_loop: 
-	python3 -W ignore -m training.training_inner_loop $(args)
-
-
-
+## --- Custom Commands ---------------------------------------------------------------------------- ##
+# Place custom commands here, if needed

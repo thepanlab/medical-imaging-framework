@@ -1,23 +1,17 @@
 {
-  "data_path": "../data/hao",
-  "output_path": "../results/processed_output/roc_output",
+  "data_path": "../results/training/mpi_outer_10/training_results",
+  "output_path": "../results/roc_many/mpi_outer_10",
 
   "line_width": "2",
   "label_types": [
-    "cortex",
-    "medulla",
-    "calyx",
-    "fat",
-    "pelvis",
-    "tumor"
+    "cortex", 
+    "medulla", 
+    "pelvis"
   ],
   "line_colors": [
     "aqua",
     "darkorange",
-    "cornflowerblue",
-    "brown",
-    "seagreen",
-    "red"
+    "cornflowerblue"
   ],
 
   "font_family": "DejaVu Sans",
@@ -27,5 +21,5 @@
   "save_resolution": "figure",
   "save_format": "png",
 
-  "is_outer": false
+  "is_outer": true
 }

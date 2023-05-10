@@ -44,11 +44,12 @@ def run_program(args, pred_paths, true_paths):
                 try:
                     # Get the program's arguments
                     json = generate_json(pred_paths, true_paths, model, subject, item, json)
-                    confusion_matrix.main(json)
+                    if json is not None:
+                        confusion_matrix.main(json)
 
                 # Catch weird stuff
                 except Exception as err:
-                    print(colored(f"Exception caught.\n\t{str(err)}", "red"))
+                    print(colored(f"Exception caught. Double-check your configuration is of the outer loop or not.\n\t{str(err)}", "red"))
                     print(colored(f"{traceback.format_exc()}\n", "yellow"))
 
 

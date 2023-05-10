@@ -37,7 +37,7 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
         roc_auc[i] = auc(fpr[i], tpr[i])
 
     # Generate values for a ravelled array
-    fpr["micro"], tpr["micro"], _ = roc_curve(true_val_bin.ravel(), pred_vals.ravel())  # TODO: error line
+    fpr["micro"], tpr["micro"], _ = roc_curve(true_val_bin.ravel(), pred_vals.ravel()) 
     roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
     # First aggregate all false positive rates
@@ -85,7 +85,7 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
     plt.ylim([0.0, 1.05])
     plt.xlabel('1 - Specificity')
     plt.ylabel('Sensitivity')
-    plt.title('Receiver Operating Characteristic(ROC): ' + file_name)
+    plt.title('ROC: ' + file_name)
     plt.legend(loc="best")
 
     # Save the figure

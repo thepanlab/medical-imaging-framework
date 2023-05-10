@@ -1,0 +1,9 @@
+{
+    "gpu_addrs": [],
+
+    "cuda_devices": [0, 1],
+
+    "n_processes": 2,
+
+    "config_loc": "./training/training_config_files"
+}

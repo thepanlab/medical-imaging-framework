@@ -1,17 +1,16 @@
 {
-  "data_path": "../data/_loop_inner",
-  "matrices_path": "../results/processed_output/confusion_matrix",
-  "means_output_path": "../results/processed_output/confusion_matrix_means",
+  "data_path": "../results/training/seq_inner_10/training_results",
+  "matrices_path": "../results/confusion_many/seq_inner_10",
+  "means_output_path": "../results/confusion_many_means/seq_inner_10",
 
   "round_to": 2,
 
   "label_types": {
-    "fat": 0,
-    "ligament": 1,
-    "flavum": 2,
-    "epidural space": 3,
-    "spinal cord": 4
-  }
+    "cortex": 0, 
+    "medulla": 1, 
+    "pelvis": 2
+  },
 
+  "is_outer": false
 
 }

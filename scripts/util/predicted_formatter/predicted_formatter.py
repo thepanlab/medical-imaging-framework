@@ -45,7 +45,6 @@ def read_json():
 
 def translate_file(file_path):
     """ Reads and translates a data-file """
-
     # Get the data in the CSV file
     data = pd.read_csv(file_path, header=None)
 
@@ -62,7 +61,6 @@ def translate_file(file_path):
 
 def write_file(file_path, formatted_data):
     """ Writes the formatted data out to CSV """
-
     # Append "_index" to the input file name
     new_file_path = file_path[:len(file_path) - 4] + '_index.csv'
 
@@ -72,15 +70,16 @@ def write_file(file_path, formatted_data):
             file.write(f"{item}\n")
 
 
-def main(data_path=None):
+def main(data_path=None, is_outer=None):
     """ The Main Program """
     # Read the JSON file's arguments
     if data_path is None:
         config = read_json()
         data_path = config["data_path"]
+        is_outer = config['is_outer']
 
     # Get a list of all files to translate
-    file_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False)
+    file_paths = path_getter.get_subfolder_files(data_path, "prediction", isIndex=False, isOuter=is_outer)
     
     # Translate each file
     for model in file_paths:

@@ -13,6 +13,7 @@ def get_input_matrices(matrices_path, is_outer):
 
     Args:
         matrices_path (string): The path of the matrices' directory.
+        is_outer (bool): Whether this data is of the outer loop.
 
     Returns:
         dict: A dictionary of matrix-dataframes amd their prediction shapes, organized by config and testing fold.
@@ -43,12 +44,15 @@ def get_input_matrices(matrices_path, is_outer):
                 
             # Search for the test-fold name from the file name
             if not is_outer:
-                test_fold = re.search('_test_.*_val_', filename).captures()[0].split("_")[2]            
+                try:
+                    test_fold = re.search('_test_.*_val_', filename).captures()[0].split("_")[2] 
+                except:    
+                    raise ValueError(colored(f"Error: No test-val pair found in the filename {filename}\n\tAre you sure it is of the inner loop?",'red'))       
                 if test_fold not in organized_paths[config]:
                     organized_paths[config][test_fold] = {}
                     organized_shapes[config][test_fold] = {}
             else:
-                test_fold = re.search('.*_test_.*_test.*', filename).captures()[0].split("_")[2]
+                test_fold = re.search('_test_.*_', filename).captures()[0].split("_")[2]
                 
             # Search for the val-fold name from the file name, read the csv, and get shape
             if not is_outer:
@@ -72,6 +76,7 @@ def get_matrices_of_mode_shape(shapes, matrices, is_outer):
     Args:
         shapes (dict): The shapes (prediction rows) of the corresponding confusion matrices.
         matrices (dict): A dictionary of the matrices.
+        is_outer (bool): Whether this data is of the outer loop.
 
     Returns:
         dict: A reduced dictionary of matrix-dataframes, organized by config and testing fold.
@@ -89,13 +94,11 @@ def get_matrices_of_mode_shape(shapes, matrices, is_outer):
 
     # Remove matrices whose prediction value length do not match the mode
     for config in matrices:
-        if is_outer:
-            config_matrices = []
         for test_fold in matrices[config]:
+            test_fold_matrices = []
             
             # Each testing fold will have an array of coresponding validation matrices
             if not is_outer:
-                test_fold_matrices = []
                 for val_fold in matrices[config][test_fold]:
                     val_fold_shape = shapes[config][test_fold][val_fold]
                     if val_fold_shape == shapes_mode:
@@ -109,9 +112,8 @@ def get_matrices_of_mode_shape(shapes, matrices, is_outer):
             else:
                 test_fold_shape = shapes[config][test_fold]
                 if test_fold_shape == shapes_mode:
-                    config_matrices.append(matrices[config][test_fold])
-        if is_outer:
-            matrices[config] = config_matrices
+                    test_fold_matrices.append(matrices[config][test_fold])
+                    matrices[config][test_fold] = test_fold_matrices
     return matrices
 
 
@@ -123,6 +125,7 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
         shapes (dict): A dictionary of shapes organized by config and testing fold.
         output_path(string): The path to write the average matrices to.
         labels(list(str)): The labels of the matrix data.
+        is_outer (bool): Whether this data is of the outer loop.
     """
     if type(labels) == dict:
         labels = list(labels.keys())
@@ -142,9 +145,10 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
         for test_fold in matrices[config]:
 
             # Check shape is the mode for each validation fold
-            valid_matrices = all_valid_matrices[config]
-            if not is_outer:
-                valid_matrices = valid_matrices[test_fold]
+            if is_outer:
+                valid_matrices = [all_valid_matrices[config][t][i] for t in all_valid_matrices[config] for i in range(len(all_valid_matrices[config][t]))]
+            else:
+                valid_matrices = all_valid_matrices[config][test_fold]
 
             # Check if length is valid for finding mean/stderr
             n_items = len(valid_matrices)
@@ -256,8 +260,12 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
             # Output all of the mean and error dataframes
             output_folder = os.path.join(output_path, f'{config}_{test_fold}/')
             if not os.path.exists(output_folder): os.makedirs(output_folder)
+                
+                        
             matrix_avg.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean.csv'))
+            
+                        
             matrix_err.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_stderr.csv'))
             matrix_combo.to_csv(os.path.join(

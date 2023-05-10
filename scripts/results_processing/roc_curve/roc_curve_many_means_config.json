@@ -1,0 +1,28 @@
+{
+  "data_path": "../results/training/mpi_inner_10/training_results",
+  "output_path": "../results/roc_many_means/mpi_inner_10",
+
+  "line_width": "2",
+  "label_types": [
+    "cortex", 
+    "medulla", 
+    "pelvis"
+  ],
+  "line_colors": [
+    "aqua",
+    "darkorange",
+    "cornflowerblue"
+  ],
+
+  "average_all_subjects": false,
+  "subjects": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
+
+  "font_family": "DejaVu Sans",
+  "label_font_size": 12,
+  "title_font_size": 12,
+
+  "save_resolution": "figure",
+  "save_format": "png",
+
+  "is_outer": false
+}

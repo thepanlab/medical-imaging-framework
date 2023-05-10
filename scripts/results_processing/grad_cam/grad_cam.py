@@ -59,6 +59,7 @@ def preprocessing(img_addr):
     img = Image.open(img_addr).convert('L') #.resize((181, 241))
     return np.array(img)[np.newaxis, :, :, np.newaxis]
 
+
 def check_layer_name(layer_names, name):
     """ Gets the name of a layer, if given the correct input.
 

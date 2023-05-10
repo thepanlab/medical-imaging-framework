@@ -1,13 +1,8 @@
-from . import console_printing, fold_generator, image_getter, image_parser, index_getter, model_creator, result_outputter, training_fold, training_loop, training_preparation
+from . import data_processing, image_processing, model_processing, output_processing, training_processing
 __all__ = [
-    'console_printing',
-    'fold_generator', 
-    'image_getter',
-    'image_parser',
-    'index_getter', 
-    'model_creator', 
-    'result_outputter', 
-    'training_fold',
-    'training_loop',
-    'training_preparation'
+    'data_processing', 
+    'image_processing', 
+    'model_processing', 
+    'output_processing', 
+    'training_processing'
 ]
