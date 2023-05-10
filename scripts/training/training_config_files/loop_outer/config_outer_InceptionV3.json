@@ -24,8 +24,7 @@
     "selected_model_name": "InceptionV3",
     
     "subject_list": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
-    "test_subjects": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
-    "validation_subjects": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
+    "test_subjects": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"]
     
     "image_size": [235, 301],
 	"target_height": 301,
