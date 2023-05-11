@@ -31,6 +31,7 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
         rank
     )
     
+    # If a rotation exists in the log, set the next rotation to that value
     if log_rotations and 'current_rotation' in log_rotations and testing_subject in log_rotations['current_rotation']:
         rotation = log_rotations['current_rotation'][testing_subject]
         print(colored(f'Starting off from rotation {rotation+1} for testing subject {testing_subject}.', 'cyan'))
@@ -38,16 +39,16 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
     # Train for every rotation specified
     for rot in range(rotation, rotations):
         if is_outer:
-            rot_subject = folds[rot]['training'][0]
+            rotation_subject = folds[rot]['training'][0]
             print(colored(f'--- Rotation {rot+1}/{rotations} for test subject {testing_subject} ---', 'magenta'))
         
         # Inner loop will use the validation subjects
         else:
-            rot_subject = folds[rot]['validation'][0]
-            print(colored(f'--- Rotation {rot+1}/{rotations} for test subject {testing_subject} and val subject {rot_subject} ---', 'magenta'))
+            rotation_subject = folds[rot]['validation'][0]
+            print(colored(f'--- Rotation {rot+1}/{rotations} for test subject {testing_subject} and val subject {rotation_subject} ---', 'magenta'))
         
         # Create and run the training fold for this subject pair
-        training_fold = Fold(rot, config, testing_subject, rot_subject, files, folds, indexes, label_position, rank, is_outer)
+        training_fold = Fold(rot, config, testing_subject, rotation_subject, files, folds, indexes, label_position, rank, is_outer)
         training_fold.run_all_steps()
         
         # Write the index to log
@@ -56,11 +57,15 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
         else:
             rotation_dict = log_rotations['current_rotation']
             rotation_dict[testing_subject] = rot + 1
+        if rank:
+            job_name = f"{config['job_name']}_test_{testing_subject}" if is_outer else f"{config['job_name']}_test_{testing_subject}_val_{rotation_subject}"
+        else:
+            job_name = config['job_name']
         write_log(
             config['output_path'], 
-            config['job_name'], 
+            job_name, 
             {'current_rotation': rotation_dict},
-            rank
+            use_lock=rank!=None
         )
              
 

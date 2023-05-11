@@ -16,8 +16,12 @@ def get_images(data_input, class_names):
     """
         Reads in a dictionary of arrays of data-paths.
 
-        data_input: A dictionary of key-array form.
-        return: A dictionary of key-array form, of all the images.
+    Args:
+        data_input (dict): A dictionary of key-array form.
+        class_names (list of str): A list of classes/labels.
+        
+    Reeturns:
+        (dict) A dictionary of key-array form, of all the images.
     """                
     # Get all valid image paths
     image_paths = {}
@@ -51,8 +55,11 @@ def read_models(model_input):
     """
         Reads in a dictionary of models.
 
-        data_input: A dictionary of key-path form.
-        return: A dictionary of key-model form.
+    Args:
+        model_input: An array of model paths.
+        
+    Return:
+        A dictionary of key-model form.
     """
     # Check that the input models exist
     for model in model_input:
@@ -91,6 +98,7 @@ def predict_images(image_paths, models, config, class_names):
     channels = config['image_settings']['channels']
     
     # Get label position
+    label_position = -1
     if config['use_true_labels']:
         for subject in image_paths:
             for file_name in image_paths[subject]:
@@ -99,8 +107,6 @@ def predict_images(image_paths, models, config, class_names):
                 label_position = temp.split('_').index(labels[0])
                 break
             break
-    else:
-        label_position = -1
     
     # Predict all items using every model
     prediction_results = {}
@@ -115,6 +121,7 @@ def predict_images(image_paths, models, config, class_names):
             timing_results[model][subject] = {}
                 
             # Separate the images into batches
+            print(image_paths[subject]), quit()
             img_slices = tf.data.Dataset.from_tensor_slices(image_paths[subject]) 
             if config['use_true_labels']:
                 tout = [tf.float32, tf.int64]
@@ -123,7 +130,7 @@ def predict_images(image_paths, models, config, class_names):
             img_map = img_slices.map(lambda x: tf.py_function(
                 func=parse_image,
                 inp=[
-                    x,                                                                 # Filename
+                    x,  
                     class_names, 
                     channels, 
                     do_cropping,  
@@ -132,13 +139,13 @@ def predict_images(image_paths, models, config, class_names):
                     target_height,
                     target_width, 
                     label_position,
-                    config['use_true_labels'],                                     # Label Position
+                    config['use_true_labels'],
                 ],
                 Tout=tout
             ))
-            """
+            """ Non-eager executing method
             img_map = img_slices.map(lambda x: parse_image(
-                x,                                                                 # Filename
+                x,                  
                 class_names, 
                 channels, 
                 do_cropping,  
@@ -155,8 +162,7 @@ def predict_images(image_paths, models, config, class_names):
             # Get the computation time
             print(colored(f"Beginning prediction for {len(image_paths[subject])} images.", 'yellow'))
             srt = time.time()
-            pred = models[model].predict(img_batch)
-            
+            pred = models[model].predict(img_batch)   #TODO         
             
             timing_results[model][subject] = time.time() - srt
             print(colored("Finished prediction.", 'cyan'))
@@ -178,7 +184,6 @@ def output_results(config, prediction_results, timing_results, input_filepaths, 
         input_filepaths (dict): The true values, (images paths.)
         class_names (str): Names of the prediction classes.
         out_vals (str): Directory output path of the values.
-        out_mets (str): Directory output path of the metrics.
     """
     
     # Output results to file
@@ -251,6 +256,12 @@ def main(config=None):
     # Obtain a dictionary of configurations
     if config is None:
         config = parse_json('./results_processing/prediction/prediction_config.json')
+        
+    # Set eager execution
+    tf_config = tf.compat.v1.ConfigProto()
+    tf_config.gpu_options.allow_growth = True
+    session = tf.compat.v1.Session(config=tf_config)
+    tf.config.run_functions_eagerly(True)
 
     # Check that output directories exist
     if not os.path.exists(config['prediction_output']): os.makedirs(config['prediction_output'])

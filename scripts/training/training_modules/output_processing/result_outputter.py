@@ -25,6 +25,7 @@ def output_results(output_path, testing_subject, rotation_subject, rotation, mod
         job_name (str): The name of this config's job name.
         config_name (str): The name of this config's config (model) name.
         is_outer (bool): If this is of the outer loop.
+        rank (int): The process rank. May be None.
     """
     # Check if the output paths exist
     if is_outer:
@@ -38,8 +39,9 @@ def output_results(output_path, testing_subject, rotation_subject, rotation, mod
         file_prefix
     )
     
+    # Create the folders to output into. If MPI, lock this section else the processes may error out.
     if rank is not None:
-        with fasteners.InterProcessLock(os.path.join(output_path, 'output_lock.tmp')):
+        with fasteners.InterProcessLock(os.path.join(os.path.dirname(output_path), 'output_lock.tmp')):
             _create_folders(path_prefix, ['prediction', 'true_label', 'file_name', 'model'])
     else:
         _create_folders(path_prefix, ['prediction', 'true_label', 'file_name', 'model'])
@@ -108,7 +110,7 @@ def output_results(output_path, testing_subject, rotation_subject, rotation, mod
             'yellow'
         ))
     else:
-        metrics[f"{file_prefix}_test_evaluation.csv"] =  model_obj.model.evaluate(datasets['testing']['ds'])          # The evaluation results
+        metrics[f"{file_prefix}_test_evaluation.csv"] =  model_obj.model.evaluate(datasets['testing']['ds'])              # The evaluation results
         if not is_outer:
             metrics[f"prediction/{file_prefix}_test_predicted.csv"] =  model_obj.model.predict(datasets['testing']['ds']) # Predictions using the testing dataset
     

@@ -13,6 +13,7 @@ def get_input_matrices(matrices_path, is_outer):
 
     Args:
         matrices_path (string): The path of the matrices' directory.
+        is_outer (bool): Whether this data is of the outer loop.
 
     Returns:
         dict: A dictionary of matrix-dataframes amd their prediction shapes, organized by config and testing fold.
@@ -75,6 +76,7 @@ def get_matrices_of_mode_shape(shapes, matrices, is_outer):
     Args:
         shapes (dict): The shapes (prediction rows) of the corresponding confusion matrices.
         matrices (dict): A dictionary of the matrices.
+        is_outer (bool): Whether this data is of the outer loop.
 
     Returns:
         dict: A reduced dictionary of matrix-dataframes, organized by config and testing fold.
@@ -123,6 +125,7 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
         shapes (dict): A dictionary of shapes organized by config and testing fold.
         output_path(string): The path to write the average matrices to.
         labels(list(str)): The labels of the matrix data.
+        is_outer (bool): Whether this data is of the outer loop.
     """
     if type(labels) == dict:
         labels = list(labels.keys())
@@ -145,7 +148,7 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
             if is_outer:
                 valid_matrices = [all_valid_matrices[config][t][i] for t in all_valid_matrices[config] for i in range(len(all_valid_matrices[config][t]))]
             else:
-                valid_matrices = valid_matrices[test_fold]
+                valid_matrices = all_valid_matrices[config][test_fold]
 
             # Check if length is valid for finding mean/stderr
             n_items = len(valid_matrices)

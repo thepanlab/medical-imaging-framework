@@ -32,5 +32,3 @@ def show_process_count(comm):
     print(colored("Process count:", 'magenta'))
     print(colored(procs, 'cyan'))
     print(colored(f"=========================================", 'magenta'))
-
-

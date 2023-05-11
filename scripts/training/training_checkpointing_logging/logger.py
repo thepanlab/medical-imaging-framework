@@ -16,9 +16,12 @@ def read_log_items(training_output_path, job_name, item_list, rank=None):
     Returns:
         dict: Of the specified items.
     """
+    # Read the log-dictionary
     log = read_log(training_output_path, job_name, rank)
     if not log:
         return None
+    
+    # Get the items within by key and return as a sub-dictionary
     specified_items = {}
     for key in item_list:
         if key in log:
@@ -37,10 +40,13 @@ def read_log(training_output_path, job_name, rank=None):
     Returns:
         tuple: Of the unpickled log. If no log, it will return None.
     """
+    # Check the log exists
     log_path = get_log_name(training_output_path, job_name, rank)
     if not os.path.exists(log_path) or os.path.getsize(log_path) == 0:
         return None
     else:
+        
+        # Try loading it as a dictionary
         try:
             with open(log_path, 'rb') as fp:
                 return dill.load(fp, encoding='latin1')
@@ -49,37 +55,42 @@ def read_log(training_output_path, job_name, rank=None):
             return None
         
         
-def _writing_prep(training_output_path, job_name, rank=None):
+def _writing_prep(training_output_path, job_name, use_lock=True, rank=None):
     """ Gets the logging path and current log.
 
     Args:
         training_output_path (str): The output path of the training results.
         job_name (str): The prefix of the log.
+        use_lock (bool): Whether to use a lock or not when writing results. Default is true. (Optional.)
         rank (int): The process rank. Default is none. (Optional)
     """
-    # Check if the output directory exists
+    # Check if the output directory exists. If MPI, lock directory creation to avoid conflicts.
     logging_path = os.path.join(training_output_path, 'logging')
-    with fasteners.InterProcessLock(os.path.join(training_output_path, 'logging_lock.tmp')):
-        if not os.path.exists(logging_path):
+    if not os.path.exists(logging_path):
+        if use_lock:
+            with fasteners.InterProcessLock(os.path.join(training_output_path, 'logging_lock.tmp')):
+                os.makedirs(logging_path)
+        else:
             os.makedirs(logging_path)
         
-    # Check if the log already exists
+    # Check if the log already exists and get the path to write to.
     current_log = read_log(training_output_path, job_name, rank)
     log_path = get_log_name(training_output_path, job_name, rank)
     return log_path, current_log
         
         
-def add_to_log_item_list(training_output_path, job_name, data_dict, rank=None):
+def add_to_log_item_list(training_output_path, job_name, data_dict, use_lock=True, rank=None):
     """ Writes a log of the state to file, adding to some list of values.
 
     Args:
         training_output_path (str): The output path of the training results.
         job_name (str): The prefix of the log.
         data_dict (dict): A dictionary of the relevant status info.
+        use_lock (bool): Whether to use a lock or not when writing results. Default is true. (Optional.)
         rank (int): The process rank. Default is none. (Optional)
     """
     # Get the log path and value
-    log_path, current_log = _writing_prep(training_output_path, job_name, rank)
+    log_path, current_log = _writing_prep(training_output_path, job_name, use_lock, rank)
     
     # Write info
     with open(log_path, 'wb') as fp:
@@ -95,17 +106,18 @@ def add_to_log_item_list(training_output_path, job_name, data_dict, rank=None):
         dill.dump(current_log, fp, encoding='latin1')
         
         
-def write_log(training_output_path, job_name, data_dict, rank=None):
+def write_log(training_output_path, job_name, data_dict, use_lock=True, rank=None):
     """ Writes a log of the state to file. Can add individual items.
 
     Args:
         training_output_path (str): The output path of the training results.
         job_name (str): The prefix of the log.
         data_dict (dict): A dictionary of the relevant status info.
+        use_lock (bool): Whether to use a lock or not when writing results. Default is true. (Optional.)
         rank (int): The process rank. Default is none. (Optional)
     """
     # Get the log path and value
-    log_path, current_log = _writing_prep(training_output_path, job_name, rank)
+    log_path, current_log = _writing_prep(training_output_path, job_name, use_lock, rank)
     
     # Write info
     with open(log_path, 'wb') as fp:
@@ -143,6 +155,7 @@ def get_log_name(training_output_path, job_name, rank=None):
     Returns:
         str: The formatted log path
     """
+    # Just append rank to the job name if given for the log
     if rank is None:
         return os.path.join(training_output_path, 'logging', f'{job_name}.log')
     else:

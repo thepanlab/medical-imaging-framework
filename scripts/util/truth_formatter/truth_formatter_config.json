@@ -8,5 +8,7 @@
     "fat": 3,
     "pelvis": 4,
     "tumor": 5
-  }
+  },
+
+  "is_outer": false
 }

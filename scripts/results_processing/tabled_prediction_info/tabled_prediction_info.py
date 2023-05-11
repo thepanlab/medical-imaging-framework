@@ -106,7 +106,10 @@ def compare_values(output_path, pred_paths, true_paths, image_paths, label_types
                 file_result = pd.DataFrame(result_dict)
                 
                 # Compare the values to create new columns
-                file_result['pred_label'] = file_result.apply(lambda row: label_types[str(row.pred_label_index)], axis=1)
+                try:
+                    file_result['pred_label'] = file_result.apply(lambda row: label_types[str(row.pred_label_index)], axis=1)
+                except:
+                    raise ValueError(colored("Error: key mismatch. Make sure your label dictionary values are correct.", 'red'))
                 if do_true:
                     file_result['true_label'] = file_result.apply(lambda row: label_types[str(row.true_label_index)], axis=1)
                     file_result['match'] = file_result.apply(lambda row: row.pred_label_index == row.true_label_index, axis=1)

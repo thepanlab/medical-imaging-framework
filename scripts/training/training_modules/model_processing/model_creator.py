@@ -37,6 +37,7 @@ class TrainingModel:
             
             # TODO: Create a custom model
 
+        # Set the model definition
         self.model_type = model_type
             
         # Get the model base

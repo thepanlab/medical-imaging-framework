@@ -18,7 +18,7 @@ def get_indexes(files, class_names, subject_list):
     """
     indexes = {'labels': [], 'idx': [], 'subjects': []}
     label_position = None
-    
+
     for file in files:
         
         # Get the proper filename to parse

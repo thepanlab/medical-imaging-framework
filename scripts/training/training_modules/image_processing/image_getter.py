@@ -8,6 +8,8 @@ def get_files(input_path, shuffle_images, seed):
 
     Args:
         input_path (str): A path to some directory.
+        shuffle_images (bool): Whether to shuffle the image paths.
+        seed (int): Random seed.
 
     Raises:
         Exception: If an input path cannot be reached.

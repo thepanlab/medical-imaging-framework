@@ -1,34 +1,34 @@
 {
     "hyperparameters": {
-        "batch_size": 8,
+        "batch_size": 32,
         "channels": 1,
         "cropping_position": [40, 10],
         "decay": 0.01,
         "do_cropping": false,
-        "epochs": 1,
+        "epochs": 10,
         "learning_rate": 0.01,
         "momentum": 0.9,
         "patience": 10
     },
 
-    "data_input_directory":"../data/ps_kidney_intensity",
-    "output_path": "../results/training_CKPT_TEST",
-    "job_name": "CKPT_TEST",
+    "data_input_directory":"../data/kidney_test_data_small",
+    "output_path": "../results/training/mpi_inner_10",
+    "job_name": "mpi_inner_10",
     
     "k_epoch_checkpoint_frequency": 1,
 
     "shuffle_the_images": true,
-    "shuffle_the_folds": true,
+    "shuffle_the_folds": false,
     "seed": 9,
 
-    "class_names": ["Cortex", "Medulla", "Calyx", "Fat"],
+    "class_names": ["cortex", "medulla", "pelvis"],
     "selected_model_name": "InceptionV3",
     
-    "subject_list": ["1-AJCQ267-left", "2-AJCQ267-right", "3-AJCT106-left", "4-AJCT106-right", "5-AJDG239-left", "6-AJDG239-right"],
-    "test_subjects": ["1-AJCQ267-left", "2-AJCQ267-right"],
-    "validation_subjects": ["5-AJDG239-left", "6-AJDG239-right"],
+    "subject_list": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
+    "test_subjects": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
+    "validation_subjects": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
     
-    "image_size": [400, 400],
-	"target_height": 400,
-    "target_width": 400
+    "image_size": [235, 301],
+	"target_height": 301,
+    "target_width": 235
 }

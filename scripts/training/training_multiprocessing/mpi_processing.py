@@ -18,15 +18,13 @@ CONFIG_LOC = './training/training_config_files'
 def split_tasks(configs, n_proc, is_outer):
     """ Generates config-fold tuples for training.
 
-        -- Input Parameters ------------------------
+    Args:
         configs (list of dict): List of configurations.
         n_proc (int): Number of training processes.
         is_outer (bool): If this is of the outer loop or not.
-        --------------------------------------------
         
-        -- Returns ---------------------------------
+    Returns:
         (list tuples): A list of config-fold tuples.
-        --------------------------------------------
     """
     # Create a list of (config, test subject, validation subject) tuples
     tasks = []
@@ -39,12 +37,18 @@ def split_tasks(configs, n_proc, is_outer):
         
         # Add folds to task list
         tasks.extend([(config, test_subject, training_subject) for test_subject, training_subject in folds])
-        
     return tasks
         
             
 def run_training(rank, config, test_subject, training_subject, is_outer):
-    
+    """ Run the training loop for some task.
+    Args:
+        rank (int): The rank of the process.
+        config (dict): The given training configuration for the task.
+        test_subject (str): The task's testing subject name.
+        training_subject (str): The task's training/validation subject name. May be None.
+        is_outer (bool): If this task is of the outer loop.
+    """    
     # Read in the log, if it exists
     job_name = f"{config['job_name']}_test_{test_subject}" if is_outer else f"{config['job_name']}_test_{test_subject}_sub_{training_subject}"
     log = read_log_items(
@@ -62,27 +66,31 @@ def run_training(rank, config, test_subject, training_subject, is_outer):
         print(colored(f"Rank {rank} is starting training for {test_subject}.", 'green'))
     else:
         print(colored(f"Rank {rank} is starting training for {test_subject} and validation subject {training_subject}.", 'green'))
-    subject_loop(rank, config, test_subject, is_outer, training_subject=training_subject)
+    subject_loop(rank, config, is_outer, test_subject, training_subject=training_subject)
     write_log(
         config['output_path'], 
         job_name, 
-        {'is_finished': True}
+        {'is_finished': True},
+        use_lock=True
     )
         
         
-def subject_loop(rank, config, test_subject, is_outer, training_subject=None):
+def subject_loop(rank, config, is_outer, test_subject, training_subject=None):
     """ Executes the training loop for the given test subject.
 
     Args:
+        rank (int): The rank of the process.
         config (dict): The training configuration.
-        test_subject (str): The test subject name.
+        is_outer (bool): If this task is of the outer loop.
+        test_subject (str): The task's test subject name.
+        training_subject (str): The task's training/validation subject name. May be None. (Optional)
     """
     print(colored(
         f"\n\n===========================================================\n" + 
         f"Rank {rank} is starting training for {test_subject} in {config['selected_model_name']}\n"
         , 'magenta'
     ))
-    training_vars = training_preparation.TrainingVars(config, test_subject, is_outer, training_subject=training_subject)
+    training_vars = training_preparation.TrainingVars(config, is_outer, test_subject, training_subject=training_subject)
     training_loop.training_loop(
         config, 
         test_subject, 
@@ -97,14 +105,18 @@ def subject_loop(rank, config, test_subject, is_outer, training_subject=None):
 
 
 def main(config_loc, is_outer):
-    """ Runs the training process for each configuration and test subject. Process 0 DOES NOT train. """
+    """ Runs the training process for each configuration and test subject. Process 0 DOES NOT train. 
+    Args:
+        config_loc (str): The location of the configuration.
+        is_outer (bool): Whether this is of the outer loop. 
+    """
     
     # Initialize MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     n_proc = comm.Get_size()
     
-    # Initalize TF
+    # Initalize TF, set the visible GPU to rank%2 for rank > 0
     tf_config = tf.compat.v1.ConfigProto()
     if rank == 0:
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -131,7 +143,7 @@ def main(config_loc, is_outer):
             print(colored("No configurations given.", 'yellow'))
             for subrank in range(1, n_proc):
                 comm.send(False, dest=subrank)
-            exit()
+            exit(-1)
         
         # Get the tasks for each process
         tasks = split_tasks(configs, n_proc, is_outer)
@@ -167,7 +179,10 @@ def main(config_loc, is_outer):
                     # Get end time and print
                     print(colored(f"Rank 0 is printing the processing time.", 'red'))
                     elapsed_time = time.time() - start_time
-                    with open(f'_TIME_MPI_{start_time_name}.txt', 'w') as fp:
+                    if not os.path.exists("../results/training_timings"):
+                        os.makedirs("../results/training_timings")
+                    outfile = f'_TIME_MPI_OUTER_{start_time_name}.txt' if is_outer else f'_TIME_MPI_INNER_{start_time_name}.txt'
+                    with open(os.path.join("../results/training_timings", outfile), 'w') as fp:
                         fp.write(f"{elapsed_time}")
                     print(colored(f'Rank {rank} terminated. All other processes are finished.', 'yellow'))
                     break
@@ -186,6 +201,7 @@ def main(config_loc, is_outer):
                     
             # Training loop
             config, test_subject, training_subject = task
+            #print(colored(f"rank {rank}: test {test_subject}, train {training_subject}", 'cyan'))
             run_training(rank, config, test_subject, training_subject, is_outer)
             comm.send(rank, dest=0)
             task = comm.recv(source=0)
@@ -193,7 +209,3 @@ def main(config_loc, is_outer):
         # Nothing more to run.
         print(colored(f'Rank {rank} terminated. All jobs finished for this process.', 'yellow'))
         
-
-if __name__ == "__main__":
-    """ Called when this file is run. """
-    main()

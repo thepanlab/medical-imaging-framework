@@ -1,24 +1,20 @@
 {
-  "data_path": "../data/_loop_inner",
-  "output_path": "../results/processed_output/roc_many_output",
+  "data_path": "../results/training/mpi_inner_10/training_results",
+  "output_path": "../results/results_processing/roc_many/mpi_inner_10",
 
   "line_width": "2",
   "label_types": [
-    "epidural-space",
-    "fat",
-    "flavum",
-    "ligament",
-    "spinalcord"
+    "cortex", 
+    "medulla", 
+    "pelvis"
   ],
   "line_colors": [
     "aqua",
     "darkorange",
-    "cornflowerblue",
-    "seagreen",
-    "red"
+    "cornflowerblue"
   ],
   "alpha":1.0,
-  
+
   "font_family": "DejaVu Sans",
   "label_font_size": 12,
   "title_font_size": 12,

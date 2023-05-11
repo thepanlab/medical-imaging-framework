@@ -48,6 +48,7 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
         ""
     )
     
+    # Read in the image file
     image = tf.io.read_file(filename)
     image = tf.io.decode_image(image, channels=channels, dtype=tf.float32, name=None, expand_animations=False)
     

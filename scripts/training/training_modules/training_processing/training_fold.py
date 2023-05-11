@@ -48,6 +48,11 @@ class _FoldTrainingInfo():
         self.callbacks = None
         self.checkpoint_name = None
         
+        # If MPI, specify the job name by task
+        if self.rank:
+            self.config['job_name'] = f"{config['job_name']}_test_{testing_subject}" \
+            if is_outer else f"{config['job_name']}_test_{testing_subject}_val_{rotation_subject}"
+        
         
     def run_all_steps(self):
         """ This will run all of the steps in order to create the basic training information. """
@@ -61,7 +66,7 @@ class _FoldTrainingInfo():
             This includes the testing and rotation_subjects, file paths,
             label indexes, and labels.
         """
-        
+        # Loop through all image files and determine which dataset they belong to
         for index, file_path in enumerate(self.files):            
             dataset = ''
             subject_name = self.indexes['subjects'][index]
@@ -107,19 +112,23 @@ class _FoldTrainingInfo():
         """ Create the training callbacks. 
             This includes early stopping and checkpoints.
         """
+        # Get the job name for saving
         self.checkpoint_prefix = f"{self.config['job_name']}_config_{self.config['selected_model_name']}_test_{self.testing_subject}"   
         if self.is_outer:
             self.checkpoint_prefix += f"_test_{self.rotation_subject}"  
         else:
             self.checkpoint_prefix += f"_val_{self.rotation_subject}"  
         
+        # Training checkpoints
         checkpoints = Checkpointer(
             self.config['hyperparameters']['epochs'],
             self.config['k_epoch_checkpoint_frequency'], 
             self.checkpoint_prefix, 
+            self.rank,
             os.path.join(self.config['output_path'], 'checkpoints')
         )
         
+        # Early stopping
         if not self.is_outer:
             early_stopping = keras.callbacks.EarlyStopping(
                 monitor='val_loss', 
@@ -183,6 +192,7 @@ class Fold():
             print(colored("Loaded previous existing state for testing subject " + 
                           f"{prev_info.testing_subject} and subject {prev_info.rotation_subject}.", 'cyan'))
 
+        # Compute everything if no checkpoint
         else:
             self.fold_info.run_all_steps()
             self.save_state()
@@ -198,8 +208,7 @@ class Fold():
         log = read_log_items(
             self.fold_info.config['output_path'], 
             self.fold_info.config['job_name'], 
-            ['fold_info'],
-            self.fold_info.rank
+            ['fold_info']
         )
         if log is None or 'fold_info' not in log:
             return None
@@ -212,7 +221,7 @@ class Fold():
             self.fold_info.config['output_path'], 
             self.fold_info.config['job_name'], 
             {'fold_info': self.fold_info},
-            self.fold_info.rank
+            use_lock=self.fold_info.rank!=None
         )
     
     
@@ -226,6 +235,7 @@ class Fold():
             print(colored(f"Loaded most recent checkpoint of epoch: {results[1]}.", 'cyan'))
             self.fold_info.model.model = results[0]
             self.checkpoint_epoch = results[1]
+        
         
     def create_dataset(self):
         """ Create the dataset needed for training the model.

@@ -1,9 +1,9 @@
 {
-  "data_path": "../data/hao",
-  "output_path": "../results/processed_output/metrics_output",
+  "data_path": "../results/training/mpi_outer_10/training_results",
+  "output_path": "../results/metrics_table/mpi_outer_10_2",
   "output_filename": "metrics_table",
 
   "round_to": 6,
 
-  "is_outer": false
+  "is_outer": true
 }

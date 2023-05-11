@@ -6,6 +6,10 @@ import sys
 import os
 
 
+# This exists as a method of creating a command for running some MPI job given some conditions.
+# The command can be put manually into the terminal or makefile to run some job.
+
+
 def main():
     """ The main program. """
     # Read in the program configuration
@@ -46,19 +50,6 @@ def main():
     arg += "python3 -m multiprocessed_training.mpi_processing "
     print(colored(f"\nRunning argument: {arg}", 'green'))
     print(colored(f"Note: An extra host CPU process is added automatically to what is given.", 'cyan'))
-    
-    # Run the command line arguement
-    """
-    sp = subprocess.Popen(
-        arg, 
-        shell=True, 
-        stdout=subprocess.PIPE, 
-        stderr=subprocess.PIPE, 
-        universal_newlines=True
-    )
-    while sp.poll() is None:
-        print(sp.stdout.readline())
-    """
     
 
 if __name__ == '__main__':

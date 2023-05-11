@@ -1,26 +1,22 @@
 {
-  "data_path": "../data/_loop_inner",
-  "output_path": "../results/processed_output/roc_means",
+  "data_path": "../results/training/mpi_outer_10/training_results",
+  "output_path": "../results/results_processing/roc_many_means/mpi_outer_10",
 
   "line_width": "2",
   "label_types": [
-    "epidural-space",
-    "fat",
-    "flavum",
-    "ligament",
-    "spinalcord"
+    "cortex", 
+    "medulla", 
+    "pelvis"
   ],
   "line_colors": [
     "aqua",
     "darkorange",
-    "cornflowerblue",
-    "seagreen",
-    "red"
+    "cornflowerblue"
   ],
   "alpha":1.0,
-  
+
   "average_all_subjects": false,
-  "subjects": ["e1", "e2", "e3"],
+  "subjects": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
 
   "font_family": "DejaVu Sans",
   "label_font_size": 12,
@@ -29,5 +25,5 @@
   "save_resolution": "figure",
   "save_format": "png",
 
-  "is_outer": false
+  "is_outer": true
 }

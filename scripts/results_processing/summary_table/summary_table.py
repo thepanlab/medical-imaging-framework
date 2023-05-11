@@ -193,7 +193,7 @@ def main(config=None):
     accuracies, stderr = get_accuracies_and_stderr(true, pred)
 
     # Graph results
-    total_output(accuracies, stderr, config['output_path'], config['output_filename'], config['round_to'], is_outer=False)
+    total_output(accuracies, stderr, config['output_path'], config['output_filename'], config['round_to'], is_outer=config['is_outer'])
     print(colored("Finished writing the summary tables.", 'green'))
 
 

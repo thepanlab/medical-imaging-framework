@@ -1,9 +1,9 @@
 {
-  "data_path": "../data/hao",
-  "output_path": "../results/processed_output/summary_output",
+  "data_path": "../results/training/seq_outer_10/training_results",
+  "output_path": "../results/summary_table/seq_outer_10",
   "output_filename": "summary_table",
 
   "round_to": 8,
 
-  "is_outer": false
+  "is_outer": true
 }

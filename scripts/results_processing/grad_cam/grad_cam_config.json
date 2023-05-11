@@ -3,6 +3,5 @@
   "input_img_address": "../data/ep_intensity/Test_subject_e2/E2_1_fat_1_Intensity/2_E2_1_fat_1_Intensity.png",
   "output_image_address": "../results/processed_output/grad_cam",
   "alpha": 0.7,
-  "last_conv_layer_name": "",
-  "index_class_gradcam":-1
+  "last_conv_layer_name": ""
 }

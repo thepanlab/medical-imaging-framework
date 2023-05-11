@@ -1,10 +1,10 @@
 {
-    "prediction_output": "../results/predictions",
+    "prediction_output": "../results/results_processing/prediction/mpi_inner_10",
     "test_subject_data_input": {
-        "e1": "/home/jshaw/medical-imaging-framework/data/ep_intensity/Test_subject_e1"
+        "k1": "../results/training/mpi_inner_10/training_results/Test_subject_k1"
     },
     "model_input": {
-        "Inception": "/home/jshaw/medical-imaging-framework/data/_loop_outer/Test_subject_k2/config_1_resnet_50/resnet_50_test_k2/model/resnet_50_test_k2_resnet50.h5"
+        "Inception": "../results/training/mpi_inner_10/training_results/Test_subject_k10/config_mpi_inner_10_test_k10_val_k1_InceptionV3/InceptionV3_0_test_k10_val_k1/model/InceptionV3_0_test_k10_val_k1_InceptionV3.h5"
     },
 
     "batch_size": 8,
@@ -14,13 +14,13 @@
     "image_settings": {
         "mean": 0,
         "use_mean": "false",
-        "class_names": ["fat", "ligament", "flavum", "epidural space", "spinal cord"],
+        "class_names": ["cortex","medulla","pelvis"],
         "channels": 1,
         "do_cropping" : "false",
         "offset_height": 0,
         "offset_width": 0,
-        "target_height": 241,
-        "target_width": 181
+        "target_height": 301,
+        "target_width": 235
     },
 
     "is_outer": false
