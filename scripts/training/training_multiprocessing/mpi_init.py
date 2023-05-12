@@ -10,11 +10,12 @@ import os
 # The command can be put manually into the terminal or makefile to run some job.
 
 
-def main():
+def main(config=None):
     """ The main program. """
     # Read in the program configuration
-    config = parse_json("./training/training_multiprocessing/mpi_config.json")
-    
+    if config is None:
+        config = parse_json("./training/training_multiprocessing/mpi_config.json")
+        
     # We will create a command line argument
     arg = ""
     
@@ -32,7 +33,7 @@ def main():
         for addr in config['gpu_addrs']:
             print(colored(f"\nAttempting to ping {addr}...", 'blue'))
             if os.system("ping -c 1 " + addr) != 0:
-                raise Exception(colored(f'Error: Host {addr} could not be reached.', 'red'))
+                raise Exception(colored(f'Error: Host {addr} could not be reached. Remember to generate SSH keys if you haven\'t. You can find a guide in the training markdown documentation.', 'red'))
             
         # One process is added to the host machine for the master (non-training) process
         ip_address = socket.gethostbyname(socket.gethostname())
@@ -47,8 +48,12 @@ def main():
         arg += f"mpirun -n {int(config['n_processes']) + 1} " 
         
     # Add the final location of the program
-    arg += "python3 -m multiprocessed_training.mpi_processing "
-    print(colored(f"Use this argument: {arg}", 'green'))
+    if config['is_outer']:
+        arg += "python3 -m training.training_multiprocessing.loop_outer.multiprocessed_training_outer_loop"
+    else:
+        arg += "python3 -m training.training_multiprocessing.loop_inner.multiprocessed_training_inner_loop"
+    print(colored(f"Use this argument:", 'green'))
+    print(colored(f"\t{arg}", 'yellow'))
     print(colored(f"Note: An extra host CPU process is added automatically to what is given.", 'cyan'))
     
 
