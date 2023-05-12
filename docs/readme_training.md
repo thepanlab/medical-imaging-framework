@@ -13,7 +13,7 @@
     </ul> <br>
     
     * ***You need to have SSH keys established in order to use any IP addresses!*** 
-          * You can find a helpful guide on this topic here: https://medium.com/@jakewies/accessing-remote-machines-using-ssh-55a0fdf5e9d8
+      * You can find a helpful guide on this topic here: https://medium.com/@jakewies/accessing-remote-machines-using-ssh-55a0fdf5e9d8
 
     ***Example:*** 
     >python3 -m -m training.training_multiprocessing.mpi_init --file myfile.json 
