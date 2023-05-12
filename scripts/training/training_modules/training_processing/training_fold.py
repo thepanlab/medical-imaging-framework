@@ -114,9 +114,7 @@ class _FoldTrainingInfo():
         """
         # Get the job name for saving
         self.checkpoint_prefix = f"{self.config['job_name']}_config_{self.config['selected_model_name']}_test_{self.testing_subject}"   
-        if self.is_outer:
-            self.checkpoint_prefix += f"_test_{self.rotation_subject}"  
-        else:
+        if not self.is_outer:
             self.checkpoint_prefix += f"_val_{self.rotation_subject}"  
         
         # Training checkpoints
