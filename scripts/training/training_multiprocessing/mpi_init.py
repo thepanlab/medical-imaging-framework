@@ -13,7 +13,7 @@ import os
 def main():
     """ The main program. """
     # Read in the program configuration
-    config = parse_json("./multiprocessed_training/mpi_config.json")
+    config = parse_json("./training/training_multiprocessing/mpi_config.json")
     
     # We will create a command line argument
     arg = ""
@@ -48,7 +48,7 @@ def main():
         
     # Add the final location of the program
     arg += "python3 -m multiprocessed_training.mpi_processing "
-    print(colored(f"\nRunning argument: {arg}", 'green'))
+    print(colored(f"Use this argument: {arg}", 'green'))
     print(colored(f"Note: An extra host CPU process is added automatically to what is given.", 'cyan'))
     
 
