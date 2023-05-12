@@ -60,5 +60,9 @@
     * **FILE PATH** Is the path to a specific configuration file. *(Optional)*
     * **JSON PATH** Is the path to a specific configuration folder of configuration file. *(Optional)*
 
+    <br>
+
+    ***In order for any given IP addresses to ping, a SSH key needs to be established between the host machine and the remote machine.***
+
 <hr> <br> <br>
 
