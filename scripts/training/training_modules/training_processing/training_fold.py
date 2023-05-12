@@ -113,9 +113,7 @@ class _FoldTrainingInfo():
             This includes early stopping and checkpoints.
         """
         # Get the job name for saving
-        self.checkpoint_prefix = f"{self.config['job_name']}_config_{self.config['selected_model_name']}_test_{self.testing_subject}"   
-        if not self.is_outer:
-            self.checkpoint_prefix += f"_val_{self.rotation_subject}"  
+        self.checkpoint_prefix = f"{self.config['job_name']}_config_{self.config['selected_model_name']}"
         
         # Training checkpoints
         checkpoints = Checkpointer(
