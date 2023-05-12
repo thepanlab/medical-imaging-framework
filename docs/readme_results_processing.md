@@ -426,8 +426,6 @@
                 "use_true_labels": false,
                     
                 "image_settings": {
-                    "mean": 0,
-                    "use_mean": "false",
                     "class_names": "A,B,C,D",
                     "channels": 1,
                     "do_cropping" : "false",
@@ -445,7 +443,7 @@
            * ***batch_size:*** The size of batches to predict with.
            * ***output_tabled_info:*** If true, will output tabled information of the predictions automatically.
            * ***use_true_labels:*** If false, the predictions will be made without any true labels. I.e. it will only guess what labels go to what image.
-           * ***image_settings:*** How to alter the given images. Mainly should worry about 'class_names'.
+           * ***image_settings:*** How to alter the given images. Should mainly make sure that the value of 'class_names' is correct.
             * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
 
         </details> <hr> <br> <br>
