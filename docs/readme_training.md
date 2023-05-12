@@ -4,7 +4,42 @@
     This module contains many various scripts that help process data from the data and training results. This can help to determine various performance metrics of the model. It does not directly affect the training process whatsoever. 
     All of these submodules can be run manually, or by using the provided Makefile. View the makefile or its documentation for more details.
 
-</ul> <hr> <br> 
+</ul> <hr> <br>
+
+
++ ## ***MPI Init***
+    <ul> 
+        This module, located with the MPI distributed modules, creates a command based on your given configuration input. For example, you can provide multiple IP addresses (as strings) in order to execute a remote, distributed training job. This program will take those addresses and create a command line arguement that will run the training program to your needs. 
+    </ul> <br>
+    
+    * ***You need to have SSH keys established in order to use any IP addresses!*** 
+          * You can find a helpful guide on this topic here: https://medium.com/@jakewies/accessing-remote-machines-using-ssh-55a0fdf5e9d8
+
+    ***Example:*** 
+    >python3 -m -m training.training_multiprocessing.mpi_init --file myfile.json 
+
+    <details>
+
+    * ***Input:*** The configuration file. *(Optional)*
+    * ***Output:*** A command that is printed to the console.
+    * ***example_config.json:***
+        ```json
+        {
+            "cuda_devices": [0, 1],
+            "gpu_addrs": ["10.10.10", "11.11.11"],
+            "n_processes": 2,
+            "is_outer": true
+        }
+        ```
+
+        * ***cuda_devices:*** A list of GPU CUDA devices visible to the program. Should be a list of ints.
+        * ***gpu_addrs:*** A list of IP addresses as strings. If the list is empty, *n_processes* is used instead.
+        * ***n_processes:*** The number of worker processes to run. The program adds one extra master process to this number. Only used if no IP addresses are given.
+        * ***is_outer:*** If the program should be run as the inner or outer loop.
+  
+    </details> </hr> <br> <br>
+<hr>
+
 
 + ## ***Inner Loop***
     <ul> 
