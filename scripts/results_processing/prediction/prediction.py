@@ -35,19 +35,25 @@ def get_images(data_input, class_names):
                 
         # Get all of the subject's image subdirectories
         image_paths[subject] = []
-        for dir in subdirs:
-            dir = os.path.join(data_input[subject], dir)
-            if not os.path.isdir(dir):
-                raise Exception(colored(f"Error: Expected '{dir}' within '{data_input[subject]}' to be a directory path.", 'red'))
-            subfiles = os.listdir(dir)
-            if len(subfiles) == 0:
-                print(colored(f"Warning: The data path '{dir}' is empty.", 'yellow'))
-                continue
-            for file in subfiles:
-                if file.endswith((".png", ".jpg", ".jpeg")):
-                    image_paths[subject].append(os.path.abspath(os.path.join(dir, file)))
-                else:
-                    print(colored(f"Warning: Non-png or non-jpg file detected. '{file}'", 'yellow'))
+        for subsubdir in subdirs:
+            subsubdir = os.path.join(data_input[subject], subsubdir)
+            
+            # If this level contains images
+            if subsubdir.endswith((".png", ".jpg", ".jpeg")):
+                image_paths[subject].append(subsubdir)
+            else:
+                subfiles = os.listdir(subsubdir)
+                if len(subfiles) == 0:
+                    print(colored(f"Warning: The data path '{subsubdir}' is empty.", 'yellow'))
+                    continue
+                
+                # If outer loop, get images on this level
+                for subfile in subfiles:
+                    subfile = os.path.abspath(os.path.join(subsubdir, subfile))
+                    if subfile.endswith((".png", ".jpg", ".jpeg")):
+                        image_paths[subject].append(subfile)
+                    else:
+                        print(colored(f"Warning: Non-png or non-jpg file detected. '{subfile}'", 'yellow'))
     return image_paths
         
 
@@ -104,7 +110,10 @@ def predict_images(image_paths, models, config, class_names):
             for file_name in image_paths[subject]:
                 labels = [class_name for class_name in class_names if class_name in file_name]
                 temp = os.path.abspath(file_name).split('/')[-1].split('.')[0]
-                label_position = temp.split('_').index(labels[0])
+                try:
+                    label_position = temp.split('_').index(labels[0])
+                except:
+                    raise ValueError(colored("Error: Class not found in image name. Are the classes correctly spelled or captialized?", 'red'))
                 break
             break
     
@@ -121,7 +130,6 @@ def predict_images(image_paths, models, config, class_names):
             timing_results[model][subject] = {}
                 
             # Separate the images into batches
-            print(image_paths[subject]), quit()
             img_slices = tf.data.Dataset.from_tensor_slices(image_paths[subject]) 
             if config['use_true_labels']:
                 tout = [tf.float32, tf.int64]
@@ -260,7 +268,6 @@ def main(config=None):
     # Set eager execution
     tf_config = tf.compat.v1.ConfigProto()
     tf_config.gpu_options.allow_growth = True
-    session = tf.compat.v1.Session(config=tf_config)
     tf.config.run_functions_eagerly(True)
 
     # Check that output directories exist
