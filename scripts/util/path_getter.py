@@ -36,7 +36,7 @@ def is_outer_loop(data_path):
     if len(config_count) > 1:
         print(colored("Data detected as inner loop.", 'yellow'))
         return False
-    print(colored("Data detected as outer loop.", 'yellow'))
+    # print(colored("Data detected as outer loop.", 'yellow'))
     return True
         
 
