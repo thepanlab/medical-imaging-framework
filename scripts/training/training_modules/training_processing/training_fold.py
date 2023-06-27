@@ -8,6 +8,8 @@ from time import perf_counter
 from tensorflow import keras
 import tensorflow as tf
 import fasteners
+from pathlib import Path
+import datetime
 
 
 class _FoldTrainingInfo():
@@ -249,21 +251,36 @@ class Fold():
             
             # Parse images here
             ds = tf.data.Dataset.from_tensor_slices(self.fold_info.datasets[dataset]['files'])
-            ds_map = ds.map(lambda x: tf.py_function(
-                func=parse_image,
-                inp=[
-                    x,                                                                 # Filename
-                    self.fold_info.config['class_names'],                              # Class Names
-                    self.fold_info.config['hyperparameters']['channels'],              # Channels
-                    self.fold_info.config['hyperparameters']['do_cropping'],           # Do Cropping
-                    self.fold_info.config['hyperparameters']['cropping_position'][0],  # Offset Height
-                    self.fold_info.config['hyperparameters']['cropping_position'][1],  # Offset Width
-                    self.fold_info.config['target_height'],                            # Target Height
-                    self.fold_info.config['target_width'],                             # Target Width
-                    self.fold_info.label_position,                                     # Label Position
-                ],
-                Tout=[tf.float32, tf.int64]
+            # Eager mode
+            # ds_map = ds.map(lambda x: tf.py_function(
+            #     func=parse_image,
+            #     inp=[
+            #         x,                                                                 # Filename
+            #         self.fold_info.config['class_names'],                              # Class Names
+            #         self.fold_info.config['hyperparameters']['channels'],              # Channels
+            #         self.fold_info.config['hyperparameters']['do_cropping'],           # Do Cropping
+            #         self.fold_info.config['hyperparameters']['cropping_position'][0],  # Offset Height
+            #         self.fold_info.config['hyperparameters']['cropping_position'][1],  # Offset Width
+            #         self.fold_info.config['target_height'],                            # Target Height
+            #         self.fold_info.config['target_width'],                             # Target Width
+            #         self.fold_info.label_position,                                     # Label Position
+            #     ],
+            #     Tout=[tf.float32, tf.int64]                
+            # ))
+            
+            # Non eager version
+            ds_map =ds.map(lambda x: parse_image(
+                        x,                                                                 # Filename
+                        self.fold_info.config['class_names'],                              # Class Names
+                        self.fold_info.config['hyperparameters']['channels'],              # Channels
+                        self.fold_info.config['hyperparameters']['do_cropping'],           # Do Cropping
+                        self.fold_info.config['hyperparameters']['cropping_position'][0],  # Offset Height
+                        self.fold_info.config['hyperparameters']['cropping_position'][1],  # Offset Width
+                        self.fold_info.config['target_height'],                            # Target Height
+                        self.fold_info.config['target_width'],                             # Target Width
+                        self.fold_info.label_position
             ))
+            
             self.fold_info.datasets[dataset]['ds'] = ds_map.batch(self.fold_info.config['hyperparameters']['batch_size'], drop_remainder=False)
             
         # If the datasets are empty, cannot train
@@ -290,15 +307,28 @@ class Fold():
             validation_data = None
         else:
             validation_data = self.fold_info.datasets['validation']['ds']
-            
-        # Fit the model
+        
+        # Configuration for tensorboard
+
+                
+        if self.is_outer:
+            file_prefix = f"{self.fold_info.model.model_type}_{self.fold_info.rotation_subject}_test_{self.fold_info.testing_subject}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        else:
+            file_prefix = f"{self.fold_info.model.model_type}_{self.fold_info.fold_index}_test_{self.fold_info.testing_subject}_val_{self.fold_info.rotation_subject}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        
+        path_output = Path(self.fold_info.config['output_path']).joinpath("tensorboard_output",file_prefix)
+        # log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_output, histogram_freq=1)       
+        
+        # Fit the model       
         time_start = perf_counter()
         self.history = self.fold_info.model.model.fit(
             self.fold_info.datasets['training']['ds'],
             validation_data=validation_data,
             epochs=self.fold_info.config['hyperparameters']['epochs'],
             initial_epoch=self.checkpoint_epoch,
-            callbacks=[self.fold_info.callbacks]
+            callbacks=[self.fold_info.callbacks, tensorboard_callback]
         )
         self.time_elapsed = perf_counter() - time_start
         

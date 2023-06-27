@@ -50,7 +50,7 @@ def main(config_loc, is_outer):
     tf_config = tf.compat.v1.ConfigProto()
     tf_config.gpu_options.allow_growth = True
     session = tf.compat.v1.Session(config=tf_config)
-    tf.config.run_functions_eagerly(True)
+    # tf.config.run_functions_eagerly(True)
     
     # Parse the command line arguments
     configs = parse_training_configs(config_loc)
