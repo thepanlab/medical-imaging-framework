@@ -80,10 +80,15 @@ def main(config_loc, is_outer):
             test_subjects = config['test_subjects']
             
         # Double-check that the test subjects are unique
-        if len(set(test_subjects)) != len(test_subjects):
-            raise ValueError("You have repeated test_subjects!. Please verify your list of test subjects.")
+        if len(set(config["validation_subjects"])) != len(config["validation_subjects"]):
+            raise ValueError("You have repeated validation_subjects!. Please verify your list of validation subjects.")
         
         test_subjects = list(test_subjects)
+        
+        if is_outer == False:
+            if len(set(test_subjects)) != len(test_subjects):
+                raise ValueError("You have repeated test_subjects!. Please verify your list of test subjects.")
+            
             
         # Train for each test subject
         for test_subject in test_subjects:

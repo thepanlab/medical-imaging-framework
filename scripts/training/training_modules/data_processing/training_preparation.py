@@ -26,7 +26,7 @@ class TrainingVars:
         if is_outer:
             validation_subjects = None
         else:
-            validation_subjects = list(set(config['validation_subjects']))
+            validation_subjects = list(config['validation_subjects'])
     
         # Generate training folds
         self.folds, self.n_folds = generate_folds(test_subjects, validation_subjects, config['subject_list'], test_subject, config['shuffle_the_folds'], training_subject=training_subject)
