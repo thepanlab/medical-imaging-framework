@@ -4,7 +4,7 @@ import tensorflow as tf
 from skimage import io
 import numpy as np
 
-
+# @tf.function
 def parse_image(filename, class_names, channels, do_cropping, offset_height, offset_width, target_height, target_width, label_position=None, use_labels=True): 
     """ Parses an image from some given filename and various parameters.
         
