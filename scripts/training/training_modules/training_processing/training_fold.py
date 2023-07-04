@@ -115,8 +115,12 @@ class _FoldTrainingInfo():
             This includes early stopping and checkpoints.
         """
         # Get the job name for saving
-        self.checkpoint_prefix = f"{self.config['job_name']}_config_{self.config['selected_model_name']}"
-        
+        if self.is_outer:          
+            self.checkpoint_prefix = f"{self.config['job_name']}_test_{self.testing_subject}_config_{self.config['selected_model_name']}"
+        else:
+            self.checkpoint_prefix = f"{self.config['job_name']}_test_{self.testing_subject}_val_{self.rotation_subject}_config_{self.config['selected_model_name']}"
+           
+            
         # Training checkpoints
         checkpoints = Checkpointer(
             self.config['hyperparameters']['epochs'],
@@ -182,6 +186,7 @@ class Fold():
         """
         # Load in the previously saved fold info. Check if valid. If so, use it.
         prev_info = self.load_state()
+        # prev_info = None
         if prev_info is not None and \
         self.fold_info.testing_subject == prev_info.testing_subject and \
         self.fold_info.rotation_subject == prev_info.rotation_subject:
@@ -279,7 +284,9 @@ class Fold():
                         self.fold_info.config['target_height'],                            # Target Height
                         self.fold_info.config['target_width'],                             # Target Width
                         self.fold_info.label_position
-            ))
+                        ),
+                        num_parallel_calls=tf.data.AUTOTUNE,
+                        deterministic=True )
             
             self.fold_info.datasets[dataset]['ds'] = ds_map.batch(self.fold_info.config['hyperparameters']['batch_size'], drop_remainder=False)
             
@@ -312,23 +319,32 @@ class Fold():
 
                 
         if self.is_outer:
-            file_prefix = f"{self.fold_info.model.model_type}_{self.fold_info.rotation_subject}_test_{self.fold_info.testing_subject}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+            file_prefix = f"{self.fold_info.model.model_type}_{self.fold_info.rotation_subject}_t_{self.fold_info.testing_subject}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
         else:
-            file_prefix = f"{self.fold_info.model.model_type}_{self.fold_info.fold_index}_test_{self.fold_info.testing_subject}_val_{self.fold_info.rotation_subject}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+            file_prefix = f"{self.fold_info.model.model_type}_{self.fold_info.fold_index}_t_{self.fold_info.testing_subject}_v_{self.fold_info.rotation_subject}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
         
         path_output = Path(self.fold_info.config['output_path']).joinpath("tensorboard_output",file_prefix)
         # log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_output, histogram_freq=1)       
+        # with profile
+        # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_output, histogram_freq=1,
+        #                                                       profile_batch=(100,150))    
+
+        # Just tensorboard
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_output, histogram_freq=1)    
         
-        # Fit the model       
+        # Fit the model
+        
+        print("tf.executing_eagerly() =", tf.executing_eagerly())
+            
         time_start = perf_counter()
         self.history = self.fold_info.model.model.fit(
             self.fold_info.datasets['training']['ds'],
             validation_data=validation_data,
             epochs=self.fold_info.config['hyperparameters']['epochs'],
             initial_epoch=self.checkpoint_epoch,
-            callbacks=[self.fold_info.callbacks, tensorboard_callback]
+            callbacks=[self.fold_info.callbacks,
+                       tensorboard_callback]
         )
         self.time_elapsed = perf_counter() - time_start
         
