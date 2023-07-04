@@ -22,7 +22,7 @@ class TrainingVars:
         self.indexes, self.label_position = get_indexes(self.files, config['class_names'], config['subject_list'])
         
         # Make sure test subjects and validation subjects are unique
-        test_subjects = list(set(config['test_subjects']))
+        test_subjects = list(config['test_subjects'])
         if is_outer:
             validation_subjects = None
         else:
