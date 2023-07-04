@@ -20,6 +20,7 @@ def is_outer_loop(data_path):
     Returns:
         bool: If a directory is of an outer-loop structure.
     """
+    # TODO improve logic, it doesn't work properly all the time
     # Get the test-fold directories
     test_subject_paths = get_subfiles(data_path)
     if not test_subject_paths:
@@ -233,8 +234,8 @@ def get_subfolder_files(data_path, target_folder, isIndex=None, getValidation=Fa
         test_fold_key = list(target_subfolder_files[test_config_key].keys())[0]
         if not target_subfolder_files[test_config_key][test_fold_key]:
             print(colored('No indexed-predictions were found in the data files. Running formatter...', 'yellow'))
-            reformat(data_path)
-            target_subfolder_files = get_subfolder_files(data_path, target_folder, isIndex, getValidation, getTesting, isCSV)
+            reformat(data_path, is_outer=isOuter)
+            target_subfolder_files = get_subfolder_files(data_path, target_folder, isIndex, getValidation, getTesting, isCSV, isOuter=isOuter)
             if not target_subfolder_files[test_config_key][test_fold_key]:
                 raise Exception(colored("Error: No prediction files were found. " +
                                         "Check the data inputs and run predicted_formatter.py", 'red'))
