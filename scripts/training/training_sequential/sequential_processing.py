@@ -42,14 +42,26 @@ def main(config_loc, is_outer):
 
     Args:
         is_outer (bool): If this is of the outer loop.
+
     """
-    # Print a list of the available GPUs
-    gpus = console_printing.show_gpu_list()
-    
-    # Set eager execution and memory limits
-    tf_config = tf.compat.v1.ConfigProto()
-    tf_config.gpu_options.allow_growth = True
-    session = tf.compat.v1.Session(config=tf_config)
+      
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        try:
+            # Currently, memory growth needs to be the same across GPUs
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
+            logical_gpus = tf.config.list_logical_devices('GPU')
+            print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+        except RuntimeError as e:
+            # Memory growth must be set before GPUs have been initialized
+            print(e)
+
+    # https://stackoverflow.com/questions/66768279/running-tf-config-run-functions-eagerlytrue-in-python-3
+    # Disables eager execution.
+    # tf.compat.v1.disable_eager_execution()
+
+    # Enables eager execution of tf.functions.
     # tf.config.run_functions_eagerly(True)
     
     # Parse the command line arguments
@@ -68,7 +80,10 @@ def main(config_loc, is_outer):
             test_subjects = config['test_subjects']
             
         # Double-check that the test subjects are unique
-        test_subjects = list(set(test_subjects))
+        if len(set(test_subjects)) != len(test_subjects):
+            raise ValueError("You have repeated test_subjects!. Please verify your list of test subjects.")
+        
+        test_subjects = list(test_subjects)
             
         # Train for each test subject
         for test_subject in test_subjects:
