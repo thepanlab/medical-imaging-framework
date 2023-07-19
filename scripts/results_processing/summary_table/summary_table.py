@@ -110,6 +110,8 @@ def get_accuracies_and_stderr(true, pred):
                 for val_fold in acc_tables[key][config][test_fold]:                    
                     stdev += (acc_tables[key][config][test_fold][val_fold] - mean_accs[key][config][test_fold])**2
                 
+                # sample standard deviation
+                stdev = math.sqrt(stdev/(n_val_folds-1))
                 # Get the standard deviation and the mean's error
                 n_val_folds = len(acc_tables[key][config][test_fold])
                 mean_errs[key][config][test_fold] = stdev / math.sqrt(n_val_folds)
