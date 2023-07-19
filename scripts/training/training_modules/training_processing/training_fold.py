@@ -13,7 +13,7 @@ import datetime
 
 
 class _FoldTrainingInfo():
-    def __init__(self, fold_index, config, testing_subject, rotation_subject, files, folds, indexes, label_position, rank=None, is_outer=False):
+    def __init__(self, fold_index, config, testing_subject, rotation_subject, files, folds, indexes, label_position, n_epochs, rank=None, is_outer=False):
         """ Initializes a training fold info object.
 
         Args:
@@ -45,6 +45,7 @@ class _FoldTrainingInfo():
         self.is_outer = is_outer
         self.fold_index = fold_index
         self.label_position = label_position
+        self.n_epochs = n_epochs
         
         self.model = None
         self.callbacks = None
@@ -123,7 +124,7 @@ class _FoldTrainingInfo():
             
         # Training checkpoints
         checkpoints = Checkpointer(
-            self.config['hyperparameters']['epochs'],
+            self.n_epochs,
             self.config['k_epoch_checkpoint_frequency'], 
             self.checkpoint_prefix, 
             self.rank,
@@ -144,7 +145,7 @@ class _FoldTrainingInfo():
 
 
 class Fold():
-    def __init__(self, fold_index, config, testing_subject, rotation_subject, files, folds, indexes, label_position, rank=None, is_outer=False):
+    def __init__(self, fold_index, config, testing_subject, rotation_subject, files, folds, indexes, label_position, n_epochs, rank=None, is_outer=False):
         """ Initializes a training fold object.
 
         Args:
@@ -169,6 +170,7 @@ class Fold():
             folds, 
             indexes, 
             label_position,
+            n_epochs,
             rank,
             is_outer
         )
@@ -305,7 +307,7 @@ class Fold():
     def train_model(self):
         """ Train the model, assuming the given dataset is valid. """  
         if self.checkpoint_epoch != 0 and \
-         self.checkpoint_epoch+1 == self.fold_info.config['hyperparameters']['epochs']:
+           self.checkpoint_epoch+1 == self.fold_info.n_epochs:
             print(colored("Maximum number of epochs reached from checkpoint.", 'yellow'))
             return
         
@@ -341,7 +343,7 @@ class Fold():
         self.history = self.fold_info.model.model.fit(
             self.fold_info.datasets['training']['ds'],
             validation_data=validation_data,
-            epochs=self.fold_info.config['hyperparameters']['epochs'],
+            epochs=self.fold_info.n_epochs,
             initial_epoch=self.checkpoint_epoch,
             callbacks=[self.fold_info.callbacks,
                        tensorboard_callback]

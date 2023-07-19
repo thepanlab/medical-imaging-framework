@@ -3,7 +3,7 @@ from training.training_checkpointing_logging.logger import *
 from termcolor import colored
 
 
-def training_loop(config, testing_subject, files, folds, rotations, indexes, label_position, is_outer, rank=None):
+def training_loop(config, testing_subject, files, folds, rotations, indexes, label_position, n_epochs, is_outer, rank=None):
     """ Creates a model, trains it, and writes its outputs.
         
     Args:
@@ -48,7 +48,7 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
             print(colored(f'--- Rotation {rot+1}/{rotations} for test subject {testing_subject} and val subject {rotation_subject} ---', 'magenta'))
         
         # Create and run the training fold for this subject pair
-        training_fold = Fold(rot, config, testing_subject, rotation_subject, files, folds, indexes, label_position, rank, is_outer)
+        training_fold = Fold(rot, config, testing_subject, rotation_subject, files, folds, indexes, label_position, n_epochs, rank, is_outer)
         training_fold.run_all_steps()
         
         # Write the index to log
