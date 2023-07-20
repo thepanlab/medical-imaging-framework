@@ -88,7 +88,6 @@
             "test_subjects": ["e1", "e2"],
             "validation_subjects": ["e3", "e4"],
 
-            "image_size": [800, 400],
             "target_height": 241,
             "target_width": 181
         }
@@ -116,7 +115,6 @@
         * ***subject_list:*** The list of all training subjects found in the data. 
         * ***test_subjects:*** The list of the particular testing subjects.
         * ***validation_subjects:*** The list of the particular validation subjects.
-        * ***image_size:*** The expected image size.
         * ***target_height:*** The target image height.
         * ***target_width:*** The target image width.
   
@@ -149,7 +147,7 @@
                 "cropping_position": [40, 10],
                 "decay": 0.01,
                 "do_cropping": true,
-                "epochs": 6,
+                "epochs": [4,6],
                 "learning_rate": 0.01,
                 "momentum": 0.9
             },
@@ -169,7 +167,6 @@
             "subject_list": ["e1", "e2", "e3", "e4", "e5", "e6"],
             "test_subjects": ["e1", "e2"],
 
-            "image_size": [800, 400],
             "target_height": 241,
             "target_width": 181
         }
@@ -181,7 +178,7 @@
           * ***cropping_position:*** The position at which to crop the image.
           * ***decay:*** Decays the learning rate over time.
           * ***do_cropping:*** Whether to crop the input images.
-          * ***epochs:*** The number of training epochs.
+          * ***epochs:*** The number of training epochs. You can specify a single value or a list of values according to each subject test.
           * ***learning_rate:*** The learning speed.
           * ***momentum:*** Helps the learning rate's speed by speeding up the gradient descent search.
         * ***data_input_directory:*** Where the input images are located. No specific structure is needed.
@@ -195,7 +192,6 @@
         * ***selected_model_name:*** The model type to create. The choices are: resnet_50, resnet_VGG16, InceptionV3, ResNet50V2, and Xception.
         * ***subject_list:*** The list of all training subjects found in the data. 
         * ***test_subjects:*** The list of the particular testing subjects.
-        * ***image_size:*** The expected image size.
         * ***target_height:*** The target image height.
         * ***target_width:*** The target image width.
   
