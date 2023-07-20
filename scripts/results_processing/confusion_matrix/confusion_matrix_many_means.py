@@ -147,12 +147,16 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
             # Check shape is the mode for each validation fold
             if is_outer:
                 valid_matrices = [all_valid_matrices[config][t][i] for t in all_valid_matrices[config] for i in range(len(all_valid_matrices[config][t]))]
+                # TODO all matrices for is_outer
             else:
                 valid_matrices = all_valid_matrices[config][test_fold]
+                all_matrices = matrices[config][test_fold]
 
             # Check if length is valid for finding mean/stderr
-            n_items = len(valid_matrices)
-            if not n_items > 1:
+            n_items_valid = len(valid_matrices)
+            n_items_all = len(all_matrices)
+
+            if not n_items_valid > 1:
                 print(colored(f"Warning: Mean calculation skipped for testing fold {test_fold} in {config}."
                               + " Must have multiple validation folds.\n", 'yellow'))
                 continue
@@ -161,30 +165,43 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
             if type(labels) == dict:
                 labels = list(labels.keys())
             matrix_avg = pd.DataFrame(0.0, columns=labels, index=labels)
-            matrix_weighted_avg = pd.DataFrame(0.0, columns=labels, index=labels)
-            matrix_avg.index = matrix_weighted_avg.index = index_labels
-            matrix_avg.columns = matrix_weighted_avg.columns = columns_labels
+            matrix_perc_avg = pd.DataFrame(0.0, columns=labels, index=labels)
+            matrix_sum_temp = pd.DataFrame(0.0, columns=labels, index=labels)
+            matrix_avg.index = matrix_perc_avg.index = matrix_sum_temp.index = index_labels
+            matrix_avg.columns = matrix_perc_avg.columns = matrix_sum_temp.columns = columns_labels
 
             # See if more than one item to average
-            can_weight = len(valid_matrices) > 1
+            b_weight = len(all_matrices) > 1
 
-            # The original weighted matrix values
-            weighted_values = {}
+            # Percentage matrix values
+            perc_values = {}
 
+            # Absolute version
             # Loop through every validation fold and sum the totals and weighted totals
             for val_index in range(len(valid_matrices)):
                 val_fold = pd.read_csv(valid_matrices[val_index], index_col=[0,1], header=[0,1])
-                if can_weight:
-                    weighted_values[val_index] = pd.DataFrame(0, columns=labels, index=labels)
-                    weighted_values[val_index].index = index_labels
-                    weighted_values[val_index].columns = columns_labels
                 for row in labels:
-
                     # Count the row total and add column-row items to total
                     row_total = 0
                     for col in labels:
                         item = val_fold["Predicted"][col]["Truth"][row]
                         matrix_avg["Predicted"][col]["Truth"][row] += item
+                        row_total += item
+                   
+            # Percentage version
+            # Loop through every validation fold and sum the totals and weighted totals
+            for val_index in range(len(all_matrices)):
+                val_fold = pd.read_csv(all_matrices[val_index], index_col=[0,1], header=[0,1])
+                if b_weight:
+                    perc_values[val_index] = pd.DataFrame(0, columns=labels, index=labels)
+                    perc_values[val_index].index = index_labels
+                    perc_values[val_index].columns = columns_labels
+                for row in labels:
+                    # Count the row total and add column-row items to total
+                    row_total = 0
+                    for col in labels:
+                        item = val_fold["Predicted"][col]["Truth"][row]
+                        matrix_sum_temp["Predicted"][col]["Truth"][row] += item
                         row_total += item
 
                     # Add to the weighted total
@@ -194,21 +211,22 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
                             weighted_item = item / row_total
                         else:
                             weighted_item = 0
-                        weighted_values[val_index]["Predicted"][col]["Truth"][row] = weighted_item
-                        matrix_weighted_avg["Predicted"][col]["Truth"][row] += weighted_item
-                        
+                        perc_values[val_index]["Predicted"][col]["Truth"][row] = weighted_item
+                        matrix_perc_avg["Predicted"][col]["Truth"][row] += weighted_item
+
             # Divide the mean-sums by the length
             for row in labels:
                 for col in labels:
-                    matrix_avg["Predicted"][col]["Truth"][row] /= n_items
-                    matrix_weighted_avg["Predicted"][col]["Truth"][row] /= n_items
+                    matrix_avg["Predicted"][col]["Truth"][row] /= n_items_valid
+                    matrix_perc_avg["Predicted"][col]["Truth"][row] /= n_items_all
 
             # The standard error of the mean and weighted mean
             matrix_err = pd.DataFrame(0.0, columns=labels, index=labels)
-            matrix_weighted_err = pd.DataFrame(0.0, columns=labels, index=labels)
-            matrix_err.index = matrix_weighted_err.index = index_labels
-            matrix_err.columns = matrix_weighted_err.columns = columns_labels
-
+            matrix_perc_err = pd.DataFrame(0.0, columns=labels, index=labels)
+            matrix_err.index = matrix_perc_err.index = index_labels
+            matrix_err.columns = matrix_perc_err.columns = columns_labels
+            
+            # Average
             # Sum the differences between the true and mean values squared. Divide by the num matrices minus one.
             for val_index in range(len(valid_matrices)):
                 val_fold = pd.read_csv(valid_matrices[val_index], index_col=[0,1], header=[0,1])
@@ -220,63 +238,72 @@ def get_mean_matrices(matrices, shapes, output_path, labels, round_to, is_outer)
                         mean = matrix_avg["Predicted"][col]["Truth"][row]
                         matrix_err["Predicted"][col]["Truth"][row] += (true - mean) ** 2
 
+            # Percentage
+            # Sum the differences between the true and mean values squared. Divide by the num matrices minus one.
+            for val_index in range(len(all_matrices)):
+                val_fold = pd.read_csv(all_matrices[val_index], index_col=[0,1], header=[0,1])
+                for row in labels:
+                    for col in labels:
+                        
                         # Sum the (true_weighted - mean_weighted) ^ 2
-                        true_weighted = weighted_values[val_index]["Predicted"][col]["Truth"][row]
-                        mean_weighted = matrix_weighted_avg["Predicted"][col]["Truth"][row]
-                        matrix_weighted_err["Predicted"][col]["Truth"][row] += (true_weighted - mean_weighted) ** 2
+                        true_weighted = perc_values[val_index]["Predicted"][col]["Truth"][row]
+                        mean_weighted = matrix_perc_avg["Predicted"][col]["Truth"][row]
+                        matrix_perc_err["Predicted"][col]["Truth"][row] += (true_weighted - mean_weighted) ** 2
 
             # Get the standard error
             for row in labels:
                 for col in labels:
-                    if n_items > 1:
+                    if n_items_valid > 1:
                         
                         # Divide by N-1
-                        matrix_err["Predicted"][col]["Truth"][row] /= n_items - 1
-                        matrix_weighted_err["Predicted"][col]["Truth"][row] /= n_items - 1
-                        
+                        matrix_err["Predicted"][col]["Truth"][row] /= n_items_valid - 1
                         # Sqrt the entire calculation
                         matrix_err["Predicted"][col]["Truth"][row] = math.sqrt(matrix_err["Predicted"][col]["Truth"][row])
-                        matrix_weighted_err["Predicted"][col]["Truth"][row] = math.sqrt(matrix_weighted_err["Predicted"][col]["Truth"][row])
-                        
                         # Divide by sqrt N
-                        matrix_err["Predicted"][col]["Truth"][row] /= math.sqrt(n_items)
-                        matrix_weighted_err["Predicted"][col]["Truth"][row] /= math.sqrt(n_items)
+                        matrix_err["Predicted"][col]["Truth"][row] /= math.sqrt(n_items_valid)
+                        
+                    if n_items_all > 1:
+                        
+                        # Divide by N-1
+                        matrix_perc_err["Predicted"][col]["Truth"][row] /= n_items_all - 1
+                        # Sqrt the entire calculation
+                        matrix_perc_err["Predicted"][col]["Truth"][row] = math.sqrt(matrix_perc_err["Predicted"][col]["Truth"][row])
+                        # Divide by sqrt N
+                        matrix_perc_err["Predicted"][col]["Truth"][row] /= math.sqrt(n_items_all)
                     
                         
                         
             # Create a combination of the mean and std error
             matrix_combo = pd.DataFrame('', columns=labels, index=labels)
-            matrix_weighted_combo = pd.DataFrame(0, columns=labels, index=labels)
-            matrix_combo.index = matrix_weighted_combo.index = index_labels
-            matrix_combo.columns = matrix_weighted_combo.columns = columns_labels
+            matrix_perc_combo = pd.DataFrame(0, columns=labels, index=labels)
+            matrix_combo.index = matrix_perc_combo.index = index_labels
+            matrix_combo.columns = matrix_perc_combo.columns = columns_labels
             for row in labels:
                 for col in labels:
                     matrix_combo.loc[("Truth", row), ("Predicted", col)] = \
                         f'{round(matrix_avg["Predicted"][col]["Truth"][row], round_to)} ± {round(matrix_err["Predicted"][col]["Truth"][row], round_to)}'
-                    if not matrix_weighted_avg.empty:
-                        matrix_weighted_combo.loc[("Truth", row), ("Predicted", col)] = \
-                            f'{round(matrix_weighted_avg["Predicted"][col]["Truth"][row], round_to)} ± {round(matrix_weighted_err["Predicted"][col]["Truth"][row], round_to)}'
+                    if not matrix_perc_avg.empty:
+                        matrix_perc_combo.loc[("Truth", row), ("Predicted", col)] = \
+                            f'{round(matrix_perc_avg["Predicted"][col]["Truth"][row], round_to)} ± {round(matrix_perc_err["Predicted"][col]["Truth"][row], round_to)}'
             
             # Output all of the mean and error dataframes
             output_folder = os.path.join(output_path, f'{config}_{test_fold}/')
             if not os.path.exists(output_folder): os.makedirs(output_folder)
-                
-                        
+                 
             matrix_avg.round(round_to).to_csv(os.path.join(
-                output_folder, f'{config}_{test_fold}_conf_matrix_mean.csv'))
-            
-                        
+                output_folder, f'{config}_{test_fold}_conf_matrix_mean.csv'))          
             matrix_err.round(round_to).to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_stderr.csv'))
             matrix_combo.to_csv(os.path.join(
                 output_folder, f'{config}_{test_fold}_conf_matrix_mean_stderr.csv'))
-            if not matrix_weighted_avg.empty:
-                matrix_weighted_avg.round(round_to).to_csv(os.path.join(
-                    output_folder, f'{config}_{test_fold}_conf_matrix_mean_weighted.csv'))
-                matrix_weighted_err.round(round_to).to_csv(os.path.join(
-                    output_folder, f'{config}_{test_fold}_conf_matrix_stderr_weighted.csv'))
-                matrix_weighted_combo.to_csv(os.path.join(
-                    output_folder, f'{config}_{test_fold}_conf_matrix_mean_stderr_weighted.csv'))
+
+            if not matrix_perc_avg.empty:
+                matrix_perc_avg.round(round_to).to_csv(os.path.join(
+                    output_folder, f'{config}_{test_fold}_conf_matrix_perc_mean.csv'))
+                matrix_perc_err.round(round_to).to_csv(os.path.join(
+                    output_folder, f'{config}_{test_fold}_conf_matrix_perc_stderr.csv'))
+                matrix_perc_combo.to_csv(os.path.join(
+                    output_folder, f'{config}_{test_fold}_conf_matrix_perc_mean_stderr.csv'))
             print(colored(f"Mean confusion matrix results created for {test_fold} in {config}", 'green'))
 
 

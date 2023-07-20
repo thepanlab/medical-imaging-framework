@@ -112,7 +112,7 @@
         <details>
 
         * ***Input:*** The configuration file. *(Optional)*
-        * ***Output:*** Many confusion means in CSV format and their standard error.
+        * ***Output:*** Confusion matrix average at the subject level and its standard error.
         * ***confusion_matrix_many_means_config.json:***
             ```json
                 {
