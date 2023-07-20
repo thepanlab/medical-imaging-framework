@@ -325,7 +325,7 @@
         * ***learning_curve_many_config.json:***
             ```json
                 {
-                    "data_path": "[path]/data/",
+                    "data_path": "[path]/folder/training_results/",
                     "output_path": "[path]/learning_curve",
 
                     "loss_line_color": "r",
@@ -341,7 +341,7 @@
                     "save_format": "png"
                 }
             ```
-            * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
+            * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories. You should specify the path of `training_results`
             * ***output_path:*** The directory path to where the PNG files should be written. 
             * ***loss_line_color:*** Color of the loss line. 
             * ***val_loss_line_color:*** Color of the validation loss line.
