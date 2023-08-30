@@ -1,7 +1,7 @@
 {
   "data_path": "../results/training/mpi_outer_10/training_results",
-  "output_path": "../results/class_accuracy/mpi_outer_10",
-  "output_filename": "class_accuracy_mpi_outer_10",
+  "output_path": "../results/class_recall/mpi_outer_10",
+  "output_filename": "class_recall_mpi_outer_10",
 
   "round_to": 2,
 

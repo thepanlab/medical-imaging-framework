@@ -7,26 +7,26 @@
 
 
 
-+ ## ***Class Accuracy***
-    <ul> This prints the accuracy scores for every class and subject, along with their averages.
++ ## ***Class Recall***
+    <ul> This prints the recall scores for every class and subject, along with their averages.
     </ul> <br>
     <details>
     <summary>Show/Hide files</summary>
 
     1) ### ***class_accuracy.py:***
         ***Example:*** 
-        > python3 class_accuracy.py -j my_config.json
+        > python3 class_recall.py -j my_config.json
 
         <details>
 
         * ***Input:*** The configuration file. *(Optional)*
         * ***Output:*** A CSV file.
-        * ***class_accuracy_config.json:***
+        * ***class_recall_config.json:***
             ```json
                 {
                     "data_path": "[path]/data/",
-                    "output_path": "[path]/class_accuracy",
-                    "output_filename": "class_accuracy",
+                    "output_path": "[path]/class_recall",
+                    "output_filename": "class_recall",
   
                     "classes": {"A": 0, "B": 1}
 
