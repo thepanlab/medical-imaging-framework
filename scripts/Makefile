@@ -63,9 +63,9 @@ truth_formatter:
 	python3 -W ignore -m util.truth_formatter.truth_formatter
 
 
-class_accuracy: ## Creates a list of class accuracies for every test-val fold.
-class_accuracy: 
-	python3 -W ignore -m results_processing.class_accuracy.class_accuracy -j ${j}
+class_recall: ## Creates a list of class accuracies for every test-val fold.
+class_recall: 
+	python3 -W ignore -m results_processing.class_recall.class_recall -j ${j}
 
 
 confusion_matrix: ## Creates a single confusion matrix for the specified inputs.
