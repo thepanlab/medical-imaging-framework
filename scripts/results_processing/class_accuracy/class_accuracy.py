@@ -96,9 +96,8 @@ def get_accuracies_and_stderr(true, pred, classes):
                 
         # Get the average column accuracies
         for class_label in accs['column'][config]:
-            denom = len(accs['column'][config][class_label])-1
-            if denom < 1:
-                denom = 1
+            denom = len(accs['column'][config][class_label])
+
             accs['column'][config][class_label] = sum(accs['column'][config][class_label]) / denom
             
     # Calculate the standard error of the accuracies
