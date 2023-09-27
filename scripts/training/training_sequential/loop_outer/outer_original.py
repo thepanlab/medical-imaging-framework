@@ -234,7 +234,6 @@ def training(data, testing_subject, config_name):
     # Get cropping position
     cropping_position = data['cropping_position'].split(',')  # (string list)
     # Get image size
-    image_size = data['image_size'].split(",")  # (string list)
     offset_height = int(cropping_position[0])  # (int)
     offset_width = int(cropping_position[1])  # (int)
     target_height = int(data['target_height'])  # (int)

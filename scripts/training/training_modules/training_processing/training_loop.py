@@ -25,7 +25,7 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
     # Get the current rotation progress
     rotation = 0
     log_rotations = read_log_items(
-        config['output_path'], 
+        config['output_path'],
         config['job_name'], 
         ['current_rotation'],
         rank
@@ -67,6 +67,3 @@ def training_loop(config, testing_subject, files, folds, rotations, indexes, lab
             {'current_rotation': rotation_dict},
             use_lock=rank!=None
         )
-             
-
-    

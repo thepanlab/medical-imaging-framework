@@ -3,6 +3,7 @@ from training.training_modules.output_processing import console_printing
 from training.training_modules.training_processing import training_loop
 from training.training_checkpointing_logging.logger import *
 from util.get_config import parse_training_configs
+from util.training import get_list_of_epochs
 from termcolor import colored
 import tensorflow as tf
             
@@ -36,52 +37,6 @@ def subject_loop(config, test_subject, n_epochs, is_outer):
         n_epochs,
         is_outer
     )
-
-
-def get_list_of_epochs(epochs_param, is_outer, test_subjects):
-    """
-    Return list of epochs. If unique value is given it repeats
-    according to the length of test_subjects list. Otherwise,
-    it returns lists of epochs for each subject test
-
-    Args:
-        epochs_param (int or list): epochs value(s)
-        is_outer (bool): If this is of the outer loop.
-        test_subjects (list): list of test subjects
-    
-    Returns:
-        (list) list of epochs
-        
-    Raises:
-        ValueError: if epochs_param is a list when inner loop
-        ValueError: if len of epochs != len test subjects
-    """
-    
-    b_single_epoch = True
-    
-    if isinstance(epochs_param, int):
-        epochs = epochs_param
-    elif isinstance(epochs_param, list):
-        # if len of list is one and inner loop, extract value
-        if len(epochs_param) == 1:
-            epochs = epochs_param[0]
-        # if len of list is greater than one and inner loop, raise ValueError
-        elif len(epochs_param) > 1 and is_outer == False:
-            raise ValueError("For inner loop, you should have only one value for epoch")
-
-        # Check that the list of epochs is the same length as the list of subjects
-        if len(epochs_param) != len(test_subjects):
-            raise ValueError(f"Length of list of epochs is :{len(epochs_param)},"+
-                                f"length of test_subjects is {len(test_subjects)}")
-        else:
-            b_single_epoch = False
-        
-    if b_single_epoch:
-        l_epochs = [epochs] * len(test_subjects)
-    else:
-        l_epochs = epochs_param
-            
-    return l_epochs
 
 def main(config_loc, is_outer):
     """ Runs the training process for each configuration and test subject.
