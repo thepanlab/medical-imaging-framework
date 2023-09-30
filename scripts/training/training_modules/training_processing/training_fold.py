@@ -256,8 +256,22 @@ class Fold():
             csvreader = ImageReaderCSV(configs=self.fold_info.config)
             imreader = ImageReaderGlobal()
             
+            
+            b_drop_remainder = False 
+            
+            if dataset == "training":
+                residual = len(self.fold_info.datasets[dataset]['files']) % self.fold_info.config['hyperparameters']['batch_size']
+                print("residual =", residual)
+                
+                if residual < (self.fold_info.config['hyperparameters']['batch_size']/2):
+                    b_drop_remainder = True
+            
+            # ds = tf.data.Dataset.from_tensor_slices(self.fold_info.datasets[dataset]['files'])
+            
+            
             # Parse images here
             ds = tf.data.Dataset.from_tensor_slices(self.fold_info.datasets[dataset]['files'])
+
             # Eager mode
             # ds_map = ds.map(lambda x: tf.py_function(
             #     func=parse_image,
@@ -290,7 +304,9 @@ class Fold():
                         num_parallel_calls=tf.data.AUTOTUNE,
                         deterministic=True )
             
-            self.fold_info.datasets[dataset]['ds'] = ds_map.batch(self.fold_info.config['hyperparameters']['batch_size'], drop_remainder=False)
+             
+                      
+            self.fold_info.datasets[dataset]['ds'] = ds_map.batch(self.fold_info.config['hyperparameters']['batch_size'], drop_remainder=b_drop_remainder)
             
         # If the datasets are empty, cannot train
         if self.fold_info.datasets['training']['ds'] is None or \
