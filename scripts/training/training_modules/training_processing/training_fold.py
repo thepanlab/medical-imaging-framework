@@ -211,7 +211,7 @@ class Fold():
     def load_state(self):
         """ Loads the latest training state. """
         log = read_log_items(
-            self.fold_info.config['output_path'], 
+            self.fold_info.config['output_path'],
             self.fold_info.config['job_name'], 
             ['fold_info']
         )
@@ -233,7 +233,7 @@ class Fold():
     def load_checkpoint(self):
         """ Loads the latest checkpoint to start from. """
         results = get_most_recent_checkpoint(
-            self.fold_info.config['output_path'], 
+            os.path.join(self.fold_info.config['output_path'], 'checkpoints'),
             self.fold_info.checkpoint_prefix
         )
         if results is not None:
@@ -346,10 +346,10 @@ class Fold():
 
         # with profile
         # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_output, histogram_freq=1,
-        #                                                       profile_batch=(100,150))    
+        #                                                       profile_batch=(5,20))    
 
         # Just tensorboard
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_output, histogram_freq=1)    
+        # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_output, histogram_freq=1)    
         
         # Fit the model
         
@@ -361,8 +361,7 @@ class Fold():
             validation_data=validation_data,
             epochs=self.fold_info.n_epochs,
             initial_epoch=self.checkpoint_epoch,
-            callbacks=[self.fold_info.callbacks,
-                       tensorboard_callback]
+            callbacks=[self.fold_info.callbacks]
         )
         self.time_elapsed = perf_counter() - time_start
         
