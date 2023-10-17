@@ -96,6 +96,6 @@ def load_checkpoint(path, get_epoch=True):
     if not os.path.exists(path):
         raise Exception(colored(f"Error: No checkpoint was found at '{path}'", 'red'))
     if get_epoch:
-        epoch = path.split('/')[-1].split('.')[0].split('_')[-1]
+        epoch = path.split('/')[-1].split('.')[0].split('_')[-1] -1
         return models.load_model(path), epoch
     return models.load_model(path)

@@ -194,6 +194,8 @@ class Fold():
         self.fold_info.rotation_subject == prev_info.rotation_subject:
             self.fold_info = prev_info
             self.load_checkpoint()
+            # Conditional if there is no checkpoint
+            
             print(colored("Loaded previous existing state for testing subject " + 
                           f"{prev_info.testing_subject} and subject {prev_info.rotation_subject}.", 'cyan'))
 
@@ -240,6 +242,9 @@ class Fold():
             print(colored(f"Loaded most recent checkpoint of epoch: {results[1]}.", 'cyan'))
             self.fold_info.model.model = results[0]
             self.checkpoint_epoch = results[1]
+        else:
+            # Create model if not checkpoint
+            self.fold_info.create_model()
         
         
     def create_dataset(self):
@@ -261,10 +266,14 @@ class Fold():
             
             if dataset == "training":
                 residual = len(self.fold_info.datasets[dataset]['files']) % self.fold_info.config['hyperparameters']['batch_size']
-                print("residual =", residual)
+                print("Residual for Batch training  =", residual)
                 
                 if residual < (self.fold_info.config['hyperparameters']['batch_size']/2):
                     b_drop_remainder = True
+                    print("Residual discarded")
+                else:
+                    print("Residual not discarded")
+                
             
             # ds = tf.data.Dataset.from_tensor_slices(self.fold_info.datasets[dataset]['files'])
             
@@ -323,7 +332,7 @@ class Fold():
     def train_model(self):
         """ Train the model, assuming the given dataset is valid. """  
         if self.checkpoint_epoch != 0 and \
-           self.checkpoint_epoch+1 == self.fold_info.n_epochs:
+           self.checkpoint_epoch == self.fold_info.n_epochs:
             print(colored("Maximum number of epochs reached from checkpoint.", 'yellow'))
             return
         
