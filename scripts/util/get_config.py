@@ -90,7 +90,7 @@ def parse_training_configs(default_config_directory_name):
         configs = []
         for file in os.listdir(args.folder):
             full_path = os.path.join(args.folder, file)
-            if not os.path.isdir(full_path):
+            if not os.path.isdir(full_path) and full_path.endswith(".json"):
                 with open(full_path) as fp:
                     configs.append(json.load(fp))
         return configs
