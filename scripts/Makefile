@@ -18,7 +18,10 @@ help:
 	$(call find.functions)
 	@echo ''
 
-
+## --- Random Search ----------------------------------------------- ##
+create_random_json:
+create_random_json:
+	python3 -W ignore -m training.random_search.create_random_json -j ${j}
 
 
 ## --- Sequential Training ------------------------------------------------------------------------ ##

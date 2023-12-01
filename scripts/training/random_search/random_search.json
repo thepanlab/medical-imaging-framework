@@ -1,0 +1,43 @@
+{
+
+    "seed": 1234,
+
+    "n_trials": 9,
+
+    "hyperparameters": {
+        "batch_size_min": 16,
+        "batch_size_max": 128,
+        "channels": 1,
+        "cropping_position": [40, 10],
+        "do_cropping": false,
+        "epochs": 5,
+        "learning_rate_min": 0.0001,
+        "learning_rate_max": 0.01,
+        "l_momentum": [0.5, 0.9, 0.99],
+        "l_nesterov": [true, false],
+        "l_models":["resnet_50", "InceptionV3",
+                    "Xception" ],
+        "patience": 10
+    },
+
+    "configurations_directory": "/home/pcallec/mif_outer/results/random_search_configurations",
+    "data_input_directory": "/home/pcallec/mif_outer/data/pig_kidney_modified",
+    "output_path": "../results/random-search",
+    "job_name": "resnet_sequential_oct",
+    
+    "k_epoch_checkpoint_frequency": 1,
+    
+    "shuffle_the_images": true,
+    "shuffle_the_folds": false,
+    
+    "class_names": ["cortex", "medulla","pelvis-calyx"],
+    
+    "subject_list": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8","k9","k10"],
+    "test_subjects": ["k1","k2", "k3", "k4", "k5"],
+    "validation_subjects": ["k1","k2", "k3", "k4", "k5", "k6", "k7", "k8","k9","k10"],
+    
+    "image_size": [301, 235],
+    "target_height": 301,
+    "target_width": 235
+}
+    
