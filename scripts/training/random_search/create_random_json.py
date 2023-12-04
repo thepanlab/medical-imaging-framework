@@ -119,34 +119,49 @@ def get_combinations(config):
                                          "momentum", "bool_nesterov"])
 
     for index in range(config["n_trials"]):
+        
+        # While loop until avoiding repetition
+
+        while True:
         # random
-        batch_size = np.random.choice(a_batch_size)
-        learning_rate = np.random.choice(a_learning_rate)
-        decay = learning_rate
+            bool_repeated = False
+
+            batch_size = np.random.choice(a_batch_size)
+            learning_rate = np.random.choice(a_learning_rate)
+            decay = learning_rate
+            
+            momentum = np.random.choice(a_momentum)
+            bool_nesterov = bool(np.random.choice(a_nesterov))
+            model = np.random.choice(a_models)
+            
+            path_output_directory = Path(config["output_path"])
+            path_output_subdirectory = path_output_directory / f"random-search_{index}"
         
-        momentum = np.random.choice(a_momentum)
-        bool_nesterov = bool(np.random.choice(a_nesterov))
-        model = np.random.choice(a_models)
-        
-        path_output_directory = Path(config["output_path"])
-        path_output_subdirectory = path_output_directory / f"random-search_{index}"
-      
-        output_path = path_output_subdirectory
-        job_name = "random-search_{index}"
-        
-        df_temp = pd.DataFrame({"index":[index],
-                                "model": [model],
-                                "batch_size": [int(batch_size)],
-                                "learning_rate": [learning_rate],
-                                "decay": [decay],
-                                "momentum": [momentum],
-                                "bool_nesterov": [bool_nesterov] })
-        
+            output_path = path_output_subdirectory
+            job_name = f"random-search_{index}"
+            
+            df_temp = pd.DataFrame({"index":[index],
+                                    "model": [model],
+                                    "batch_size": [int(batch_size)],
+                                    "learning_rate": [learning_rate],
+                                    "decay": [decay],
+                                    "momentum": [momentum],
+                                    "bool_nesterov": [bool_nesterov] })
+            
+            # iterate through rows in pandas dataframe
+            for i in range(df_summary.shape[0]):
+                return_compare = df_temp.iloc[:, 1:].compare(df_summary.iloc[[i], 1:].reset_index(drop=True))
+                if return_compare.shape[0] == 0:
+                    bool_repeated = True
+            
+            if bool_repeated == False:
+                break
+            
         df_summary = pd.concat([df_summary, df_temp], ignore_index=True)
         
         temp_variable = variables(batch_size, learning_rate, decay,
-                                  momentum, bool_nesterov, model,
-                                  output_path, job_name)        
+                                momentum, bool_nesterov, model,
+                                output_path, job_name)        
 
         # fixed
         dict_json_temp = create_dict_json(temp_variable, config)
