@@ -116,6 +116,11 @@ metrics_table:
 	python3 -W ignore -m results_processing.metrics_table.metrics_table -j ${j}
 
 
+summary_random_search:
+summary_random_search:
+	python3 -W ignore -m results_processing.summary_random_search.summary_random_search -j ${j}
+
+
 prediction: ## Creates predictions from a given set of inputs.
 prediction: 
 	python3 -W ignore -m results_processing.prediction.prediction -j ${j}
