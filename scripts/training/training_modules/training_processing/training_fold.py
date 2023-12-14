@@ -89,7 +89,7 @@ class _FoldTrainingInfo():
                     dataset = 'testing'
                 elif subject_name == self.rotation_subject:
                     dataset = 'validation'
-                elif subject_name in self.config['validation_subjects']:
+                elif subject_name in self.config['subject_list']:
                     dataset = 'training'
                 else:
                     continue
