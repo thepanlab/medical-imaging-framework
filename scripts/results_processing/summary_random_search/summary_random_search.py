@@ -119,16 +119,25 @@ def main(config=None):
     df_summary_randomsearch_mean = df_summary_randomsearch.groupby(by=["test_fold","rs"]).mean()
     df_summary_randomsearch_mean  = df_summary_randomsearch_mean.rename(columns={"value":"mean"})
     
+    df_summary_randomsearch_count = df_summary_randomsearch.groupby(by=["test_fold","rs"]).count()
+    df_summary_randomsearch_count = df_summary_randomsearch_count.drop(columns=['value'])
+    df_summary_randomsearch_count = df_summary_randomsearch_count.rename(columns={"val_fold":"count"})
+    
     df_summary_randomsearch_stderror = df_summary_randomsearch.groupby(by=["test_fold","rs"]).std().div(df_summary_randomsearch.groupby(by=["test_fold","rs"]).count()[["value"]]**0.5)
     df_summary_randomsearch_stderror  = df_summary_randomsearch_stderror.rename(columns={"value":"stderr"})
     
-    df_mean_stderr = pd.merge(df_summary_randomsearch_mean, df_summary_randomsearch_stderror, left_index=True, right_index=True)
+    df_mean_stderr_csv = pd.merge(df_summary_randomsearch_count, df_summary_randomsearch_mean, left_index=True, right_index=True)
+    df_mean_stderr_csv = pd.merge(df_mean_stderr_csv, df_summary_randomsearch_stderror, left_index=True, right_index=True)
 
     file_path = path_folder_output / f'{config["prefix_output_filename"]}_mean_stderr.csv'
         
-    df_mean_stderr.to_csv(file_path)
+    df_mean_stderr_csv.to_csv(file_path)
+    
+    df_mean_stderr = pd.merge(df_summary_randomsearch_mean, df_summary_randomsearch_stderror, left_index=True, right_index=True)
     
     print(colored(f"Saving table means and standard error in {file_path}.", 'green'))
+
+    # Creating new verstion of table
     
     l_test_folds = []
     # Select the best 
@@ -136,6 +145,21 @@ def main(config=None):
         
         if index[0] not in l_test_folds:
             l_test_folds.append(index[0])
+    
+    idx = pd.IndexSlice
+    
+    df_mean_stderr_v2 =pd.DataFrame()
+
+    for test_fold in l_test_folds:
+        df_mean_stderr_v2_temp = df_mean_stderr.loc[idx[test_fold,:]].T
+        df_mean_stderr_v2_temp = df_mean_stderr_v2_temp.rename(index={"mean":f"{test_fold}_mean",
+                                                                      "stderr":f"{test_fold}_stderr"})
+    
+        df_mean_stderr_v2 = pd.concat((df_mean_stderr_v2, df_mean_stderr_v2_temp))
+    
+    file_path = path_folder_output / f'{config["prefix_output_filename"]}_mean_stderr_v2.csv'
+        
+    df_mean_stderr_v2 .to_csv(file_path)
     
     df_best =pd.DataFrame()
     
@@ -145,6 +169,7 @@ def main(config=None):
         
         df_temp = pd.DataFrame({"test_fold":[test_fold],
                                 "best_rs":[rs_index]})
+        
         df_best = pd.concat([df_best, df_temp], ignore_index=True)
 
     file_path = path_folder_output / f'{config["prefix_output_filename"]}_mean_best.csv'
