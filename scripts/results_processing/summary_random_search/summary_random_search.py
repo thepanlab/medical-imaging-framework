@@ -1,5 +1,6 @@
 import os 
 import pathlib
+import math
 import pandas as pd
 from termcolor import colored
 from scipy.stats import sem as std_err
@@ -7,6 +8,7 @@ from sklearn.metrics import accuracy_score
 from util import path_getter
 from util.get_config import parse_json
 from results_processing.metrics_table import metrics_table
+from results_processing.epoch_counting import epoch_counting
 
 
 def convert_metrics_table(output_path, output_filename):
@@ -47,6 +49,19 @@ def convert_metrics_table(output_path, output_filename):
     # Return
     return df_output
      
+def read_epoch_dataframe(output_path):
+    
+    path_mean_stderr = pathlib.Path(output_path) / "epoch_inner_avg_stderr.csv"
+
+    df_epoch_mean = pd.read_csv(path_mean_stderr)
+
+    l_columns = ["test_fold", "avg_epochs", "std_err"]
+
+    df_epoch_mean_subset = df_epoch_mean[l_columns]
+    df_epoch_mean_subset = df_epoch_mean_subset.rename(columns={"avg_epochs": "epochs_mean",
+                                                                "std_err": "epochs_stderr"})
+    
+    return df_epoch_mean_subset
 
 def main(config=None):
     """ The main program.
@@ -137,7 +152,7 @@ def main(config=None):
     
     print(colored(f"Saving table means and standard error in {file_path}.", 'green'))
 
-    # Creating new verstion of table
+    # Creating new version of table
     
     l_test_folds = []
     # Select the best 
@@ -159,8 +174,63 @@ def main(config=None):
     
     file_path = path_folder_output / f'{config["prefix_output_filename"]}_mean_stderr_v2.csv'
         
-    df_mean_stderr_v2 .to_csv(file_path)
+    df_mean_stderr_v2.to_csv(file_path)
     
+    # Process epochs   
+    df_epochs_mean_stderr = pd.DataFrame()
+    
+    for directory in l_directories:
+        config_temp = {}
+
+        data_path_directory = directory / "training_results"
+        config_temp["data_path"] = str(data_path_directory)
+        
+        output_path = directory / "epoch_counting"
+        config_temp["output_path"] = output_path
+        
+        random_search_index = directory.name.split("_")[-1]
+        output_filename = f"epoch_counting_rs{random_search_index}"
+
+        config_temp["is_outer"] = False
+
+        print(colored(f"Creating metrics table for {directory} in {output_path}.", 'green'))
+
+        epoch_counting.main(config_temp)
+           
+        df_temp = read_epoch_dataframe(output_path)        
+        # add random search value
+        
+        df_temp.insert(1,"rs",random_search_index)
+        
+        df_epochs_mean_stderr = pd.concat([df_epochs_mean_stderr, df_temp], ignore_index=True)
+    
+    df_epochs_mean_stderr = df_epochs_mean_stderr.sort_values(by=['test_fold',"rs"]).reset_index(drop=True)
+    
+    file_path = path_folder_output / f'{config["prefix_output_filename"]}_epochs_mean_stderr.csv'
+    
+    # Changing name of fold* to test_fold*
+    dict_change = {}
+
+    for test_fold in  l_test_folds:
+        key_fold = test_fold.split("_")[1]
+        dict_change[key_fold] = test_fold
+    
+    df_epochs_mean_stderr = df_epochs_mean_stderr.replace(dict_change)
+    
+    df_epochs_mean_stderr.to_csv(file_path)
+    
+    print(colored(f"Saving epoch means and standard error in {file_path}.", 'green'))
+
+    df_epochs_mean_stderr_indexed = df_epochs_mean_stderr.set_index(['test_fold', 'rs'])
+    
+    df_merged = pd.merge(df_mean_stderr, df_epochs_mean_stderr_indexed, left_index=True, right_index=True)    
+
+    file_path = path_folder_output / f'{config["prefix_output_filename"]}_merged.csv'
+
+    df_merged.to_csv(file_path)
+
+    print(colored(f"Saving merged table in {file_path}.", 'green'))
+   
     df_best =pd.DataFrame()
     
     for test_fold in l_test_folds:
@@ -168,13 +238,24 @@ def main(config=None):
         rs_index = mean_index[1]
         
         df_temp = pd.DataFrame({"test_fold":[test_fold],
-                                "best_rs":[rs_index]})
+                                "rs":[rs_index]})
         
         df_best = pd.concat([df_best, df_temp], ignore_index=True)
 
-    file_path = path_folder_output / f'{config["prefix_output_filename"]}_mean_best.csv'
+    file_path = path_folder_output / f'{config["prefix_output_filename"]}_best.csv'
 
-    df_best.to_csv(file_path)
+    # Add column for average number of epochs
+    
+    # and round
+    df_best = df_best.set_index(['test_fold', 'rs'])
+    df_best_w_epoch = pd.merge(df_best, df_epochs_mean_stderr_indexed,
+                               left_index=True, right_index=True)
+
+
+    # Round to create a new column
+    df_best_w_epoch["epochs_ceiling"] = df_best_w_epoch["epochs_mean"].apply(math.ceil)
+
+    df_best_w_epoch.to_csv(file_path)
  
     print(colored(f"Saving table best per test fold in {file_path}.", 'green'))
     
