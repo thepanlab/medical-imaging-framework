@@ -244,13 +244,9 @@ def main(config=None):
 
     file_path = path_folder_output / f'{config["prefix_output_filename"]}_best.csv'
 
-    # Add column for average number of epochs
-    
-    # and round
     df_best = df_best.set_index(['test_fold', 'rs'])
     df_best_w_epoch = pd.merge(df_best, df_epochs_mean_stderr_indexed,
                                left_index=True, right_index=True)
-
 
     # Round to create a new column
     df_best_w_epoch["epochs_ceiling"] = df_best_w_epoch["epochs_mean"].apply(math.ceil)
