@@ -1,6 +1,7 @@
 import os 
 import pathlib
 import math
+import json
 import pandas as pd
 from termcolor import colored
 from scipy.stats import sem as std_err
@@ -62,6 +63,20 @@ def read_epoch_dataframe(output_path):
                                                                 "std_err": "epochs_stderr"})
     
     return df_epoch_mean_subset
+
+def create_json_file(test_fold, dict_json, config):
+    
+    file_name = f"outer_{test_fold}_config.json"
+    path_output_directory_config = pathlib.Path(config["path_output_configurations"])
+    path_output_directory_config.mkdir(mode=0o777, parents=True,
+                                        exist_ok=True)
+
+    path_output_file = path_output_directory_config / file_name
+       
+    with open(path_output_file, "w") as output:
+        json.dump(dict_json, output, indent=4)
+
+    return path_output_file
 
 def main(config=None):
     """ The main program.
@@ -250,12 +265,90 @@ def main(config=None):
 
     # Round to create a new column
     df_best_w_epoch["epochs_ceiling"] = df_best_w_epoch["epochs_mean"].apply(math.ceil)
+    
+    df_best_w_epoch = df_best_w_epoch.reset_index()
 
     df_best_w_epoch.to_csv(file_path)
  
     print(colored(f"Saving table best per test fold in {file_path}.", 'green'))
     
+    # Creation of configurations files
+    
+    # get rs_0_config.json
+    
+    path_directories_configurations = pathlib.Path(config["path_directory_rs_configurations"])
+    path_rs_0 = path_directories_configurations / "rs_0_config.json"
+    
+    f = open(path_rs_0)
+    dict_rs_0 = json.load(f)
+    f.close()
+    # import table of configurations
+    
+    path_table_rs = path_directories_configurations / "random_search_summary.csv"
         
+    df_table_rs = pd.read_csv(path_table_rs, index_col=0)
+    
+    df_best_w_epoch
+    
+    path_output_results_outer_parent = pathlib.Path(config["output_path_outer"])
+    
+    # building dict for outer configurations
+    for test_fold in l_test_folds:
+        df_test_best = df_best_w_epoch.query(f"test_fold == '{test_fold}'")
+        
+        outer_fold = test_fold.split("_")[1]
+        
+        rs_best = df_test_best["rs"].values[0]
+        rs_best_epoch = df_test_best["epochs_ceiling"].values[0]
+        
+        df_rs_best = df_table_rs.query(f"index == {rs_best}")     
+        
+        # Create outer configuration
+        
+        dict_json = {}
+        
+        dict_hyperparameters = {}
+
+        # random values    
+        dict_hyperparameters["batch_size"] = int(df_rs_best["batch_size"].values[0])
+        dict_hyperparameters["decay"] = float(df_rs_best["decay"].values[0])
+        dict_hyperparameters["learning_rate"] = float(df_rs_best["learning_rate"].values[0])
+        dict_hyperparameters["momentum"] = float(df_rs_best["momentum"].values[0])  
+        dict_hyperparameters["bool_nesterov"] = bool(df_rs_best["bool_nesterov"].values[0]) 
+
+        dict_json["selected_model_name"] =  df_rs_best["model"].values[0]
+
+        # fixed values
+        dict_hyperparameters["channels"] = dict_rs_0["hyperparameters"]["channels"]
+        dict_hyperparameters["cropping_position"] = dict_rs_0["hyperparameters"]["cropping_position"]
+        dict_hyperparameters["do_cropping"] = dict_rs_0["hyperparameters"]["do_cropping"]
+        dict_hyperparameters["epochs"] = int(rs_best_epoch)
+        
+        # TODO !!!!! compelte and verify
+        
+        dict_json["hyperparameters"] = dict_hyperparameters
+        
+        dict_json["data_input_directory"] = dict_rs_0["data_input_directory"]
+        
+        path_output_outer = path_output_results_outer_parent / test_fold
+        
+        dict_json["output_path"] = path_output_outer.as_posix()
+        dict_json["job_name"] = f"outer_{test_fold}"
+        dict_json["k_epoch_checkpoint_frequency"] = dict_rs_0["k_epoch_checkpoint_frequency"]
+        dict_json["shuffle_the_images"] = dict_rs_0["shuffle_the_images"]
+        dict_json["shuffle_the_folds"] = dict_rs_0["shuffle_the_folds"]
+        dict_json["seed"] = dict_rs_0["seed"]
+        dict_json["class_names"] = dict_rs_0["class_names"]   
+        dict_json["subject_list"] = dict_rs_0["subject_list"]
+        dict_json["test_subjects"] = [outer_fold]
+        dict_json["image_size"] = dict_rs_0["image_size"]
+        dict_json["target_height"] = dict_rs_0["target_height"]
+        dict_json["target_width"] = dict_rs_0["target_width"]
+
+        path_output_file = create_json_file(test_fold, dict_json, config)
+
+        print(colored(f"Saving outer configuration for {test_fold} in {path_output_file}.", 'green'))
+    
 if __name__ == "__main__":
     """ Executes the program """
     main()
