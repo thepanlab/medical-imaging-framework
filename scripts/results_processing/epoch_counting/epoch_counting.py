@@ -7,7 +7,8 @@ import os
 
 
 def count_epochs(history_paths, is_outer):
-    """ Reads in the history paths and finds the ideal loss.
+    """ Reads in the history paths and finds the epoch with the
+        minium validation loss.
 
     Args:
         history_paths (dict): A dictionary of file locations.
@@ -59,8 +60,10 @@ def count_epochs(history_paths, is_outer):
     return model_dfs
 
 
-def print_counts(epochs, output_path, config_nums, is_outer):
-    """ This will output a CSV of the epoch counts.
+def save_epoch_counts(epochs, output_path, config_nums, is_outer):
+    """ 
+    This will save a CSV file containing the following columns:
+    test_fold, config, conifig_index, val_fold, epochs
 
     Args:
         epochs (dict): Dictionary of epochs with minimum loss.
@@ -80,13 +83,15 @@ def print_counts(epochs, output_path, config_nums, is_outer):
             for validation_fold in epochs[config][testing_fold]:
 
                 # Each row should contain the given columns
-                df = df.append({
-                    col_names[0]: testing_fold,
-                    col_names[1]: config,
-                    col_names[2]: config_nums[config],
-                    col_names[3]: validation_fold,
-                    col_names[4]: epochs[config][testing_fold][validation_fold]
-                }, ignore_index=True)
+                df_temp = pd.DataFrame({
+                            col_names[0]: testing_fold,
+                            col_names[1]: config,
+                            col_names[2]: config_nums[config],
+                            col_names[3]: validation_fold,
+                            col_names[4]: epochs[config][testing_fold][validation_fold]
+                            })
+                
+                df = pd.concat([df, df_temp], ignore_index=True)
 
     # Print to file
     if is_outer:
@@ -98,9 +103,11 @@ def print_counts(epochs, output_path, config_nums, is_outer):
     print(colored('Successfully printed epoch results to: ' + file_name, 'green'))
 
 
-def print_stderr(epochs, output_path, config_nums):
-    """ This will output a CSV of the average epoch standard errors.
-
+def save_epoch_avg_stderr(epochs, output_path, config_nums):
+    """ 
+    This will save CSV containing average epoch standard errors.
+    It has the columns: test_fold, config, config-index, avg_epochs, std_err
+    
     Args:
         epochs (dict): Dictionary of epochs with minimum loss.
         output_path (str): Path to write files into.
@@ -128,13 +135,15 @@ def print_stderr(epochs, output_path, config_nums):
             stdev = math.sqrt(stdev / (n_val_folds - 1))
 
             # Each row should contain the given columns
-            df = df.append({
+            df_temp = pd.DataFrame({
                 col_names[0]: test_fold,
                 col_names[1]: config,
                 col_names[2]: config_nums[config],
                 col_names[3]: epoch_mean,
                 col_names[4]: stdev / math.sqrt(n_val_folds)
-            }, ignore_index=True)
+            })
+            
+            df = pd.concat([df, df_temp], ignore_index=True)
 
     # Print to file
     file_name = 'epoch_inner_avg_stderr.csv'
@@ -162,11 +171,11 @@ def main(config=None):
     config_nums = path_getter.get_config_indexes(config['data_path'])
 
     # Output the counts
-    print_counts(epochs, config['output_path'], config_nums, is_outer)
+    save_epoch_counts(epochs, config['output_path'], config_nums, is_outer)
 
     # Output the stderr
     if not is_outer:
-        print_stderr(epochs, config['output_path'], config_nums)
+        save_epoch_avg_stderr(epochs, config['output_path'], config_nums)
 
 
 if __name__ == "__main__":
