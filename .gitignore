@@ -9,6 +9,7 @@ results/
 *.png
 *.log
 *.tmp
+*.txt
 
 # Distribution / packaging
 .Python
