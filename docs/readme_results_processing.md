@@ -407,7 +407,7 @@
         <details>
         
         * ***Input:*** The configuration file. *(Optional)*
-        * ***Output:*** Three CSV files.
+        * ***Output:*** CSV files for metrics: recall, precision, and f1.
         * ***metrics_table_config.json:***
             ```json
                 {
