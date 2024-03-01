@@ -394,6 +394,38 @@
     </details>
 <hr>
 
++ ## ***Metrics Per Category***
+    <ul> This will create tables for metrics: recall, precision and f1 for inner and outer loop. Providing mean value and standard error.
+    </ul> <br>
+    <details>
+    <summary>Show/Hide files</summary>
+
+    1) ### ***metrics_table.py:***
+        ***Example:*** 
+        > python3 metrics_per_category.py -j my_config.json
+
+        <details>
+        
+        * ***Input:*** The configuration file. *(Optional)*
+        * ***Output:*** Three CSV files.
+        * ***metrics_table_config.json:***
+            ```json
+                {
+                    "data_path": "[path]/data/",
+                    "output_path": "[path]/metrics_output",
+                    "prefix_filename": "metrics_table",
+
+                    "is_outer": true
+                }
+            ```
+            * ***data_path:*** The directory path of the training results. Additionally, it can be a parent folder of random search configurations.
+            * ***output_path:*** The directory path to where the CSV file should be written. 
+            * ***prefix_filename:*** This prefix will be used to name the files.csv*" 
+            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
+
+        </details> <hr> <br> <br>
+    </details>
+<hr>
 
 
 + ## ***Prediction***

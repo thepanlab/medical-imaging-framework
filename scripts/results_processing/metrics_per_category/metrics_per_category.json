@@ -1,0 +1,13 @@
+{
+  "data_path": ".../results/OCT_split1_random/",
+  "output_path": "../results/metrics_per_category/oct_inner_randomsearch",
+  "prefix_filename": "oct_inner_randomsearch",
+
+  "classes": {
+    "cortex": 0, 
+    "medulla": 1, 
+    "pelvis": 2
+    },
+
+  "is_outer": false
+}
