@@ -400,7 +400,7 @@
     <details>
     <summary>Show/Hide files</summary>
 
-    1) ### ***metrics_table.py:***
+    1) ### ***metrics_per_category.py:***
         ***Example:*** 
         > python3 metrics_per_category.py -j my_config.json
 
@@ -413,15 +413,25 @@
                 {
                     "data_path": "[path]/data/",
                     "output_path": "[path]/metrics_output",
-                    "prefix_filename": "metrics_table",
+                    "prefix_filename": "data_outer",
 
-                    "is_outer": true
+                    "classes": {
+                        "class0_name": 0, 
+                        "class1_name": 1, 
+                        "class2_name": 2
+                        },
+
+                    "is_outer": true,
+                    "random_search_if_inner": false
                 }
             ```
             * ***data_path:*** The directory path of the training results. Additionally, it can be a parent folder of random search configurations.
             * ***output_path:*** The directory path to where the CSV file should be written. 
             * ***prefix_filename:*** This prefix will be used to name the files.csv*" 
-            * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
+            * ***classes***: list of classes names with index
+            * ***is_outer***: True if the data is of the outer loop. False if it is of the inner loop.
+
+            * ***random_search_if_inner***: It allows to analyze inner loop results that use random search. That is, the random search index will be an additional column.
 
         </details> <hr> <br> <br>
     </details>
