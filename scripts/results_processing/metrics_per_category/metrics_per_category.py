@@ -374,6 +374,12 @@ def save_dataframes(dict_true_index, dict_prediction_index, config):
                 
             df_all=df_all.sort_values(by=['test_fold']).reset_index(drop=True)
             
+            n_testfolds = df_all.shape[0]
+            df_all = df_all.set_index('test_fold')
+        
+            df_all.loc['mean'] = df_all.mean()
+            df_all.loc['std_err'] = df_all.std()/n_testfolds**0.5
+            
             p_path_folder_output = Path(config["output_path"])
 
             p_path_folder_output.mkdir(parents=True, exist_ok=True)
