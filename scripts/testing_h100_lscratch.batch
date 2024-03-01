@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#SBATCH --partition=disc_dual_h100
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --output=%x_%J_stdout.txt
+#SBATCH --error=%x_%J_stderr.txt
+#SBATCH --mem=40G
+#SBATCH --time=2:00:00
+#SBATCH --job-name=testing_h100_lscratch
+#SBATCH --mail-user=pcallec@ou.edu
+#SBATCH --mail-type=ALL
+#SBATCH --chdir=/work/omicsbio/paulcalle/medical-imaging-framework/scripts
+
+#################################################
+cp -r /work/omicsbio/paulcalle/medical-imaging-framework/data/pig_kidney_subset/  $LSCRATCH/.
+
+CUDA_VISIBLE_DEVICES=0 python3 -m training.training_sequential.loop_inner.training_inner_loop --file /work/omicsbio/paulcalle/medical-imaging-framework/scripts/training/training_config_files/loop_inner/config_inner_InceptionV3_modified_h100_lscratch.json

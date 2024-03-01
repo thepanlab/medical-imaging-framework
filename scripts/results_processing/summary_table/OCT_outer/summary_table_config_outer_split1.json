@@ -1,0 +1,9 @@
+{
+  "data_path": "/scratch/paulcalle/split1_random/outer_loop",
+  "output_path": "../results/summary_table/oct_outer/split1",
+  "output_filename": "summary_table",
+
+  "round_to": 8,
+
+  "is_outer": true
+}

@@ -1,0 +1,107 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "results_processing.metrics_per_category.metrics_per_category",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/results_processing/metrics_per_category/oct_outer/metrics_per_category_split1.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "results_processing.metrics_per_category.metrics_per_category",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/results_processing/metrics_per_category/oct_inner/metrics_per_category_split1_rs.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "results_processing.metrics_per_category.metrics_per_category",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/results_processing/metrics_per_category/oct_inner/metrics_per_category_rs0.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "results_processing.summary_table.summary_table",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/results_processing/summary_table/OCT_inner/summary_table_config.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "results_processing.summary_random_search.summary_random_search",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/results_processing/summary_random_search/OCT_summary/summary_random_search_split1.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "training.training_sequential.loop_inner.training_inner_loop",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "--file",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/results/OCT_split1_random_configurations/rs_3_config_rest1.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "training.random_search.create_random_json",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/training/random_search/random_search_OCT_split1_random.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

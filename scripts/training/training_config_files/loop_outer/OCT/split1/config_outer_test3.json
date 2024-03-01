@@ -1,0 +1,37 @@
+{
+    "hyperparameters": {
+        "batch_size": 128,
+        "decay": 0.01,
+        "learning_rate": 0.01,
+        "momentum": 0.9,
+        "bool_nesterov": true,
+        "patience": 20,
+        "channels": 1,
+        "cropping_position": [
+            40,
+            10
+        ],
+        "do_cropping": false,
+        "epochs": 50
+    },
+
+    "data_input_directory":"/work/omicsbio/paulcalle/medical-imaging-framework/data/OCT_paper/split_random",
+    "output_path": "/scratch/paulcalle/split1_random/outer_loop/fold3",
+    "job_name": "oct_split1_test3",
+
+    "k_epoch_checkpoint_frequency": 5,
+
+    "shuffle_the_images": true,
+    "shuffle_the_folds": false,
+    "seed": 1234,
+
+    "class_names": ["cortex", "medulla", "pelvis"],
+    "selected_model_name": "resnet_50",
+    
+    "subject_list": ["fold1", "fold2", "fold3", "fold4", "fold5",
+                     "fold6", "fold7", "fold8", "fold9", "fold10"],
+    "test_subjects": ["fold3"],
+    
+    "target_height": 210,
+    "target_width": 185
+}

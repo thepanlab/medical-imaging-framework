@@ -1,0 +1,15 @@
+{
+  "data_path": "/ourdisk/hpc/nullspace/paulcalle/auto_archive_notyet/tape_2copies/Pipeline_project/results/OCT_split1_random/random-search_0/training_results",
+  "output_path": "../results/class_recall/oct_inner/rs0",
+  "output_filename": "class_recall_oct_inner_rs0",
+
+  "round_to": 2,
+
+  "classes": {
+    "cortex": 0, 
+    "medulla": 1, 
+    "pelvis": 2
+  },
+
+  "is_outer": true
+}

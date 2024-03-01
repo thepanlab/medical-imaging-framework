@@ -115,6 +115,9 @@ metrics_table: ## Creates a metrics_table for the given data folder.
 metrics_table: 
 	python3 -W ignore -m results_processing.metrics_table.metrics_table -j ${j}
 
+metrics_per_category: ## Creates a metrics_table for the given data folder.
+metrics_per_category: 
+	python3 -W ignore -m results_processing.metrics_per_category.metrics_per_category -j ${j}
 
 summary_random_search:
 summary_random_search:

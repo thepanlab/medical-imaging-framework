@@ -84,11 +84,11 @@ def save_epoch_counts(epochs, output_path, config_nums, is_outer):
 
                 # Each row should contain the given columns
                 df_temp = pd.DataFrame({
-                            col_names[0]: testing_fold,
-                            col_names[1]: config,
-                            col_names[2]: config_nums[config],
-                            col_names[3]: validation_fold,
-                            col_names[4]: epochs[config][testing_fold][validation_fold]
+                            col_names[0]: [testing_fold],
+                            col_names[1]: [config],
+                            col_names[2]: [config_nums[config]],
+                            col_names[3]: [validation_fold],
+                            col_names[4]: [epochs[config][testing_fold][validation_fold]]
                             })
                 
                 df = pd.concat([df, df_temp], ignore_index=True)
@@ -136,11 +136,11 @@ def save_epoch_avg_stderr(epochs, output_path, config_nums):
 
             # Each row should contain the given columns
             df_temp = pd.DataFrame({
-                col_names[0]: test_fold,
-                col_names[1]: config,
-                col_names[2]: config_nums[config],
-                col_names[3]: epoch_mean,
-                col_names[4]: stdev / math.sqrt(n_val_folds)
+                col_names[0]: [test_fold],
+                col_names[1]: [config],
+                col_names[2]: [config_nums[config]],
+                col_names[3]: [epoch_mean],
+                col_names[4]: [stdev / math.sqrt(n_val_folds)]
             })
             
             df = pd.concat([df, df_temp], ignore_index=True)

@@ -1,0 +1,9 @@
+{
+  "data_path": "/scratch/paulcalle/split3_subject/outer_loop",
+  "output_path": "../results/summary_table/oct_outer/split3",
+  "output_filename": "summary_table",
+
+  "round_to": 8,
+
+  "is_outer": true
+}

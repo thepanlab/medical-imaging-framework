@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_a100
+#SBATCH --ntasks=4
+#SBATCH --array=2-5
+#SBATCH --output=%x_%J_stdout.txt
+#SBATCH --error=%x_%J_stderr.txt
+#SBATCH --mem=50G
+#SBATCH --gpus-per-node=1
+#SBATCH --time=30:00:00
+#SBATCH --job-name=s3_rs
+#SBATCH --mail-user=pcallec@ou.edu
+#SBATCH --mail-type=ALL
+#SBATCH --chdir=/work/omicsbio/paulcalle/medical-imaging-framework/scripts
+
+#################################################
+
+python -m training.training_sequential.loop_inner.training_inner_loop --file "/work/omicsbio/paulcalle/medical-imaging-framework/results/OCT_split3_subjects_configurations/rs_${SLURM_ARRAY_TASK_ID}_config.json"

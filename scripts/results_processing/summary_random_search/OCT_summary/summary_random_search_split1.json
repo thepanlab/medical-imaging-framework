@@ -1,0 +1,12 @@
+{
+  "results_folder_or_list": "/ourdisk/hpc/nullspace/paulcalle/auto_archive_notyet/tape_2copies/Pipeline_project/results/OCT_split1_random",
+  "output_path": "../results/OCT_split1/summary_random_search/",
+  "prefix_output_filename": "oct_split1",
+
+  "path_directory_rs_configurations": "/work/omicsbio/paulcalle/medical-imaging-framework/results/OCT_split1_random_configurations",
+  "path_output_configurations": "/work/omicsbio/paulcalle/medical-imaging-framework/results/OCT_split1_outer_configurations",
+
+  "output_path_outer": "/scratch/paulcalle/split1_random/outer_loop",
+
+  "round_to": 6
+}

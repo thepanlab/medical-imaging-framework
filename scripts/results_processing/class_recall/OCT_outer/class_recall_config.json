@@ -1,0 +1,15 @@
+{
+  "data_path": "/scratch/paulcalle/split1_random/outer_loop/test_fold1/training_results",
+  "output_path": "../results/class_recall/oct_outer",
+  "output_filename": "class_recall_oct_outer",
+
+  "round_to": 2,
+
+  "classes": {
+    "cortex": 0, 
+    "medulla": 1, 
+    "pelvis": 2
+  },
+
+  "is_outer": true
+}
