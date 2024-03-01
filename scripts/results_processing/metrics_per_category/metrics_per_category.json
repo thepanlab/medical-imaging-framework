@@ -9,5 +9,6 @@
     "pelvis": 2
     },
 
-  "is_outer": false
+  "is_outer": true,
+  "random_search_if_inner": false
 }
