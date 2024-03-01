@@ -439,8 +439,14 @@ def generate_best(df_mean_stderr, df_epochs_mean_stderr,
         mean_index, _ = df_mean_stderr.loc[[test_fold]].idxmax()
         rs_index = mean_index[1]
         
+        mean_temp = df_mean_stderr.loc[(test_fold, rs_index), "mean"]
+        stderr_temp = df_mean_stderr.loc[(test_fold, rs_index), "stderr"]
+        
+        
         df_temp = pd.DataFrame({"test_fold":[test_fold],
-                                "rs":[rs_index]})
+                                "rs":[rs_index],
+                               "mean": [mean_temp],
+                                "stderr":[stderr_temp]})
         
         df_best = pd.concat([df_best, df_temp], ignore_index=True)
 
