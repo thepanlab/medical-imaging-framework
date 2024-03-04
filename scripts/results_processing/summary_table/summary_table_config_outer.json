@@ -4,5 +4,5 @@
   "prefix_filename": "summary_table",
 
   "is_outer": true,
-  "random_search_if_inner": true
+  "random_search_if_inner": false
 }
