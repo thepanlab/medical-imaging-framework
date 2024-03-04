@@ -3,7 +3,6 @@
   "output_path": "../results/summary_table/outer",
   "output_filename": "summary_table",
 
-  "round_to": 8,
-
-  "is_outer": true
+  "is_outer": true,
+  "random_search_if_inner": true
 }

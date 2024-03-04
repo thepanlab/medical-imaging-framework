@@ -1,9 +1,0 @@
-{
-  "data_path": "/ourdisk/hpc/nullspace/paulcalle/auto_archive_notyet/tape_2copies/Pipeline_project/results/OCT_split1_random/random-search_1/training_results",
-  "output_path": "../results/summary_table/oct_inner/split1",
-  "output_filename": "summary_table",
-
-  "round_to": 8,
-
-  "is_outer": false
-}
