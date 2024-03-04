@@ -16,6 +16,7 @@ from util.predicted_formatter.predicted_formatter import write_file
 from termcolor import colored
 from util import path_getter
 
+
 def extract_test_val(path):
     """ From absolute path, it extracts the test, val and 
     the indices in a array
@@ -85,6 +86,7 @@ def read_data_inner(l_paths, config):
 
     # Return the dictionary
     return results
+
 
 def read_data_outer(l_paths):
     """ From a list of paths of files with indices, it gets 
@@ -162,6 +164,7 @@ def process_list_true_and_predictions_inner(path_data):
     
     return l_true_label_index, l_prediction_index
 
+
 def get_list_true_and_prediction(config):
     """ Based on the 'data_path' parameter in the config.
     It returns list of path of true value indices and 
@@ -227,8 +230,8 @@ def get_list_true_and_prediction(config):
 
         if len(l_true_label_index) != len(l_prediction_index):
             raise RuntimeError(f"Length of true label index: {len(l_true_label_index)}" +
-                            f" and length of predicion: {len(l_true_label_index)}" +
-                            "are different.")
+                               f" and length of predicion: {len(l_true_label_index)}" +
+                                "are different.")
 
     return l_true_label_index, l_prediction_index
 
@@ -248,9 +251,6 @@ def save_dataframes(dict_true_index, dict_prediction_index, config):
     
     if config["is_outer"] == False:
         
-        # # TODO fix for this
-
-
         l_test_val_folds = dict_prediction_index.keys()
             
         # TODO
