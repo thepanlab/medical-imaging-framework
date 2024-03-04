@@ -15,6 +15,7 @@ from util.predicted_formatter.predicted_formatter import write_file
 from termcolor import colored
 from util import path_getter
 
+
 def extract_test_val(path):
     """ From absolute path, it extracts the test, val and 
     the indices in a array
@@ -74,7 +75,6 @@ def process_list_true_and_predictions_inner(path_data):
         if val_name not in l_test_val_fold_names:
             l_test_val_fold_names.append(tuple_test_val)
 
-
     for test_name, val_name in l_test_val_fold_names:
         l_prediction_val = list(path_data.rglob(f"*/prediction/*test_{test_name}_val_{val_name}*val*"))
 
@@ -115,10 +115,8 @@ def read_data_inner(l_paths, config):
         for test_name, val_name, a_value_index in l_results:
             results[(test_name,val_name)] = a_value_index
         
-    
     # config["random_search_if_inner"] == True:
     else:
-
         # example of filenames
         # resnet_50_0_test_fold8_label_index.csv
         # resnet_50_test_E1_test-true-label-index.csv
@@ -203,6 +201,7 @@ def get_list_true_and_prediction(config):
 
     return l_true_label_index, l_prediction_index
 
+
 def read_data(paths):
     """ This will read in file-data into a config-subject dictionary
 
@@ -243,6 +242,7 @@ def read_data(paths):
     # Return the dictionary
     return results
 
+
 def read_data_outer(l_paths):
     """ From a list of paths of files with indices, it gets 
     a dictionary where the key is the test fold and
@@ -271,128 +271,6 @@ def read_data_outer(l_paths):
     # Return the dictionary
     return results
 
-
-def get_accuracies_and_stderr(true, pred):
-    """ Gets the accuracies of each fold-config index.
-
-    Args:
-        true (dict): A dictionary of true values sorted by config and test fold.
-        pred (dict): A dictionary of predicted values sorted by config and test fold.
-
-    Returns:
-        dict: Two dictionaries of relative and real accuracies and standard error. Sorted by config and test fold.
-    """
-    # Get a table of accuracy for every config
-    acc_tables = {'weighted': {}, 'unweighted': {}, 'f1_weighted': {}}
-    acc_functions = {'weighted': weighted_acc, 'unweighted': unweighted_acc, 'f1_weighted': f1}
-    for key in acc_tables:
-        for config in pred:
-            acc_tables[key][config] = {}
-            
-            # Get the accuracy and other metrics of every test-val fold pair
-            for test_fold in pred[config]:
-                acc_tables[key][config][test_fold] = {}
-                for val_fold in pred[config][test_fold]:
-                    
-                    # Get the metrics of the test-val pair
-                    pred_vals = pred[config][test_fold][val_fold]
-                    true_vals = true[config][test_fold][val_fold]
-                    if key == 'f1_weighted':
-                        acc_tables[key][config][test_fold][val_fold] = acc_functions[key](y_true=true_vals, y_pred=pred_vals, average='weighted')
-                    else:
-                        acc_tables[key][config][test_fold][val_fold] = acc_functions[key](y_true=true_vals, y_pred=pred_vals)
-                    
-    # Get the means of the absolute and relative accuracies
-    mean_accs = {'weighted': {}, 'unweighted': {}, 'f1_weighted': {}}
-    for key in mean_accs:
-        for config in acc_tables[key]:
-            mean_accs[key][config] = {}
-            
-            # For every test-fold, sum the val-fold accs
-            for test_fold in acc_tables[key][config]:
-                mean_accs[key][config][test_fold] = 0
-                for val_fold in acc_tables[key][config][test_fold]:
-                    mean_accs[key][config][test_fold] += acc_tables[key][config][test_fold][val_fold]
-                    
-                # Divide by the number of summed val folds
-                n_val_folds = len(acc_tables[key][config][test_fold])
-                mean_accs[key][config][test_fold] /= n_val_folds
-                   
-    # Calculate the standard error of the means
-    mean_errs = {'weighted': {}, 'unweighted': {}, 'f1_weighted': {}}
-    for key in mean_errs:
-        for config in acc_tables[key]:
-            mean_errs[key][config] = {}
-            
-            # For every test-fold, sum the val-fold accs and divide by n val folds
-            for test_fold in acc_tables[key][config]:
-                stdev = 0
-                
-                # Sum the differences squared of the accuracy and its mean
-                for val_fold in acc_tables[key][config][test_fold]:                    
-                    stdev += (acc_tables[key][config][test_fold][val_fold] - mean_accs[key][config][test_fold])**2
-                
-                # sample standard deviation
-                stdev = math.sqrt(stdev/(n_val_folds-1))
-                # Get the standard deviation and the mean's error
-                n_val_folds = len(acc_tables[key][config][test_fold])
-                mean_errs[key][config][test_fold] = stdev / math.sqrt(n_val_folds)
-                
-    # Return accuracy
-    return mean_accs, mean_errs
-
-
-def total_output(accuracies, standard_error, output_path, output_file, round_to, is_outer):
-    """ Produces a table of accuracies and standard errors by config and fold
-
-    Args:
-        accuracies (dict): A dictionary of accuracies sorted by config and test fold.
-        standard_error (dict): A dictionary of errors sorted by config and test fold.
-        output_path (str): A string of the directory the output CSV should be written to.
-        output_file (str): Name prefix of the output files.
-        is_outer (bool): If the data is from the outer loop.
-    """
-    # Get names of columns and subjects
-    config_names = list(accuracies['unweighted'].keys())
-    test_folds = list(accuracies['unweighted'][config_names[0]].keys())
-    
-    # Alter output path
-    if is_outer:
-        output_path = os.path.join(output_path, 'outer_loop')
-    else:
-        output_path = os.path.join(output_path, 'inner_loop')
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    
-    # Make a file for each dataframe
-    dfs = {
-        "acc": accuracies['unweighted'], 
-        "acc_weighted": accuracies['weighted'], 
-        
-        "acc_err": standard_error['unweighted'],
-        "acc_err_weighted": standard_error['weighted'],
-        
-        "f1_weighted": accuracies['f1_weighted'],
-        "f1_err_weighted": standard_error['f1_weighted']
-    }
-    for key in dfs:
-        
-        # Create the dataframe's arrays by column (or config)
-        data = {}
-        for config in config_names:
-            data[config] = []
-            data[config] = []
-            for test_fold in test_folds:
-                data[config].append(dfs[key][config][test_fold])
-
-        # Create and save the Pandas dataframe
-        df = pd.DataFrame(data=data, index=test_folds)
-        df.index.names = ['test_fold']
-        df = df.sort_values(by=['test_fold'], ascending=True)
-        if is_outer:
-            df.round(round_to).to_csv(f'{output_path}/{output_file}_outer_{key}.csv')
-        else:
-            df.round(round_to).to_csv(f'{output_path}/{output_file}_inner_{key}.csv')
 
 def get_list_true_and_prediction_outer(config):
     """ Based on the 'data_path' parameter in the config.
@@ -456,8 +334,6 @@ def save_dataframes(dict_true_index, dict_prediction_index, config):
   
         if config["random_search_if_inner"] == False:
             
-            # TODO
-            # FIX not output so far !!!! for inner loop
             for test_fold, val_fold in l_test_val_folds:
                 dict_row = {"test_fold":[test_fold],
                             "val_fold":[val_fold]}
