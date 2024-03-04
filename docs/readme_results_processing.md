@@ -661,7 +661,7 @@
             ```
             * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
             * ***output_path:*** The directory path to where the CSV file should be written. 
-            * ***prefix_filename:*** This will result in file(s) that start with *prefix_filename*"
+            * ***prefix_filename:*** This will result in file(s) that start with "*prefix_filename*"
             * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
             * ***random_search_if_inner:*** If analyzing inner results and random search was used, set value to True.
 
