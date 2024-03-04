@@ -1,7 +1,7 @@
 {
   "data_path": "../results/training/seq_outer_10/training_results",
   "output_path": "../results/summary_table/seq_outer_10",
-  "output_filename": "summary_table",
+  "prefix_filename": "summary_table",
 
   "is_outer": false,
   "random_search_if_inner": true
