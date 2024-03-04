@@ -653,17 +653,17 @@
                 {
                     "data_path": "[path]/data/",
                     "output_path": "[path]/summary_output",
-                    "output_filename": "summary_table",
+                    "prefix_filename": "summary_table",
 
-                    "round_to": 6,
-                    "is_outer": true
+                    "is_outer": true,
+                    "random_search_if_inner": false
                 }
             ```
             * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
             * ***output_path:*** The directory path to where the CSV file should be written. 
-            * ***output_filename:*** This will result in a file named "*[name].csv*" 
-            * ***round_to:*** This will allow the rounding of output values.
+            * ***prefix_filename:*** This will result in file(s) that start with *prefix_filename*"
             * ***is_outer:*** True if the data is of the outer loop. False if it is of the inner loop.
+            * ***random_search_if_inner:*** If analyzing inner results and random search was used, set value to True.
 
        </details> <hr>  <br> <br>
     </details>
