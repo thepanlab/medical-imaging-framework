@@ -374,7 +374,7 @@ def generate_epoch_csv(list_directories, config):
     return df_epochs_mean_stderr
 
 
-def generate_best(df_mean_stderr, df_epochs_mean_stderr,
+def generate_best(df_summary_randomsearch, df_mean_stderr, df_epochs_mean_stderr,
                   config):
     """ 
     First, it generates a dataframe that combines `df_mean_stderr` and
@@ -453,18 +453,44 @@ def generate_best(df_mean_stderr, df_epochs_mean_stderr,
     file_path = path_folder_output / f'{config["prefix_output_filename"]}_best.csv'
 
     df_best = df_best.set_index(['test_fold', 'rs'])
+    
+    # Calculating std error from raw value of best test and val
+    
+    best_indices = df_best.index
+    
+    df_best_all_val =pd.DataFrame()
+    
+    for test_fold, rs_value in best_indices:
+        print(test_fold, rs_value)
+        df_temp = df_summary_randomsearch.query("test_fold==@test_fold and rs==@rs_value")
+        df_best_all_val = pd.concat([df_best_all_val, df_temp], ignore_index=True)
+        
+    inner_mean = df_best_all_val["value"].mean()
+    inner_count = df_best_all_val["value"].count()
+    inner_stddev = df_best_all_val["value"].std()
+    
+    inner_stderr = inner_stddev / inner_count**0.5
+    
+    df_inner_mean_stderr = pd.DataFrame({"mean":[inner_mean],
+                                         "stderr_all_validation":[inner_stderr]})
+                                        
+    file_path = path_folder_output / f'{config["prefix_output_filename"]}_mean_stderr_all_val.csv'
+    
+    df_inner_mean_stderr.to_csv(file_path)
+    
+    # Best with epoch
     df_best_w_epoch = pd.merge(df_best, df_epochs_mean_stderr_indexed,
                                left_index=True, right_index=True)
 
     # Round to create a new column
     df_best_w_epoch["epochs_ceiling"] = df_best_w_epoch["epochs_mean"].apply(math.ceil)
     
-    df_best_w_epoch = df_best_w_epoch.reset_index()
-
+    df_best_w_epoch.loc[('mean'), "mean"] = inner_mean
+    df_best_w_epoch.loc[('stderr_all_val'), "mean"] = inner_stderr
+    
     df_best_w_epoch.to_csv(file_path)
- 
     print(colored(f"Saving table best per test fold in {file_path}.", 'green'))
-
+    
     return df_best_w_epoch
 
 
@@ -495,9 +521,13 @@ def create_configurations(df_best_w_epoch, config):
     
     path_output_results_outer_parent = pathlib.Path(config["output_path_outer"])
     
+    # Removing last two rows containint
+    # mean and std err values
+    df_best_w_epoch_for_config = df_best_w_epoch.iloc[:-2,:].reset_index(drop=False)
+    
     # building dict for outer configurations
-    for test_fold in df_best_w_epoch["test_fold"]:
-        df_test_best = df_best_w_epoch.query(f"test_fold == '{test_fold}'")
+    for test_fold in df_best_w_epoch_for_config["test_fold"]:
+        df_test_best = df_best_w_epoch_for_config.query(f"test_fold == '{test_fold}'")
         
         outer_fold = test_fold.split("_")[1]
         
@@ -583,8 +613,8 @@ def main(config=None):
     
     df_epochs_mean_stderr = generate_epoch_csv(l_directories, config)
     
-    df_best_w_epoch = generate_best(df_mean_stderr, df_epochs_mean_stderr,
-                                    config)
+    df_best_w_epoch = generate_best(df_summary_randomsearch, df_mean_stderr,
+                                    df_epochs_mean_stderr, config)
     
     create_configurations(df_best_w_epoch, config)
 
