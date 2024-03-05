@@ -450,8 +450,6 @@ def generate_best(df_summary_randomsearch, df_mean_stderr, df_epochs_mean_stderr
         
         df_best = pd.concat([df_best, df_temp], ignore_index=True)
 
-    file_path = path_folder_output / f'{config["prefix_output_filename"]}_best.csv'
-
     df_best = df_best.set_index(['test_fold', 'rs'])
     
     # Calculating std error from raw value of best test and val
@@ -474,7 +472,7 @@ def generate_best(df_summary_randomsearch, df_mean_stderr, df_epochs_mean_stderr
     df_inner_mean_stderr = pd.DataFrame({"mean":[inner_mean],
                                          "stderr_all_validation":[inner_stderr]})
                                         
-    file_path = path_folder_output / f'{config["prefix_output_filename"]}_mean_stderr_all_val.csv'
+    file_path = path_folder_output / f'{config["prefix_output_filename"]}_best_mean_stderr_all_val.csv'
     
     df_inner_mean_stderr.to_csv(file_path)
     
