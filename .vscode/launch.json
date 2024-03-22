@@ -22,6 +22,58 @@
             "type": "python",
             "request": "launch",
             "console": "integratedTerminal",
+            "module": "results_processing.summary_random_search.summary_random_search",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/results_processing/summary_random_search/OCT_summary/summary_random_search_split3.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "results_processing.summary_table.summary_table",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/results_processing/summary_table/OCT_outer/summary_table_config_outer_split1.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "results_processing.summary_table.summary_table",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/results_processing/summary_table/OCT_inner/summary_table_config_inner_split1_rs0.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "module": "results_processing.summary_table.summary_table",
+            "cwd": "${workspaceFolder}/scripts/",
+            "justMyCode": true,
+            "args": [
+                "-j",
+                "/work/omicsbio/paulcalle/medical-imaging-framework/scripts/results_processing/summary_table/OCT_inner/summary_table_config_inner_split1.json"
+            ]
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "console": "integratedTerminal",
             "module": "results_processing.metrics_per_category.metrics_per_category",
             "cwd": "${workspaceFolder}/scripts/",
             "justMyCode": true,
