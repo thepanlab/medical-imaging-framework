@@ -133,10 +133,17 @@ def main(config_loc, is_outer):
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
         # tf_config.gpu_options.visible_device_list = ""
     else:
-        cuda_device = str((rank+1)%2)
-        os.environ["CUDA_VISIBLE_DEVICES"] = cuda_device
-        print("cuda_device", cuda_device)
-        # tf_config.gpu_options.allow_growth = True
+        physical_devices = tf.config.list_physical_devices('GPU')
+
+        print(colored(f'Rank {rank}', 'cyan'))
+        print("Num GPUs Available: ", len(physical_devices))
+        print("GPUs Available: ", physical_devices)        
+       
+        # Assuming there are only 2 gpus in the list
+        index_gpu = (rank+1)%2
+        
+        print("physical_devices[index_gpu]=", physical_devices[index_gpu])
+        tf.config.set_visible_devices(physical_devices[index_gpu], 'GPU')
         
     gpus = tf.config.list_physical_devices('GPU')
     if gpus:
