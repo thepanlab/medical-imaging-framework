@@ -7,7 +7,8 @@
         "do_cropping": false,
         "epochs": 10,
         "learning_rate": 0.01,
-        "momentum": 0.9
+        "momentum": 0.9,
+        "bool_nesterov": true
     },
 
     "data_input_directory":"../data/kidney_test_data_small",
