@@ -69,6 +69,7 @@
                 "epochs": 6,
                 "learning_rate": 0.01,
                 "momentum": 0.9,
+                "bool_nesterov": true,
                 "patience": 10
             },
 
@@ -102,6 +103,7 @@
           * ***epochs:*** The number of training epochs.
           * ***learning_rate:*** The learning speed.
           * ***momentum:*** Helps the learning rate's speed by speeding up the gradient descent search.
+          * ***"bool_nesterov"***: Whether to apply Nesterov momentum
           * ***patience:*** How long to wait for improvement within early stopping.
         * ***data_input_directory:*** Where the input images are located. No specific structure is needed.
         * ***output_path:*** Where to write the results to.
