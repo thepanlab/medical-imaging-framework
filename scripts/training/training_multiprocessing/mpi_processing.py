@@ -1,20 +1,37 @@
-from training.training_modules.data_processing import training_preparation, fold_generator
-from training.training_modules.output_processing import console_printing
-from training.training_modules.training_processing import training_loop
-from training.training_checkpointing_logging.logger import *
-from util.get_config import parse_training_configs
-from termcolor import colored
-from datetime import date
-import tensorflow as tf
-from mpi4py import MPI
 import datetime
 import time
 import math
 import os
 import sys
+from datetime import date
+import tensorflow as tf
+from termcolor import colored
+from mpi4py import MPI
+from training.training_modules.data_processing import training_preparation, fold_generator
+from training.training_modules.output_processing import console_printing
+from training.training_modules.training_processing import training_loop
+from training.training_checkpointing_logging.logger import *
+from util.get_config import parse_training_configs
+from argparse import ArgumentParser
 
 # Location of the configurations
 CONFIG_LOC = './training/training_config_files'
+
+def parse_n_gpus():
+    parser = ArgumentParser()
+
+    parser.add_argument("-ng", "--ngpus",
+                        help=" Number of gpus per server",
+                        required=False)
+    
+    # This functions allows to not produce an error when extra arguments are present
+    args = parser.parse_known_args()
+    # print("args =", args)
+    n_gpus = int(args[0].ngpus)
+    # print("n_gpus =", n_gpus)
+    
+    return n_gpus
+
 
 def split_tasks(configs, n_proc, is_outer):
     """ Generates config-fold tuples for training.
@@ -119,11 +136,13 @@ def main(config_loc, is_outer):
         config_loc (str): The location of the configuration.
         is_outer (bool): Whether this is of the outer loop. 
     """
-    
+       
     # Initialize MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     n_proc = comm.Get_size()
+    
+    n_gpus = parse_n_gpus()
     
     print("python location", os.path.dirname(sys.executable))
     
@@ -140,7 +159,7 @@ def main(config_loc, is_outer):
         print("GPUs Available: ", physical_devices)        
        
         # Assuming there are only 2 gpus in the list
-        index_gpu = (rank+1)%2
+        index_gpu = (rank+1)%n_gpus
         
         print("physical_devices[index_gpu]=", physical_devices[index_gpu])
         tf.config.set_visible_devices(physical_devices[index_gpu], 'GPU')
@@ -188,7 +207,7 @@ def main(config_loc, is_outer):
         # 1: number of epochs
         # 2: test_fold
         # 3: validation_fold
-        print("len(tasks(top3) = ", tasks[:3])
+        print("len(tasks(top3)) = ", tasks[:3])
         print("tasks(top3) = ", tasks[:3])
         
         # Listen for process messages while running
