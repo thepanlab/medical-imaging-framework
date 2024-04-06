@@ -207,8 +207,10 @@ def main(config_loc, is_outer):
         # 1: number of epochs
         # 2: test_fold
         # 3: validation_fold
-        print("len(tasks(top3)) = ", tasks[:3])
+        print("len(tasks(top3)) = ", len(tasks[:3]))
         print("tasks(top3) = ", tasks[:3])
+
+        n_tasks = len(tasks)
         
         # Listen for process messages while running
         exited = []
@@ -218,7 +220,7 @@ def main(config_loc, is_outer):
             
             # Send task if the process is ready
             if tasks:
-                print(colored(f"Rank 0 is sending rank {subrank} their first task.", 'green'))
+                print(colored(f"Rank 0 is sending rank {subrank} its task {len(tasks)}/{n_tasks}.", 'green'))
                 comm.send(tasks.pop(), dest=subrank)
                 next_task_index += 1
                     
