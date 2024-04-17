@@ -32,6 +32,19 @@ def parse_n_gpus():
     
     return n_gpus
 
+def parse_dummy_node():
+    parser = ArgumentParser()
+
+    parser.add_argument('--dummy', default=False,
+                        action=argparse.BooleanOptionalAction)
+    
+    
+    args = parser.parse_known_args()
+    
+    b_dummy = args[0].dummy
+    
+    return b_dummy
+ 
 
 def split_tasks(configs, n_proc, is_outer):
     """ Generates config-fold tuples for training.
@@ -143,14 +156,14 @@ def main(config_loc, is_outer):
     n_proc = comm.Get_size()
     
     n_gpus = parse_n_gpus()
-    
+    b_dummy = parse_dummy_node()
     print("python location", os.path.dirname(sys.executable))
     
     # Initalize TF, set the visible GPU to rank%2 for rank > 0
     # tf_config = tf.compat.v1.ConfigProto()
     if rank == 0:
-        os.environ["CUDA_VISIBLE_DEVICES"] = ""
-        # tf_config.gpu_options.visible_device_list = ""
+        tf.config.set_visible_devices([], 'GPU')
+
     else:
         physical_devices = tf.config.list_physical_devices('GPU')
 
@@ -159,26 +172,28 @@ def main(config_loc, is_outer):
         print("GPUs Available: ", physical_devices)        
        
         # Assuming there are only 2 gpus in the list
-        index_gpu = (rank+1)%n_gpus
         
-        print("physical_devices[index_gpu]=", physical_devices[index_gpu])
+        if b_dummy:
+           
+            # Assuming we discard one process
+            # Assunming # gpus 2
+            # mod number is (# gpus +1)
+            # Rank 0 Rank 1  Rank 2
+            #        0       1  
+            # Rank 3 Rank 4  Rank 5
+            # 2      0       1
+            # Rank 6 Rank 7  Rank 8 
+            # 2      0       1      
+            
+            # The value 2 will do nothing 
+            index_gpu = (rank-1)%(n_gpus+1)
+        else:
+            index_gpu = (rank-1)%n_gpus
+        
+        print(f"physical_devices[{index_gpu}]=", physical_devices[index_gpu])
         tf.config.set_visible_devices(physical_devices[index_gpu], 'GPU')
+        tf.config.experimental.set_memory_growth(physical_devices[index_gpu], True)
         
-    gpus = tf.config.list_physical_devices('GPU')
-    if gpus:
-        try:
-            # Currently, memory growth needs to be the same across GPUs
-            for gpu in gpus:
-                tf.config.experimental.set_memory_growth(gpu, True)
-            logical_gpus = tf.config.list_logical_devices('GPU')
-            print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-        except RuntimeError as e:
-            # Memory growth must be set before GPUs have been initialized
-            print(e)
-
-    # session = tf.compat.v1.Session(config=tf_config)
-
-    
     # Rank 0 initializes the program and runs the configuration loops
     if rank == 0:  
         
@@ -250,21 +265,24 @@ def main(config_loc, is_outer):
         # tf.config.run_functions_eagerly(True)
         
         # Listen for the first task
-        comm.send(rank, dest=0)
-        print(colored(f'Rank {rank} is listening for process 0.', 'cyan'))
-        task = comm.recv(source=0)
         
-        # While there are tasks to run, train
-        while task:
-                    
-            # Training loop
-            config, n_epochs, test_subject, validation_subject = task
-            print(colored(f"rank {rank}: test {test_subject}, train {validation_subject}", 'cyan'))         
-            
-            run_training(rank, config, n_epochs, test_subject, validation_subject, is_outer)
+        if not b_dummy:
             comm.send(rank, dest=0)
+        
+            print(colored(f'Rank {rank} is listening for process 0.', 'cyan'))
             task = comm.recv(source=0)
             
-        # Nothing more to run.
-        print(colored(f'Rank {rank} terminated. All jobs finished for this process.', 'yellow'))
-        
+            # While there are tasks to run, train
+            while task:
+                        
+                # Training loop
+                config, n_epochs, test_subject, validation_subject = task
+                print(colored(f"rank {rank}: test {test_subject}, train {validation_subject}", 'cyan'))         
+                
+                run_training(rank, config, n_epochs, test_subject, validation_subject, is_outer)
+                comm.send(rank, dest=0)
+                task = comm.recv(source=0)
+                
+            # Nothing more to run.
+            print(colored(f'Rank {rank} terminated. All jobs finished for this process.', 'yellow'))
+            
