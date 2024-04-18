@@ -12,13 +12,12 @@ from training.training_modules.output_processing import console_printing
 from training.training_modules.training_processing import training_loop
 from training.training_checkpointing_logging.logger import *
 from util.get_config import parse_training_configs
-from argparse import ArgumentParser
-
+import argparse
 # Location of the configurations
 CONFIG_LOC = './training/training_config_files'
 
 def parse_n_gpus():
-    parser = ArgumentParser()
+    parser = argparse.ArgumentParser()
 
     parser.add_argument("-ng", "--ngpus",
                         help=" Number of gpus per server",
@@ -32,16 +31,17 @@ def parse_n_gpus():
     
     return n_gpus
 
-def parse_dummy_node():
-    parser = ArgumentParser()
 
-    parser.add_argument('--dummy', default=False,
-                        action=argparse.BooleanOptionalAction)
-    
-    
+def parse_dummy_node():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--dummy', action="store_true")
+        
     args = parser.parse_known_args()
     
     b_dummy = args[0].dummy
+    
+    print("b_dummy =", b_dummy)
     
     return b_dummy
  
@@ -163,7 +163,6 @@ def main(config_loc, is_outer):
     # tf_config = tf.compat.v1.ConfigProto()
     if rank == 0:
         tf.config.set_visible_devices([], 'GPU')
-
     else:
         physical_devices = tf.config.list_physical_devices('GPU')
 
@@ -171,8 +170,8 @@ def main(config_loc, is_outer):
         print("Num GPUs Available: ", len(physical_devices))
         print("GPUs Available: ", physical_devices)        
        
-        # Assuming there are only 2 gpus in the list
-        
+        index_gpu = -100
+       
         if b_dummy:
            
             # Assuming we discard one process
@@ -186,13 +185,10 @@ def main(config_loc, is_outer):
             # 2      0       1      
             
             # The value 2 will do nothing 
-            index_gpu = (rank-1)%(n_gpus+1)
+            index_gpu = (rank-1) % (n_gpus+1)
+            print("index_gpu =", index_gpu)
         else:
-            index_gpu = (rank-1)%n_gpus
-        
-        print(f"physical_devices[{index_gpu}]=", physical_devices[index_gpu])
-        tf.config.set_visible_devices(physical_devices[index_gpu], 'GPU')
-        tf.config.experimental.set_memory_growth(physical_devices[index_gpu], True)
+            index_gpu = (rank-1) % n_gpus
         
     # Rank 0 initializes the program and runs the configuration loops
     if rank == 0:  
@@ -265,8 +261,16 @@ def main(config_loc, is_outer):
         # tf.config.run_functions_eagerly(True)
         
         # Listen for the first task
+        print("n_gpus:", n_gpus)
+        print(f"rank: {rank}, index_gpu: {index_gpu}")
+        print("b_dummy:", b_dummy)
         
-        if not b_dummy:
+        if not b_dummy or ( b_dummy and index_gpu != n_gpus):
+
+            print(f"physical_devices[{index_gpu}]=", physical_devices[index_gpu])
+            tf.config.set_visible_devices(physical_devices[index_gpu], 'GPU')
+            tf.config.experimental.set_memory_growth(physical_devices[index_gpu], True)
+
             comm.send(rank, dest=0)
         
             print(colored(f'Rank {rank} is listening for process 0.', 'cyan'))
