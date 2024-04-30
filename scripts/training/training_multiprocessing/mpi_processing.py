@@ -46,12 +46,11 @@ def parse_dummy_node():
     return b_dummy
  
 
-def split_tasks(configs, n_proc, is_outer):
+def split_tasks(configs, is_outer):
     """ Generates config-fold tuples for training.
 
     Args:
         configs (list of dict): List of configurations.
-        n_proc (int): Number of training processes.
         is_outer (bool): If this is of the outer loop or not.
         
     Returns:
@@ -211,7 +210,7 @@ def main(config_loc, is_outer):
             exit(-1)
         
         # Get the tasks for each process
-        tasks = split_tasks(configs, n_proc, is_outer)
+        tasks = split_tasks(configs, is_outer)
         # tasks is a list of tuples
         # where tuple has 4 elements
         # 0: dictionary of configuration of hyperparameters
@@ -225,6 +224,24 @@ def main(config_loc, is_outer):
         
         # Listen for process messages while running
         exited = []
+        # add manually when b_dummy is used 
+        # to avoid problems later
+        if b_dummy:
+            
+            # r: rank
+            # 2 GPUs
+            #       | r0 r1 r2 | r3 r4 r5 | r6 r7 r8 | r9 r10 r11 |
+            # index_gpu   0  1 |  2  0  1 |  2  0  1 |  2   0   1 |
+            #                     ^          ^          ^           
+            # ranks with index_gpu are not used
+            # r3, r6, r9 
+            
+            n_not_used_ranks = n_proc/(n_gpus+1) - 1
+            
+            exited.extend([(n_gpus+1)*i for i in range(1, n_not_used_ranks+1)])
+            
+        print("exited =", exited)
+
         while True:
             # it received rank from other processes
             subrank = comm.recv(source=MPI.ANY_SOURCE)
@@ -281,7 +298,7 @@ def main(config_loc, is_outer):
                         
                 # Training loop
                 config, n_epochs, test_subject, validation_subject = task
-                print(colored(f"rank {rank}: test {test_subject}, train {validation_subject}", 'cyan'))         
+                print(colored(f"rank {rank}: test {test_subject}, validation {validation_subject}", 'cyan'))         
                 
                 run_training(rank, config, n_epochs, test_subject, validation_subject, is_outer)
                 comm.send(rank, dest=0)
