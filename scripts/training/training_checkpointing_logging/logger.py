@@ -69,9 +69,9 @@ def _writing_prep(training_output_path, job_name, use_lock=True, rank=None):
     if not os.path.exists(logging_path):
         if use_lock:
             with fasteners.InterProcessLock(os.path.join(training_output_path, 'logging_lock.tmp')):
-                os.makedirs(logging_path)
+                os.makedirs(logging_path, exist_ok = True)
         else:
-            os.makedirs(logging_path)
+            os.makedirs(logging_path, exist_ok = True)
         
     # Check if the log already exists and get the path to write to.
     current_log = read_log(training_output_path, job_name, rank)
