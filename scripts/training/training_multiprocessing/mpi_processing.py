@@ -236,7 +236,7 @@ def main(config_loc, is_outer):
             # ranks with index_gpu are not used
             # r3, r6, r9 
             
-            n_not_used_ranks = n_proc/(n_gpus+1) - 1
+            n_not_used_ranks = int(n_proc/(n_gpus+1) - 1)
             
             exited.extend([(n_gpus+1)*i for i in range(1, n_not_used_ranks+1)])
             
@@ -289,7 +289,7 @@ def main(config_loc, is_outer):
             tf.config.experimental.set_memory_growth(physical_devices[index_gpu], True)
 
             comm.send(rank, dest=0)
-        
+
             print(colored(f'Rank {rank} is listening for process 0.', 'cyan'))
             task = comm.recv(source=0)
             
@@ -306,4 +306,3 @@ def main(config_loc, is_outer):
                 
             # Nothing more to run.
             print(colored(f'Rank {rank} terminated. All jobs finished for this process.', 'yellow'))
-            
