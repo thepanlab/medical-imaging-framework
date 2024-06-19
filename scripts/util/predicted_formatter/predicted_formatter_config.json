@@ -1,3 +1,4 @@
 {
-  "data_path": "/home/jshaw/medical-imaging-framework/data/hao"
+  "data_path": "/home/jshaw/medical-imaging-framework/data/hao",
+  "is_outer":false
 }

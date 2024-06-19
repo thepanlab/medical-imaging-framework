@@ -14,6 +14,7 @@
     <br>
 
     The possible result processing modules to call are as follows:
+    * *class_accuracy*
     * *confusion_matrix*
     * *confusion_matrix_many*
     * *confusion_matrix_many_means*
@@ -23,16 +24,31 @@
     * *learning_curve*
     * *learning_curve_many*
     * *metrics_table*
+    * *predicted_formatter*
     * *prediction*
     * *roc_curve*
+    * *roc_curve_many*
+    * *roc_curve_many_means*
     * *summary_table*
     * *tabled_prediction_info*
+    * *truth_formatter*
 
 <hr> <br> <br>
 
 
 + ## ***Training***
-    The training module has a specific format.
+    
+    **Modules:**
+    * *training_inner_loop*
+    * *training_outer_loop*
+    * *distributed_training_inner_loop*
+    * *distributed_training_outer_loop*
+    * *mpi_init*
+
+    <br>
+
+    The *mpi_init* module generates a command line arguement to copy-paste if the makefile does not suffice.
+    The other makefile modules have a specific format. For example:
     > make training_inner_loop
 
     or
@@ -43,3 +59,10 @@
     
     * **FILE PATH** Is the path to a specific configuration file. *(Optional)*
     * **JSON PATH** Is the path to a specific configuration folder of configuration file. *(Optional)*
+
+    <br>
+
+    ***In order for any given IP addresses to ping, a SSH key needs to be established between the host machine and the remote machine.***
+
+<hr> <br> <br>
+

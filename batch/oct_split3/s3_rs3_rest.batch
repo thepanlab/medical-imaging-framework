@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#SBATCH --partition=disc
+#SBATCH --ntasks=4
+#SBATCH --output=%x_%J_stdout.txt
+#SBATCH --error=%x_%J_stderr.txt
+#SBATCH --mem=50G
+#SBATCH --gpus-per-node=1
+#SBATCH --time=30:00:00
+#SBATCH --job-name=s3_rs3_rest
+#SBATCH --mail-user=pcallec@ou.edu
+#SBATCH --mail-type=ALL
+#SBATCH --chdir=/work/omicsbio/paulcalle/medical-imaging-framework/scripts
+
+#################################################
+
+python -m training.training_sequential.loop_inner.training_inner_loop --file "/work/omicsbio/paulcalle/medical-imaging-framework/results/OCT_split3_subjects_configurations/rs_3_config_rest.json"

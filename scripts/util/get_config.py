@@ -1,9 +1,9 @@
+import os
+import io
+import json
+import argparse
 from contextlib import redirect_stderr
 from termcolor import colored
-import argparse
-import json
-import io
-import os
 
 
 def parse_json(default_config_file_name):
@@ -66,31 +66,36 @@ def parse_training_configs(default_config_directory_name):
         type=str, default=default_config_directory_name, required=False,
         help='Load settings from a JSON file.'
     )
-    args = parser.parse_args()
+    
+    args = parser.parse_known_args()
+    # print("args training =", args)
+
+    # args = parser.parse_args()    
+    
     
     # Check for command line errors
-    if not (args.file or args.folder):
+    if not (args[0].file or args[0].folder):
         raise Exception("Error: no configuration file or folder specified.")
-    if (args.file and args.folder) and args.folder != default_config_directory_name:
+    if (args[0].file and args[0].folder) and args[0].folder != default_config_directory_name:
         raise Exception(colored("Error: Please only specify a configuration file or directory, not both.", 'red'))
 
     # Read in a single file
-    if args.file:
-        if not os.path.exists(args.file):
-            raise Exception(colored(f"Error: The file '{args.file}' does not exist."))
-        with open(args.file) as fp:
+    if args[0].file:
+        if not os.path.exists(args[0].file):
+            raise Exception(colored(f"Error: The file '{args[0].file}' does not exist."))
+        with open(args[0].file) as fp:
             return [json.load(fp)]
             
     # Read in a directory of files
-    elif args.folder:
-        if not os.path.isdir(args.folder):
-            raise Exception(colored(f"Error: The directory '{args.folder}' does not exist."))
+    elif args[0].folder:
+        if not os.path.isdir(args[0].folder):
+            raise Exception(colored(f"Error: The directory '{args[0].folder}' does not exist."))
         
         # Read in each valid config file within
         configs = []
-        for file in os.listdir(args.folder):
-            full_path = os.path.join(args.folder, file)
-            if not os.path.isdir(full_path):
+        for file in os.listdir(args[0].folder):
+            full_path = os.path.join(args[0].folder, file)
+            if not os.path.isdir(full_path) and full_path.endswith(".json"):
                 with open(full_path) as fp:
                     configs.append(json.load(fp))
         return configs

@@ -8,10 +8,12 @@ from time import perf_counter
 from tensorflow import keras
 import tensorflow as tf
 import fasteners
+from pathlib import Path
+import datetime
 
 
 class _FoldTrainingInfo():
-    def __init__(self, fold_index, config, testing_subject, rotation_subject, files, folds, indexes, label_position, rank=None, is_outer=False):
+    def __init__(self, fold_index, config, testing_subject, rotation_subject, files, folds, indexes, label_position, n_epochs, rank=None, is_outer=False):
         """ Initializes a training fold info object.
 
         Args:
@@ -43,6 +45,7 @@ class _FoldTrainingInfo():
         self.is_outer = is_outer
         self.fold_index = fold_index
         self.label_position = label_position
+        self.n_epochs = n_epochs
         
         self.model = None
         self.callbacks = None
@@ -86,7 +89,7 @@ class _FoldTrainingInfo():
                     dataset = 'testing'
                 elif subject_name == self.rotation_subject:
                     dataset = 'validation'
-                elif subject_name in self.config['validation_subjects']:
+                elif subject_name in self.config['subject_list']:
                     dataset = 'training'
                 else:
                     continue
@@ -113,15 +116,15 @@ class _FoldTrainingInfo():
             This includes early stopping and checkpoints.
         """
         # Get the job name for saving
-        self.checkpoint_prefix = f"{self.config['job_name']}_config_{self.config['selected_model_name']}_test_{self.testing_subject}"   
-        if self.is_outer:
-            self.checkpoint_prefix += f"_test_{self.rotation_subject}"  
+        if self.is_outer:          
+            self.checkpoint_prefix = f"{self.config['job_name']}_test_{self.testing_subject}_config_{self.config['selected_model_name']}"
         else:
-            self.checkpoint_prefix += f"_val_{self.rotation_subject}"  
-        
+            self.checkpoint_prefix = f"{self.config['job_name']}_test_{self.testing_subject}_val_{self.rotation_subject}_config_{self.config['selected_model_name']}"
+           
+            
         # Training checkpoints
         checkpoints = Checkpointer(
-            self.config['hyperparameters']['epochs'],
+            self.n_epochs,
             self.config['k_epoch_checkpoint_frequency'], 
             self.checkpoint_prefix, 
             self.rank,
@@ -142,7 +145,7 @@ class _FoldTrainingInfo():
 
 
 class Fold():
-    def __init__(self, fold_index, config, testing_subject, rotation_subject, files, folds, indexes, label_position, rank=None, is_outer=False):
+    def __init__(self, fold_index, config, testing_subject, rotation_subject, files, folds, indexes, label_position, n_epochs, rank=None, is_outer=False):
         """ Initializes a training fold object.
 
         Args:
@@ -167,6 +170,7 @@ class Fold():
             folds, 
             indexes, 
             label_position,
+            n_epochs,
             rank,
             is_outer
         )
@@ -184,11 +188,14 @@ class Fold():
         """
         # Load in the previously saved fold info. Check if valid. If so, use it.
         prev_info = self.load_state()
+        # prev_info = None
         if prev_info is not None and \
         self.fold_info.testing_subject == prev_info.testing_subject and \
         self.fold_info.rotation_subject == prev_info.rotation_subject:
             self.fold_info = prev_info
             self.load_checkpoint()
+            # Conditional if there is no checkpoint
+            
             print(colored("Loaded previous existing state for testing subject " + 
                           f"{prev_info.testing_subject} and subject {prev_info.rotation_subject}.", 'cyan'))
 
@@ -206,7 +213,7 @@ class Fold():
     def load_state(self):
         """ Loads the latest training state. """
         log = read_log_items(
-            self.fold_info.config['output_path'], 
+            self.fold_info.config['output_path'],
             self.fold_info.config['job_name'], 
             ['fold_info']
         )
@@ -228,13 +235,16 @@ class Fold():
     def load_checkpoint(self):
         """ Loads the latest checkpoint to start from. """
         results = get_most_recent_checkpoint(
-            self.fold_info.config['output_path'], 
+            os.path.join(self.fold_info.config['output_path'], 'checkpoints'),
             self.fold_info.checkpoint_prefix
         )
         if results is not None:
             print(colored(f"Loaded most recent checkpoint of epoch: {results[1]}.", 'cyan'))
             self.fold_info.model.model = results[0]
             self.checkpoint_epoch = results[1]
+        else:
+            # Create model if not checkpoint
+            self.fold_info.create_model()
         
         
     def create_dataset(self):
@@ -251,24 +261,61 @@ class Fold():
             csvreader = ImageReaderCSV(configs=self.fold_info.config)
             imreader = ImageReaderGlobal()
             
+            
+            b_drop_remainder = False 
+            
+            if dataset == "training":
+                residual = len(self.fold_info.datasets[dataset]['files']) % self.fold_info.config['hyperparameters']['batch_size']
+                print("Residual for Batch training  =", residual)
+                
+                if residual < (self.fold_info.config['hyperparameters']['batch_size']/2):
+                    b_drop_remainder = True
+                    print("Residual discarded")
+                else:
+                    print("Residual not discarded")
+                
+            
+            # ds = tf.data.Dataset.from_tensor_slices(self.fold_info.datasets[dataset]['files'])
+            
+            
             # Parse images here
             ds = tf.data.Dataset.from_tensor_slices(self.fold_info.datasets[dataset]['files'])
-            ds_map = ds.map(lambda x: tf.py_function(
-                func=parse_image,
-                inp=[
-                    x,                                                                 # Filename
-                    self.fold_info.config['class_names'],                              # Class Names
-                    self.fold_info.config['hyperparameters']['channels'],              # Channels
-                    self.fold_info.config['hyperparameters']['do_cropping'],           # Do Cropping
-                    self.fold_info.config['hyperparameters']['cropping_position'][0],  # Offset Height
-                    self.fold_info.config['hyperparameters']['cropping_position'][1],  # Offset Width
-                    self.fold_info.config['target_height'],                            # Target Height
-                    self.fold_info.config['target_width'],                             # Target Width
-                    self.fold_info.label_position,                                     # Label Position
-                ],
-                Tout=[tf.float32, tf.int64]
-            ))
-            self.fold_info.datasets[dataset]['ds'] = ds_map.batch(self.fold_info.config['hyperparameters']['batch_size'], drop_remainder=False)
+
+            # Eager mode
+            # ds_map = ds.map(lambda x: tf.py_function(
+            #     func=parse_image,
+            #     inp=[
+            #         x,                                                                 # Filename
+            #         self.fold_info.config['class_names'],                              # Class Names
+            #         self.fold_info.config['hyperparameters']['channels'],              # Channels
+            #         self.fold_info.config['hyperparameters']['do_cropping'],           # Do Cropping
+            #         self.fold_info.config['hyperparameters']['cropping_position'][0],  # Offset Height
+            #         self.fold_info.config['hyperparameters']['cropping_position'][1],  # Offset Width
+            #         self.fold_info.config['target_height'],                            # Target Height
+            #         self.fold_info.config['target_width'],                             # Target Width
+            #         self.fold_info.label_position,                                     # Label Position
+            #     ],
+            #     Tout=[tf.float32, tf.int64]                
+            # ))
+            
+            # Non eager version
+            ds_map =ds.map(lambda x: parse_image(
+                        x,                                                                 # Filename
+                        self.fold_info.config['class_names'],                              # Class Names
+                        self.fold_info.config['hyperparameters']['channels'],              # Channels
+                        self.fold_info.config['hyperparameters']['do_cropping'],           # Do Cropping
+                        self.fold_info.config['hyperparameters']['cropping_position'][0],  # Offset Height
+                        self.fold_info.config['hyperparameters']['cropping_position'][1],  # Offset Width
+                        self.fold_info.config['target_height'],                            # Target Height
+                        self.fold_info.config['target_width'],                             # Target Width
+                        self.fold_info.label_position
+                        ),
+                        num_parallel_calls=tf.data.AUTOTUNE,
+                        deterministic=True )
+            
+             
+                      
+            self.fold_info.datasets[dataset]['ds'] = ds_map.batch(self.fold_info.config['hyperparameters']['batch_size'], drop_remainder=b_drop_remainder)
             
         # If the datasets are empty, cannot train
         if self.fold_info.datasets['training']['ds'] is None or \
@@ -285,7 +332,7 @@ class Fold():
     def train_model(self):
         """ Train the model, assuming the given dataset is valid. """  
         if self.checkpoint_epoch != 0 and \
-         self.checkpoint_epoch+1 == self.fold_info.config['hyperparameters']['epochs']:
+           self.checkpoint_epoch == self.fold_info.n_epochs:
             print(colored("Maximum number of epochs reached from checkpoint.", 'yellow'))
             return
         
@@ -294,13 +341,34 @@ class Fold():
             validation_data = None
         else:
             validation_data = self.fold_info.datasets['validation']['ds']
-            
+        
+        # Configuration for tensorboard
+
+                
+        if self.is_outer:
+            file_prefix = f"{self.fold_info.model.model_type}_{self.fold_info.rotation_subject}_t_{self.fold_info.testing_subject}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        else:
+            file_prefix = f"{self.fold_info.model.model_type}_{self.fold_info.fold_index}_t_{self.fold_info.testing_subject}_v_{self.fold_info.rotation_subject}_{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        
+        path_output = Path(self.fold_info.config['output_path']).joinpath("tensorboard_output",file_prefix)
+        # log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+        # with profile
+        # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_output, histogram_freq=1,
+        #                                                       profile_batch=(5,20))    
+
+        # Just tensorboard
+        # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=path_output, histogram_freq=1)    
+        
         # Fit the model
+        
+        print("tf.executing_eagerly() =", tf.executing_eagerly())
+            
         time_start = perf_counter()
         self.history = self.fold_info.model.model.fit(
             self.fold_info.datasets['training']['ds'],
             validation_data=validation_data,
-            epochs=self.fold_info.config['hyperparameters']['epochs'],
+            epochs=self.fold_info.n_epochs,
             initial_epoch=self.checkpoint_epoch,
             callbacks=[self.fold_info.callbacks]
         )

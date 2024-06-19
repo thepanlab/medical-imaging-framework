@@ -1,9 +1,6 @@
 {
-    "gpu_addrs": [],
-
     "cuda_devices": [0, 1],
-
+    "gpu_addrs": [],
     "n_processes": 2,
-
-    "config_loc": "./training/training_config_files"
+    "is_outer": true
 }

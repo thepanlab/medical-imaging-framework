@@ -1,0 +1,15 @@
+{
+  "data_path": "/scratch/paulcalle/split3_subject/outer_loop",
+  "output_path": "../results/metrics_per_category/oct_outer_split3",
+  "prefix_filename": "oct_outer_split3",
+
+  "classes": {
+    "cortex": 0, 
+    "medulla": 1, 
+    "pelvis": 2
+    },
+
+  "round_to": 8,
+
+  "is_outer": true
+}

@@ -1,0 +1,9 @@
+{
+  "data_path": "/scratch/paulcalle/split2_volume/outer_loop",
+  "output_path": "../results/summary_table/oct_outer/split2",
+  "output_filename": "summary_table",
+
+  "round_to": 8,
+
+  "is_outer": true
+}

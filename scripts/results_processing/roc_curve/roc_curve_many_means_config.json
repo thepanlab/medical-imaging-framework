@@ -1,6 +1,6 @@
 {
-  "data_path": "../results/training/mpi_inner_10/training_results",
-  "output_path": "../results/roc_many_means/mpi_inner_10",
+  "data_path": "../results/training/mpi_outer_10/training_results",
+  "output_path": "../results/results_processing/roc_many_means/mpi_outer_10",
 
   "line_width": "2",
   "label_types": [
@@ -13,6 +13,7 @@
     "darkorange",
     "cornflowerblue"
   ],
+  "alpha":1.0,
 
   "average_all_subjects": false,
   "subjects": ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k10"],
@@ -24,5 +25,5 @@
   "save_resolution": "figure",
   "save_format": "png",
 
-  "is_outer": false
+  "is_outer": true
 }

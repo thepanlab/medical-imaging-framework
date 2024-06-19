@@ -4,7 +4,7 @@ import tensorflow as tf
 from skimage import io
 import numpy as np
 
-
+# @tf.function
 def parse_image(filename, class_names, channels, do_cropping, offset_height, offset_width, target_height, target_width, label_position=None, use_labels=True): 
     """ Parses an image from some given filename and various parameters.
         
@@ -31,12 +31,12 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
         If eager execution is disabled.
     """
     # Assert eager execution, else trouble will be had...
-    if not tf.executing_eagerly():
-        raise Exception(
-            "Fatal Error: TensorFlow must have eager execution enabled when parsing images.\n\t" +
-            "Try including this function call within 'tf.py_function' and/or calling\n\t" +
-            "'tf.config.run_functions_eagerly(True)' before running this."
-        )
+    # if not tf.executing_eagerly():
+    #     raise Exception(
+    #         "Fatal Error: TensorFlow must have eager execution enabled when parsing images.\n\t" +
+    #         "Try including this function call within 'tf.py_function' and/or calling\n\t" +
+    #         "'tf.config.run_functions_eagerly(True)' before running this."
+    #     )
     
     # Split to get only the image name
     image_path = tf.strings.split(filename, "/")[-1]
@@ -73,14 +73,19 @@ def parse_image(filename, class_names, channels, do_cropping, offset_height, off
         
         # Check for label matches
         path_label = tf.strings.split(path_substring, "_")[label_position]
-        class_matches = np.where(path_label == class_names)[0]
-        if len(class_matches) > 1:
-            raise ValueError(colored(f'Error: more than one class name found in the image: "{image_path}"', 'red'))
-        elif len(class_matches) < 1:
-            raise ValueError(colored(f'Error: no class name found was in the image: "{image_path}"\n\tIs the case correct?', 'red'))
+        
+        # class_matches = np.where(path_label == class_names)[0]
+        # if len(class_matches) > 1:
+        #     raise ValueError(colored(f'Error: more than one class name found in the image: "{image_path}"', 'red'))
+        # elif len(class_matches) < 1:
+        #     raise ValueError(colored(f'Error: no class name found was in the image: "{image_path}"\n\tIs the case correct?', 'red'))
+
+        label_bool = (path_label == class_names)
         
         # Return the tensor
-        return image, class_matches[0]
+        # return image, class_matches[0]
+        return image, tf.argmax(label_bool)
+
     else:
         return image
     

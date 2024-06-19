@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#SBATCH --partition=disc
+#SBATCH --ntasks=4
+#SBATCH --array=2-10
+#SBATCH --output=%x%a_%J_stdout.txt
+#SBATCH --error=%x%a_%J_stderr.txt
+#SBATCH --mem=50G
+#SBATCH --gpus-per-node=1
+#SBATCH --time=30:00:00
+#SBATCH --job-name=s2_f
+#SBATCH --mail-user=pcallec@ou.edu
+#SBATCH --mail-type=ALL
+#SBATCH --chdir=/work/omicsbio/paulcalle/medical-imaging-framework/scripts
+
+#################################################
+
+echo "RS: $SLURM_ARRAY_TASK_ID"
+
+python -m training.training_sequential.loop_outer.training_outer_loop --file "/work/omicsbio/paulcalle/medical-imaging-framework/results/OCT_split2_outer_configurations/outer_test_fold${SLURM_ARRAY_TASK_ID}_config.json"

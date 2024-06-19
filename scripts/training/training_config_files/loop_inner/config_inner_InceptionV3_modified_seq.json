@@ -1,0 +1,34 @@
+{
+    "hyperparameters": {
+        "batch_size": 32,
+        "channels": 1,
+        "cropping_position": [40, 10],
+        "decay": 0.01,
+        "do_cropping": false,
+        "epochs": 10,
+        "learning_rate": 0.01,
+        "momentum": 0.9,
+        "patience": 10
+    },
+
+    "data_input_directory":"/work/omicsbio/paulcalle/medical-imaging-framework/data/pig_kidney_subset",
+    "output_path": "../results/training/pig_kidney_subset_seq",
+    "job_name": "pig_kidney_subset_seq",
+    
+    "k_epoch_checkpoint_frequency": 1,
+
+    "shuffle_the_images": true,
+    "shuffle_the_folds": false,
+    "seed": 9,
+
+    "class_names": ["cortex", "medulla", "pelvis-calyx"],
+    "selected_model_name": "InceptionV3",
+    
+    "subject_list": ["k1", "k2", "k3", "k4", "k5"],
+    "test_subjects": ["k1", "k2", "k3", "k4", "k5"],
+    "validation_subjects": ["k1", "k2", "k3", "k4", "k5"],
+    
+    "image_size": [235, 301],
+	"target_height": 301,
+    "target_width": 235
+}

@@ -1,0 +1,31 @@
+name: mif
+channels:
+  - defaults
+  - conda-forge
+  - anaconda
+dependencies:
+  - dill
+  - fasteners=0.16.3
+  - google-auth=2.6.0
+  - google-auth-oauthlib=0.4.4
+  - google-pasta=0.2.0
+  - keras=2.4.3
+  - keras-base=2.4.3
+  - keras-preprocessing=1.1.2
+  - matplotlib
+  - mpi
+  - mpi4py
+  - numpy
+  - pandas
+  - pillow
+  - pip=22.3.1
+  - python=3.8.0
+  - regex
+  - scikit-image=0.19.3
+  - scikit-learn=1.1.1
+  - scipy=1.7.3
+  - tensorboard=2.10.0
+  - tensorflow=2.3.0
+  - termcolor=2.1.0
+  - tk=8.6.12
+prefix: /home/jshaw/anaconda3/envs/mif

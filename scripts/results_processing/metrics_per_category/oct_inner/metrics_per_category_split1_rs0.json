@@ -1,0 +1,16 @@
+{
+  "data_path": "/ourdisk/hpc/nullspace/paulcalle/auto_archive_notyet/tape_2copies/Pipeline_project/results/OCT_split1_random/random-search_0",
+  "output_path": "../results/metrics_per_category/oct_inner_split1_rs0",
+  "prefix_filename": "oct_inner_split1_rs0",
+
+  "classes": {
+    "cortex": 0, 
+    "medulla": 1, 
+    "pelvis": 2
+    },
+
+  "round_to": 8,
+
+  "is_outer": false,
+  "random_search_if_inner": true
+}

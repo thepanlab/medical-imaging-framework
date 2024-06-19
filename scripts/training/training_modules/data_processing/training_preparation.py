@@ -5,14 +5,14 @@ from random import seed
 
 
 class TrainingVars:
-    def __init__(self, config, is_outer, test_subject, training_subject=None):
+    def __init__(self, config, is_outer, test_subject, validation_subject=None):
         """ Gets some parameters needing for training
             
         Args:
             config (dict): List of input image paths.
             test_subject (str): The test subject to train.
             is_outer (bool): A flag telling if running the outer loop.
-            training_subject (str): The training/validation subject. (Optional)
+            validation_subject (str): The training/validation subject. (Optional)
         """
         # Set the seed
         seed(config['seed'])
@@ -22,12 +22,12 @@ class TrainingVars:
         self.indexes, self.label_position = get_indexes(self.files, config['class_names'], config['subject_list'])
         
         # Make sure test subjects and validation subjects are unique
-        test_subjects = list(set(config['test_subjects']))
+        test_subjects = list(config['test_subjects'])
         if is_outer:
             validation_subjects = None
         else:
-            validation_subjects = list(set(config['validation_subjects']))
+            validation_subjects = list(config['validation_subjects'])
     
         # Generate training folds
-        self.folds, self.n_folds = generate_folds(test_subjects, validation_subjects, config['subject_list'], test_subject, config['shuffle_the_folds'], training_subject=training_subject)
+        self.folds, self.n_folds = generate_folds(test_subjects, validation_subjects, config['subject_list'], test_subject, config['shuffle_the_folds'], validation_subject=validation_subject)
             

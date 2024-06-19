@@ -1,10 +1,11 @@
 {
-  "input_model_address": "/data/jshaw/medical-imaging-framework/data/_loop_inner/Test_subject_e2/config_1_InceptionV3/InceptionV3_0_test_e2_val_e1/model/InceptionV3_0_test_e2_val_e1_resnet50.h5",
-  "input_directory_or_tabled_info": "/data/jshaw/medical-imaging-framework/data/ps_kidney_intensity",
-  "output_directory": "../results/processed_output/grad_cam",
+  "input_model_address": "../results/training/mpi_inner_10/training_results/Test_subject_k10/config_mpi_inner_10_test_k10_val_k1_InceptionV3/InceptionV3_0_test_k10_val_k1/model/InceptionV3_0_test_k10_val_k1_InceptionV3.h5",
+  "input_directory_or_tabled_info": "../data/kidney_test_data_small",
+  "output_directory": "../results/GRADCAM",
 
   "alpha": 0.7,
   "last_conv_layer_name": "mixed8",
+  "index_class_gradcam":-1,
 
   "query":{
     "cutoff_number_of_results": -1,
@@ -12,7 +13,7 @@
 
     "test_subject": [],
 
-    "match": [true, false],
+    "match": [],
 
     "true_label": [],
     "true_label_index": [],

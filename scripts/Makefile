@@ -1,4 +1,5 @@
 ## --- Variables and Functions -------------------------------------------------------------------- ##
+## --- Variables and Functions -------------------------------------------------------------------- ##
 j ?=
 args ?=
 
@@ -18,7 +19,10 @@ help:
 	$(call find.functions)
 	@echo ''
 
-
+## --- Random Search ----------------------------------------------- ##
+create_random_json:
+create_random_json:
+	python3 -W ignore -m training.random_search.create_random_json -j ${j}
 
 
 ## --- Sequential Training ------------------------------------------------------------------------ ##
@@ -63,9 +67,9 @@ truth_formatter:
 	python3 -W ignore -m util.truth_formatter.truth_formatter
 
 
-class_accuracy: ## Creates a list of class accuracies for every test-val fold.
-class_accuracy: 
-	python3 -W ignore -m results_processing.class_accuracy.class_accuracy -j ${j}
+class_recall: ## Creates a list of class accuracies for every test-val fold.
+class_recall: 
+	python3 -W ignore -m results_processing.class_recall.class_recall -j ${j}
 
 
 confusion_matrix: ## Creates a single confusion matrix for the specified inputs.
@@ -111,6 +115,14 @@ learning_curve_many:
 metrics_table: ## Creates a metrics_table for the given data folder.
 metrics_table: 
 	python3 -W ignore -m results_processing.metrics_table.metrics_table -j ${j}
+
+metrics_per_category: ## Creates a metrics_table for the given data folder.
+metrics_per_category: 
+	python3 -W ignore -m results_processing.metrics_per_category.metrics_per_category -j ${j}
+
+summary_random_search:
+summary_random_search:
+	python3 -W ignore -m results_processing.summary_random_search.summary_random_search -j ${j}
 
 
 prediction: ## Creates predictions from a given set of inputs.

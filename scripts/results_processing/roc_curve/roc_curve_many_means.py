@@ -15,7 +15,7 @@ import os
 
 def run_program(config):
     """ Run the program for each item.
-    Args:
+
         config (dict): Program configuration.
     """
     # Get the needed input paths, as well as the proper file names for output
@@ -29,12 +29,7 @@ def run_program(config):
     
     
 def read_data(config, pred_paths, true_paths):
-    """ Reads the data from the input files 
-    Args:
-        config (dict): The program configuration
-        pred_paths (list of str): A list of prediction files.
-        true_paths (list of str): A list of truth files.
-    """
+    """ Reads the data from the input files """
     # For every model...
     data = {}
     classes = []
@@ -57,32 +52,20 @@ def read_data(config, pred_paths, true_paths):
         
         
 def get_auc(true, pred):
-    """ Calculates the true pos, false pos, and area under the roc curve from true and predicted values. 
-    Args:
-        true (dataframe): True value dataframe.
-        pred (dataframe): Prediction value dataframe.
-    """
+    """ Calculates the true pos, false pos, and area under the roc curve from true and predicted values. """
     fpr, tpr, _ = roc_curve(true.ravel(), pred.ravel())
     roc_auc = auc(fpr, tpr)
     return fpr, tpr, roc_auc
 
 
 def get_micro_average(data, classes):
-    """ For every class, calculate the rates. 
-    Args:
-        data (dict): Dictionary of subject data.
-        classes (list of str): List of classes/labels.
-    """
+    """ For every class, calculate the rates """
     # Combine all of the subjects into a single array
     true_cat, pred_cat = [], []
     for subject in data:
         true_cat += data[subject]['true']
         pred_cat += data[subject]['pred']
-        
-    try:
-        true_cat, pred_cat = label_binarize(np.concatenate(true_cat), classes=classes), np.concatenate(pred_cat)
-    except:
-        raise ValueError(colored("Error: No subject data recorded. Are you sure your subject names are correct?", 'red'))
+    true_cat, pred_cat = label_binarize(np.concatenate(true_cat), classes=classes), np.concatenate(pred_cat)
     
     # Get the items for each class
     fpr, tpr, roc_auc = ({} for _ in range(3))
@@ -92,11 +75,7 @@ def get_micro_average(data, classes):
 
 
 def get_macro_average(data, classes):
-    """ For every subject calculate the rates, then mean the resulting values.
-    Args:
-        data (dict): Dictionary of subject data.
-        classes (list of str): List of classes/labels. 
-    """
+    """ For every subject calculate the rates, then mean the resulting values """
     # Think of the subjects as the 'classes' when taking the F/TPR averages.
     #   Get the mean of each subject-label, then mean on all of the subjects per label.
     subjects = [s for s in data]
@@ -133,7 +112,6 @@ def create_roc_curves(config, data, classes):
     Args:
         config (dict): Program configuration.
         data (dict): Truth and prediction data.
-        classes (list of str): List of classes/labels.
     """    
     # Print diagrams for each model
     for model in data:
@@ -145,14 +123,23 @@ def create_roc_curves(config, data, classes):
         # Plot a graph for each mean-type
         for plot_i in ['micro', 'macro']:
             
+            # Set the diagram's font options
+            plt.rcParams['font.family'] = config['font_family']
+            plt.rc('axes', labelsize=config['label_font_size'])
+            plt.rc('axes', titlesize=config['title_font_size'])
+
+            # Set the diagrams's axis options
+            plt.rcParams['axes.spines.right'] = False
+            plt.rcParams['axes.spines.top'] = False
             # Plot the micro curve values
             if plot_i == 'micro':
                 for i, type_name, color in zip(classes, config['label_types'], config['line_colors']):
                     plt.plot(
                         fpr_micro[i], 
                         tpr_micro[i],
-                        label='{0} (AUC={1:0.2f})' ''.format(type_name, roc_auc_micro[i]),
-                        color=color, 
+                        label=f'{type_name} (AUC={roc_auc_micro[i]:.2f})',
+                        color=color,
+                        alpha=config['alpha'],
                         linewidth=config['line_width']
                     )
             
@@ -162,8 +149,9 @@ def create_roc_curves(config, data, classes):
                     plt.plot(
                         fpr_macro[i], 
                         tpr_macro[i],
-                        label='{0} (AUC={1:0.2f})' ''.format(type_name, roc_auc_macro[i]),
-                        color=color, 
+                        label=f'{type_name} (AUC={roc_auc_macro[i]:.2f})',
+                        color=color,
+                        alpha=config['alpha'],
                         linewidth=config['line_width']
                     )
         
@@ -178,7 +166,7 @@ def create_roc_curves(config, data, classes):
             # Set the diagrams's axis options
             plt.rcParams['axes.spines.right'] = False
             plt.rcParams['axes.spines.top'] = False
-            plt.xlim([0.0, 1.0])
+            plt.xlim([-0.05, 1.0])
             plt.ylim([0.0, 1.05])
 
             # Add the diagram labels

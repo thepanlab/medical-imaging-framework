@@ -23,7 +23,7 @@ def get_indexes(files, class_names, subject_list):
         
         # Get the proper filename to parse
         formatted_name = file.replace("%20", " ").split('/')[-1].split('.')[:-1]
-        formatted_name = ''.join(formatted_name)
+        formatted_name = '.'.join(formatted_name)
         formatted_name = formatted_name.split('_')
         
         # Get the image label

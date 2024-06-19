@@ -1,4 +1,5 @@
 from training.training_modules.image_processing.image_getter import get_files
+from training.training_modules.image_processing.image_getter import get_files
 from results_processing.grad_cam import grad_cam
 from termcolor import colored
 from util import get_config
@@ -99,6 +100,7 @@ def filter_images(input_path, query):
     if os.path.isdir(input_path):
         print(colored("Note: An input directory of images was given. Only subjects and true labels can be filtered.", 'yellow'))
         image_paths = get_files(input_path, False, 1)
+        image_paths = get_files(input_path, False, 1)
         return filter_file_list(image_paths, query)
     
     # Read in the tabled prediction info CSV, filter it, and return the image paths
@@ -121,7 +123,7 @@ def generate_json_and_run(json_init, input_path, output_path):
     grad_cam.main(this_json)
 
 
-def run_program(image_addrs, config):
+def run_program(image_addrs, config, run_program):
     """ Runs the main program for each image
 
     Args:
@@ -135,7 +137,8 @@ def run_program(image_addrs, config):
     json_init = {
         'input_model_address': config['input_model_address'],
         'last_conv_layer_name': last_conv_layer_name,
-        'alpha': config['alpha']
+        'alpha': config['alpha'],
+        'index_class_gradcam':config['index_class_gradcam'] 
     }
     
     # If the addresses come in a list, output to the same directory
@@ -154,6 +157,7 @@ def run_program(image_addrs, config):
                         config['output_directory'],
                         f"subject_{subject}/{true_label}_correct"
                     )
+                    generate_json_and_run(json_init, path, output_path)
                     generate_json_and_run(json_init, path, output_path)
                     
                 # Else, separate incorrect images by the predicted label

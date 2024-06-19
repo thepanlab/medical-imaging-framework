@@ -1,6 +1,7 @@
 from random import shuffle
+from util.training import get_list_of_epochs
 
-def generate_pairs(test_subject_list, validation_subject_list, subject_list, do_shuffle):
+def generate_pairs(test_subject_list, validation_subject_list, subject_list, do_shuffle, param_epoch, is_outer):
     """ Generates subject-subject pairs
     Args:
         test_subject_list (list of str): List of test subjects.
@@ -11,26 +12,31 @@ def generate_pairs(test_subject_list, validation_subject_list, subject_list, do_
     Return:
         (list of str tuples): A list of subject pairs.
     """
+    
+    l_epochs = get_list_of_epochs(param_epoch, is_outer, test_subject_list)
+    print("test_subject_list =", test_subject_list)
+    print("l_epochs =", l_epochs)
+    print("validation_subject_list =", validation_subject_list)
+    
     # Generate subject-subject tuples
     folds = []
-    for test_subject in test_subject_list:
+    for n_epochs, test_subject in zip(l_epochs, test_subject_list):
         
         # Outer loop: use test subjects only
         if validation_subject_list is None:   
-            folds.extend([(test_subject, None)])
+            folds.extend([(n_epochs, test_subject, None)])
             
         # Inner loop: use validation subjects
-        else:   
-            folds.extend(_get_training_combos(validation_subject_list, test_subject))
+        else:
+            folds.extend(_get_training_combos(n_epochs, validation_subject_list, test_subject))
         
     # Shuffle the folds
     if do_shuffle:
         shuffle(folds)
-    return folds
-    
+    return folds   
 
 
-def generate_folds(test_subject_list, validation_subject_list, subject_list, test_subject, do_shuffle, training_subject=None):
+def generate_folds(test_subject_list, validation_subject_list, subject_list, test_subject, do_shuffle, validation_subject=None):
     """ Generates folds for the subject.
     Args:
         test_subject_list (list of str): A list of test subject names.
@@ -52,11 +58,11 @@ def generate_folds(test_subject_list, validation_subject_list, subject_list, tes
     # If inner loop, get the test-val combinations.
     else:        
         folds = []
-        if training_subject:    
+        if validation_subject:    
             folds.append({
                 'testing': [test_subject],
-                'training': _fill_training_fold(validation_subject_list, test_subject, training_subject), 
-                'validation': [training_subject]
+                'training': _fill_training_fold(validation_subject_list, test_subject, validation_subject), 
+                'validation': [validation_subject]
             })
         
         else:
@@ -91,7 +97,7 @@ def _fill_training_fold(subject_list, test_subject, subject):
     return training_fold
 
 
-def _get_training_combos(subject_list, test_subject):
+def _get_training_combos(n_epochs, subject_list, test_subject):
     """ Fills the training fold for some subject.
     Args:
         subject_list (list of str): A list of possible subjects.
@@ -103,6 +109,6 @@ def _get_training_combos(subject_list, test_subject):
     folds = []
     for subject in subject_list:
         if subject != test_subject:
-            folds.append((test_subject, subject))
+            folds.append((n_epochs, test_subject, subject))
     return folds
     

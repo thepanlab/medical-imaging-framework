@@ -45,6 +45,8 @@ class TrainingModel:
             include_top=False,
             weights=None,
             input_tensor=None,
+            # order of input shape is height, width, channels
+            # https://saturncloud.io/blog/keras-input-shape-ordering-is-it-width-height-channels/
             input_shape=(target_height, target_width, hyperparameters['channels']),
             pooling=None
         )
@@ -55,12 +57,20 @@ class TrainingModel:
         self.model = keras.models.Model(inputs=base_model.input, outputs=out)
         
         # Create optimizer and add to model
+        # optimizer = keras.optimizers.legacy.SGD(
+        #     learning_rate=hyperparameters['learning_rate'], 
+        #     momentum=hyperparameters['momentum'], 
+        #     nesterov=True, 
+        #     decay=hyperparameters['decay']
+        # )
+
         optimizer = keras.optimizers.SGD(
-            lr=hyperparameters['learning_rate'], 
+            learning_rate=hyperparameters['learning_rate'], 
             momentum=hyperparameters['momentum'], 
-            nesterov=True, 
+            nesterov=hyperparameters['bool_nesterov'], 
             decay=hyperparameters['decay']
         )
+        
         self.model.compile(
             loss="sparse_categorical_crossentropy", 
             optimizer=optimizer,

@@ -1,0 +1,8 @@
+{
+  "data_path": "../results/outer_loop",
+  "output_path": "../results/summary_table/outer",
+  "prefix_filename": "summary_table",
+
+  "is_outer": true,
+  "random_search_if_inner": false
+}

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#SBATCH --partition=disc
+#SBATCH --ntasks=4
+#SBATCH --output=%x_%J_stdout.txt
+#SBATCH --error=%x_%J_stderr.txt
+#SBATCH --mem=50G
+#SBATCH --gpus-per-node=1
+#SBATCH --time=12:00:00
+#SBATCH --job-name=s3_f1
+#SBATCH --mail-user=pcallec@ou.edu
+#SBATCH --mail-type=ALL
+#SBATCH --chdir=/work/omicsbio/paulcalle/medical-imaging-framework/scripts
+
+#################################################
+
+python -m training.training_sequential.loop_outer.training_outer_loop --file "/work/omicsbio/paulcalle/medical-imaging-framework/results/OCT_split3_outer_configurations/outer_test_k1_config.json"

@@ -38,6 +38,36 @@
         ```
         * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
       
+    </details>
+    
+<br>
+
++ ## ***Truth Formatter***
+    <ul> 
+        Converts indexes into a more readable format from the labels, if there is a mismatch between the values.
+    </ul> <br>
+    <details>
+    <summary>Show/Hide files</summary>
+
+  + ###  ***truth_formatter.py:***
+      This will convert true labels into indexed classes. This should be run manually.
+      ***Example:*** 
+      > python3 truth_formatter.py -j my_config.json
+
+      * ***Input:*** The configuration file. *(Optional)*
+      * ***Output:*** An indexed alternative of every prediction file.
+      * ***truth_formatter_config.json:***
+        ```json
+            {
+                "data_path": "[path]/data/",
+                "label_types": {"A": 0, "B":1},
+                "is_outer": true
+            }
+        ```
+        * ***data_path:*** The directory path of the data as a whole. This folder should contain the testing fold directories.
+        * ***label_types:*** A dictionary of labels and their indexes.
+        * ***is_outer:*** Whether the data is of the outer loop or not.
+      
       <br>
     
     </details>

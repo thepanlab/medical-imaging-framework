@@ -1,9 +1,9 @@
 {
   "data_path": "../results/training/seq_inner_10/training_results",
   "matrices_path": "../results/confusion_many/seq_inner_10",
-  "means_output_path": "../results/confusion_many_means/seq_inner_10",
+  "means_output_path": "../results/confusion_many/seq_inner_10",,
 
-  "round_to": 2,
+  "round_to": 0,
 
   "label_types": {
     "cortex": 0, 

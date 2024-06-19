@@ -1,5 +1,5 @@
 from results_processing.tabled_prediction_info import tabled_prediction_info
-from training.training_modules.image_parser import *
+from training.training_modules.image_processing.image_parser import *
 from util.get_config import parse_json
 from termcolor import colored
 from tensorflow import keras
@@ -16,8 +16,12 @@ def get_images(data_input, class_names):
     """
         Reads in a dictionary of arrays of data-paths.
 
-        data_input: A dictionary of key-array form.
-        return: A dictionary of key-array form, of all the images.
+    Args:
+        data_input (dict): A dictionary of key-array form.
+        class_names (list of str): A list of classes/labels.
+        
+    Reeturns:
+        (dict) A dictionary of key-array form, of all the images.
     """                
     # Get all valid image paths
     image_paths = {}
@@ -31,19 +35,25 @@ def get_images(data_input, class_names):
                 
         # Get all of the subject's image subdirectories
         image_paths[subject] = []
-        for dir in subdirs:
-            dir = os.path.join(data_input[subject], dir)
-            if not os.path.isdir(dir):
-                raise Exception(colored(f"Error: Expected '{dir}' within '{data_input[subject]}' to be a directory path.", 'red'))
-            subfiles = os.listdir(dir)
-            if len(subfiles) == 0:
-                print(colored(f"Warning: The data path '{dir}' is empty.", 'yellow'))
-                continue
-            for file in subfiles:
-                if file.endswith((".png", ".jpg", ".jpeg")):
-                    image_paths[subject].append(os.path.abspath(os.path.join(dir, file)))
-                else:
-                    print(colored(f"Warning: Non-png or non-jpg file detected. '{file}'", 'yellow'))
+        for subsubdir in subdirs:
+            subsubdir = os.path.join(data_input[subject], subsubdir)
+            
+            # If this level contains images
+            if subsubdir.endswith((".png", ".jpg", ".jpeg")):
+                image_paths[subject].append(subsubdir)
+            else:
+                subfiles = os.listdir(subsubdir)
+                if len(subfiles) == 0:
+                    print(colored(f"Warning: The data path '{subsubdir}' is empty.", 'yellow'))
+                    continue
+                
+                # If outer loop, get images on this level
+                for subfile in subfiles:
+                    subfile = os.path.abspath(os.path.join(subsubdir, subfile))
+                    if subfile.endswith((".png", ".jpg", ".jpeg")):
+                        image_paths[subject].append(subfile)
+                    else:
+                        print(colored(f"Warning: Non-png or non-jpg file detected. '{subfile}'", 'yellow'))
     return image_paths
         
 
@@ -51,8 +61,11 @@ def read_models(model_input):
     """
         Reads in a dictionary of models.
 
-        data_input: A dictionary of key-path form.
-        return: A dictionary of key-model form.
+    Args:
+        model_input: An array of model paths.
+        
+    Return:
+        A dictionary of key-model form.
     """
     # Check that the input models exist
     for model in model_input:
@@ -79,29 +92,30 @@ def predict_images(image_paths, models, config, class_names):
     Returns:
         tuple: The prediction results and timing results
     """
+    tf.config.run_functions_eagerly(True)
     
     # Image args
     class_names = config['image_settings']['class_names']
-    target_height = config['image_settings']['target_height']
     offset_height = config['image_settings']['offset_width']
     offset_width = config['image_settings']['offset_width']
+    target_height = config['image_settings']['target_height']
     target_width = config['image_settings']['target_width']
     do_cropping = config['image_settings']['do_cropping']
     channels = config['image_settings']['channels']
-    use_mean = config['image_settings']['use_mean']
-    mean = config['image_settings']['mean']
     
     # Get label position
+    label_position = -1
     if config['use_true_labels']:
         for subject in image_paths:
             for file_name in image_paths[subject]:
                 labels = [class_name for class_name in class_names if class_name in file_name]
-                temp = os.path.abspath(file_name).split('.')
-                label_position = temp[0].split('_').index(labels[0])
+                temp = os.path.abspath(file_name).split('/')[-1].split('.')[0]
+                try:
+                    label_position = temp.split('_').index(labels[0])
+                except:
+                    raise ValueError(colored("Error: Class not found in image name. Are the classes correctly spelled or captialized?", 'red'))
                 break
             break
-    else:
-        label_position = -1
     
     # Predict all items using every model
     prediction_results = {}
@@ -124,7 +138,7 @@ def predict_images(image_paths, models, config, class_names):
             img_map = img_slices.map(lambda x: tf.py_function(
                 func=parse_image,
                 inp=[
-                    x,                                                                 # Filename
+                    x,  
                     class_names, 
                     channels, 
                     do_cropping,  
@@ -133,16 +147,31 @@ def predict_images(image_paths, models, config, class_names):
                     target_height,
                     target_width, 
                     label_position,
-                    config['use_true_labels'],                                     # Label Position
+                    config['use_true_labels'],
                 ],
                 Tout=tout
             ))
+            """ Non-eager executing method
+            img_map = img_slices.map(lambda x: parse_image(
+                x,                  
+                class_names, 
+                channels, 
+                do_cropping,  
+                offset_height, 
+                offset_width, 
+                target_height,
+                target_width, 
+                label_position,
+                config['use_true_labels']
+            ))
+            """
             img_batch = img_map.batch(config['batch_size'], drop_remainder=False)
-
+            
             # Get the computation time
             print(colored(f"Beginning prediction for {len(image_paths[subject])} images.", 'yellow'))
             srt = time.time()
-            pred = models[model].predict(img_batch)
+            pred = models[model].predict(img_batch)   #TODO         
+            
             timing_results[model][subject] = time.time() - srt
             print(colored("Finished prediction.", 'cyan'))
             
@@ -163,7 +192,6 @@ def output_results(config, prediction_results, timing_results, input_filepaths, 
         input_filepaths (dict): The true values, (images paths.)
         class_names (str): Names of the prediction classes.
         out_vals (str): Directory output path of the values.
-        out_mets (str): Directory output path of the metrics.
     """
     
     # Output results to file
@@ -192,7 +220,7 @@ def output_results(config, prediction_results, timing_results, input_filepaths, 
             # Print the prediction probability values
             preds = pd.DataFrame(prediction_results[model][subject])
             filename = os.path.join(dirpath, f"prediction/{prefix}_predicted.csv")
-            preds.to_csv(filename, index=False, header=False)
+            preds.to_csv(filename, index=False, header=True)
             print(colored(f"\t Wrote the predictions.", 'cyan'))
             
             # Print the prediction index values
@@ -202,7 +230,6 @@ def output_results(config, prediction_results, timing_results, input_filepaths, 
             print(colored(f"\t Wrote the indexed predictions.", 'cyan'))
             
             if config['use_true_labels']:
-                print(config['use_true_labels'])
                 # Print the true labels
                 trues = pd.DataFrame(i for file in input_filepaths[subject] for i in file.split('/')[-1].split('.')[0].split('_') if i in class_names)
                 filename = os.path.join(dirpath, f"true_label/{prefix}_true_label.csv")
@@ -237,6 +264,11 @@ def main(config=None):
     # Obtain a dictionary of configurations
     if config is None:
         config = parse_json('./results_processing/prediction/prediction_config.json')
+        
+    # Set eager execution
+    tf_config = tf.compat.v1.ConfigProto()
+    tf_config.gpu_options.allow_growth = True
+    tf.config.run_functions_eagerly(True)
 
     # Check that output directories exist
     if not os.path.exists(config['prediction_output']): os.makedirs(config['prediction_output'])
@@ -266,7 +298,8 @@ def main(config=None):
             "data_path": out_vals,
             "output_path": out_mets,
             "use_true_labels": config['use_true_labels'],
-            "label_types": {str(class_names.index(label)): label for label in class_names}
+            "label_types": {str(class_names.index(label)): label for label in class_names},
+            "is_outer": config['is_outer']
         }
         tabled_prediction_info.main(table_config)
         print(colored('Successfully printed the tabeled info.', 'green'))

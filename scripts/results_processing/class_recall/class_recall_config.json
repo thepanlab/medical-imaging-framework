@@ -1,0 +1,15 @@
+{
+  "data_path": "../results/training/mpi_outer_10/training_results",
+  "output_path": "../results/class_recall/mpi_outer_10",
+  "output_filename": "class_recall_mpi_outer_10",
+
+  "round_to": 2,
+
+  "classes": {
+    "cortex": 0, 
+    "medulla": 1, 
+    "pelvis": 2
+  },
+
+  "is_outer": true
+}

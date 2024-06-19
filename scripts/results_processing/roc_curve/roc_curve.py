@@ -78,10 +78,10 @@ def create_roc_curve(true_vals, pred_vals, roc_config, file_name, output_path):
     # Create the plot
     for i, type_name, color in zip(classes, l_types, colors):
         plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                 label='{0} (AUC = {1:0.2f})'
-                       ''.format(type_name, roc_auc[i]))
+                 label=f"{type_name} (AUC={roc_auc[i]:.2f})",
+                 alpha = roc_config['alpha'])
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
-    plt.xlim([0.0, 1.0])
+    plt.xlim([-0.05, 1.0])
     plt.ylim([0.0, 1.05])
     plt.xlabel('1 - Specificity')
     plt.ylabel('Sensitivity')

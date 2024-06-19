@@ -1,2 +1,7 @@
 # **Docs**
-This folder contains documentation for the package and its modules. The main files of note are for the makefile, results_processing, training, and util modules.
+This folder contains markdown documentation for different modules included within the code. They are separated by:
+* Results Processing
+* Logging
+* Makefile
+* Training
+* Util
