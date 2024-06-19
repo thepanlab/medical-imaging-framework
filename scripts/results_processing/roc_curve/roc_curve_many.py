@@ -33,6 +33,7 @@ def find_directories(data_path, is_outer):
 
     Args:
         data_path (str): Path to the data.
+        is_outer (bool): Whether this data is of the outer loop.
 
     Returns:
         dict: Of the true paths and the prediction paths.

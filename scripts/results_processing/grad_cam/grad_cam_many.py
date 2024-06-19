@@ -1,4 +1,5 @@
 from training.training_modules.image_processing.image_getter import get_files
+from training.training_modules.image_processing.image_getter import get_files
 from results_processing.grad_cam import grad_cam
 from termcolor import colored
 from util import get_config
@@ -85,7 +86,6 @@ def filter_csv(csv, query):
     return path_dict
         
              
-
 def filter_images(input_path, query):
     """ Filters the input images by the given query.
 
@@ -99,6 +99,7 @@ def filter_images(input_path, query):
     # If directory, read in and filter the image paths.
     if os.path.isdir(input_path):
         print(colored("Note: An input directory of images was given. Only subjects and true labels can be filtered.", 'yellow'))
+        image_paths = get_files(input_path, False, 1)
         image_paths = get_files(input_path, False, 1)
         return filter_file_list(image_paths, query)
     
@@ -157,6 +158,7 @@ def run_program(image_addrs, config, run_program):
                         f"subject_{subject}/{true_label}_correct"
                     )
                     generate_json_and_run(json_init, path, output_path)
+                    generate_json_and_run(json_init, path, output_path)
                     
                 # Else, separate incorrect images by the predicted label
                 for pred_label in image_addrs[subject][true_label]['incorrect']:
@@ -182,7 +184,7 @@ def main(config=None):
     img_addrs = filter_images(config["input_directory_or_tabled_info"], config["query"])
     
     # Run the program for each image address
-    run_program(img_addrs, config, config["query"]['cutoff_number_of_results'])
+    run_program(img_addrs, config)
     print(colored("Finished processing all images.", 'magenta'))
 
 
