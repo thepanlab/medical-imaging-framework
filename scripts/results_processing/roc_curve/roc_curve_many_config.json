@@ -7,10 +7,14 @@
     "cortex", 
     "medulla", 
     "pelvis"
+    "cortex", 
+    "medulla", 
+    "pelvis"
   ],
   "line_colors": [
     "aqua",
     "darkorange",
+    "cornflowerblue"
     "cornflowerblue"
   ],
   "alpha":1.0,
@@ -22,5 +26,5 @@
   "save_resolution": "figure",
   "save_format": "png",
 
-  "is_outer": false
+  "is_outer": true
 }
